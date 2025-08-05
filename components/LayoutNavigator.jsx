@@ -9,6 +9,8 @@ import BusinessStep3 from '../Screens/BusinessStep3';
 import UserRegister from '../Screens/UserRegister';
 import Login from '../Screens/Login';
 import Layout from './Layout';
+import BusinessListScreen from '../Screens/BusinessListScreen';
+import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -40,6 +42,8 @@ const LayoutNavigator = () => {
       {/* ✅ Layout applied here */}
       <Stack.Screen name="Home" component={withLayout(Home)} />
       <Stack.Screen name="Profile" component={withLayout(Profile)} />
+      <Stack.Screen name="BusinessListScreen" component={withLayout(BusinessListScreen)} />
+      <Stack.Screen name="BusinessDetailScreen" component={withLayout(BusinessDetailScreen)} />
     </Stack.Navigator>
   );
 };
