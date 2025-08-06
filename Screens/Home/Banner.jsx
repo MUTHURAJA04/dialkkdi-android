@@ -236,15 +236,7 @@ const Banner = () => {
         <View className="flex-1 bg-white">
           <View className="flex-row justify-between items-center py-4 px-6 border-b border-gray-100">
             <Text className="text-xl font-bold text-gray-900">{modalTitle}</Text>
-            <TouchableOpacity 
-              onPress={() => {
-                console.log('Closing modal');
-                setModalVisible(false);
-              }} 
-              className="p-2 rounded-full bg-gray-100"
-            >
-              <X width={20} height={20} color="#4b5563" />
-            </TouchableOpacity>
+           
           </View>
 
           {viewMode === 'grid' ? (
@@ -267,6 +259,17 @@ const Banner = () => {
             />
           )}
         </View>
+
+      <View className="items-center">
+  <TouchableOpacity 
+    onPress={() => setModalVisible(false)} 
+    className="flex-row items-center gap-2 p-2 rounded-full bg-gray-100 mb-3"
+  >
+    <X width={20} height={20} color="#4b5563" />
+    <Text className="text-gray-600 text-base font-medium">Close</Text>
+  </TouchableOpacity>
+</View>
+
       </Modal>
     </View>
   );

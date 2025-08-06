@@ -182,6 +182,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      
         {/* Header Image */}
         <View className="relative">
           <Image
@@ -190,15 +191,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
             resizeMode="cover"
           />
           
-          {businessData.logoUrl && (
-            <View className="mx-4 -mt-12">
-              <Image
-                source={{ uri: businessData.logoUrl }}
-                className="w-24 h-24 rounded-full border-4 border-white bg-white"
-                resizeMode="contain"
-              />
-            </View>
-          )}
+          
         </View>
 
         {/* Content */}
@@ -396,12 +389,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
             }}
           />
 
-          <TouchableOpacity 
-            onPress={closeImageModal}
-            className="absolute bottom-10 left-0 right-0 mx-auto bg-white/20 p-3 rounded-full w-32 items-center"
-          >
-            <Text className="text-white font-medium">Close</Text>
-          </TouchableOpacity>
+         
 
           <View className="absolute bottom-20 left-0 right-0 flex-row justify-center">
             {businessData.photos.slice(1).map((_, idx) => (
