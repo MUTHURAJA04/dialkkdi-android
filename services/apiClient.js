@@ -1,5 +1,6 @@
 // services/apiClient.js
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
 
@@ -33,8 +34,7 @@ apiClient.interceptors.response.use(
   },
 );
 
-// ✅ Google SSO login function
-export const googleSSOLogin = async idToken => {
+export const googleSSOLogin = async (idToken) => {
   console.log('📡 googleSSOLogin() called with ID Token:', idToken);
 
   try {
@@ -44,16 +44,30 @@ export const googleSSOLogin = async idToken => {
 
     console.log('✅ Google SSO Success Response:', response.data);
 
-    const data = response.data;
+    const { token, user } = response.data;
 
-    return data;
+    // ✅ Save to AsyncStorage
+    await AsyncStorage.setItem('userToken', token);
+    await AsyncStorage.setItem('userData', JSON.stringify(user));
+
+    console.log('✅ Token and user data stored in AsyncStorage');
+
+    const userToken = await AsyncStorage.getItem('userToken');
+    const userData = await AsyncStorage.getItem('userData');
+
+    console.log('🔑 Token:', userToken);
+    console.log('👤 User Data:', userData);
+
+    return response.data;
   } catch (error) {
     console.error('❌ Google SSO API call failed:', {
       message: error.message,
       response: error.response?.data,
     });
+    throw error; 
   }
 };
+
 
 //get categories
 
@@ -99,6 +113,51 @@ export const getBusinessById = async (businessId) => {
     throw error;
   }
 };
+
+
+
+
+export const review = async (businessId, reviewData) => {
+  try {
+    // ⬇️ Get user and token from storage
+    const userData = await AsyncStorage.getItem('userData');
+    const token = await AsyncStorage.getItem('userToken');
+
+    if (!userData || !token) {
+      console.error('❌ No user data or token found in AsyncStorage.');
+      throw new Error('Not authenticated');
+    }
+
+    const user = JSON.parse(userData);
+
+    // ⬇️ Build the final payload
+    const payload = {
+      ...reviewData,
+      user: user.id,
+      business: businessId,
+    };
+
+    console.log('📤 Review payload:', payload);
+
+    const response = await apiClient.post('/reviews', payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('✅ Review submitted successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Review API failed:', {
+      message: error.message,
+      url: '/reviews',
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
 
 
 export default apiClient;
