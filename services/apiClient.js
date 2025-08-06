@@ -93,21 +93,6 @@ export const signupUser = async (name, email, phone, password) => {
   }
 };
 
-/** Verify OTP */
-export const verifyOtpAndCreateAccount = async (email, otp) => {
-  try {
-    const response = await apiClient.post('/user/verify-otp', {
-      email,
-      otp,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('OTP Verification API failed:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
-
 
 /** Email/Password Login */
 export const loginWithEmail = async (email, password) => {
@@ -125,6 +110,34 @@ export const loginWithEmail = async (email, password) => {
       message: error.message,
       response: error.response?.data,
     });
+    throw error;
+  }
+};
+
+
+/** ✅ Verify OTP & Create Account */
+export const verifyOtpAndCreateAccount = async (email, otp) => {
+  try {
+    const response = await apiClient.post('/user/verifyOtpAndCreateAccount', {
+      email,
+      otp,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Verify OTP & Create Account API Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/** ✅ Resend OTP (Signup) */
+export const resendRegisterOtp = async (email) => {
+  try {
+    const response = await apiClient.post('/user/resendregisterotp', {
+      email,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Resend OTP API Error:', error.response?.data || error.message);
     throw error;
   }
 };
