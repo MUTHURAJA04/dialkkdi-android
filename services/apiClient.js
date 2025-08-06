@@ -55,6 +55,68 @@ export const googleSSOLogin = async idToken => {
   }
 };
 
+
+
+/** ✅ Sign Up / Register */
+export const signupUser = async (name, email, phone, password) => {
+  console.log(' [API] signupUser called:', { name, email, phone, password });
+
+  try {
+    const response = await apiClient.post('/user/signup', {
+      name,
+      email,
+      phone,
+      password,
+    });
+
+    console.log(' [API] Signup Success:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      ' [API] Signup Failed:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+/** Verify OTP */
+export const verifyOtpAndCreateAccount = async (email, otp) => {
+  try {
+    const response = await apiClient.post('/user/verify-otp', {
+      email,
+      otp,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('OTP Verification API failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+/** Email/Password Login */
+export const loginWithEmail = async (email, password) => {
+  console.log(' loginWithEmail() called with:', { email, password });
+  try {
+    const response = await apiClient.post('/user/login', {
+      email,
+      password,
+    });
+
+    console.log(' Email/Password Login Success:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Email/Password Login API failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+    throw error;
+  }
+};
+
+
 //get categories
 
 export const getCategories = async () => {

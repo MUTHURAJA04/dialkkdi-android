@@ -11,6 +11,8 @@ import Login from '../Screens/Login';
 import Layout from './Layout';
 import BusinessListScreen from '../Screens/BusinessListScreen';
 import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
+import ForgotPassword from '../Screens/Forgetpassword';
+import VerifyOtp from '../Screens/VerifyOtp';
 
 
 const Stack = createNativeStackNavigator();
@@ -36,8 +38,9 @@ const LayoutNavigator = () => {
 
       <Stack.Screen name="UserRegister" component={UserRegister} />
       <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
 
-      
 
       {/* ✅ Layout applied here */}
       <Stack.Screen name="Home" component={withLayout(Home)} />

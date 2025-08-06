@@ -25,7 +25,7 @@ const Header = ({
           <Menu stroke="#3B82F6" width={20} height={20} />
         </TouchableOpacity> */}
         
-        <Text className="text-blue-500 text-2xl font-extrabold">{title}</Text>
+        {/* <Text className="text-blue-500 text-2xl font-extrabold">{title}</Text> */}
         
         <View className="flex-row">
           {/* <TouchableOpacity 
