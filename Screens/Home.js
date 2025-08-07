@@ -7,7 +7,7 @@ import Services from './Home/Services';
 import ServicesOn from './Home/ServicesOn';
 import ProductOffers from './Home/ProductOffers';
 import Categories from './Home/Categories';
-import VideoSlide from './Home/VideoSlide';
+// import VideoSlide from './Home/VideoSlide';
 import Seasonal from './Home/Seasonal';
 import LimitedOffers from './Home/LimitedOffers';
 import Recognized from './Home/Recognized';
@@ -23,7 +23,7 @@ const Home = ({ navigation }) => {
       <ServicesOn />
       <ProductOffers />
       <Categories />
-      <VideoSlide />
+      {/* <VideoSlide /> */}
       <Seasonal />
       <LimitedOffers />
       <Recognized />
