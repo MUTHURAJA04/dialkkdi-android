@@ -46,7 +46,10 @@ const LayoutNavigator = () => {
       <Stack.Screen name="Home" component={withLayout(Home)} />
       <Stack.Screen name="Profile" component={withLayout(Profile)} />
       <Stack.Screen name="BusinessListScreen" component={withLayout(BusinessListScreen)} />
-      <Stack.Screen name="BusinessDetailScreen" component={withLayout(BusinessDetailScreen)} />
+      <Stack.Screen name="BusinessDetailScreen" component={withLayout(BusinessDetailScreen)}  options={{ title: "Business Details" }} />
+  
+
+
     </Stack.Navigator>
   );
 };
