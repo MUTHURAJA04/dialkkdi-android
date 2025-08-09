@@ -27,7 +27,7 @@ const Home = ({ navigation }) => {
       <Seasonal />
       <LimitedOffers />
       <Recognized />
-      <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} />
+      {/* <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} /> */}
     </ScrollView>
   );
 };
