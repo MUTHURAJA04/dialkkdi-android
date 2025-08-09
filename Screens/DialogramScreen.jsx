@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-  View, 
-  FlatList, 
-  Alert, 
+import {
+  View,
+  FlatList,
+  Alert,
   useColorScheme,
   RefreshControl,
   ActivityIndicator,
@@ -14,6 +14,7 @@ import {
 import { Dialogram } from '../services/apiClient';
 import PostItem from './PostItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DialogramScreen = () => {
   const colorScheme = useColorScheme();
@@ -32,13 +33,13 @@ const DialogramScreen = () => {
     try {
       const likeStates = await AsyncStorage.getItem('userLikeStates');
       const parsedStates = likeStates ? JSON.parse(likeStates) : {};
-      
+
       parsedStates[postId] = {
         isLiked,
         likesCount,
         timestamp: Date.now()
       };
-      
+
       await AsyncStorage.setItem('userLikeStates', JSON.stringify(parsedStates));
       console.log(`[DialogramScreen] 💾 Stored like state for post ${postId}:`, { isLiked, likesCount });
     } catch (error) {
@@ -52,7 +53,7 @@ const DialogramScreen = () => {
       const likeStates = await AsyncStorage.getItem('userLikeStates');
       const parsedStates = likeStates ? JSON.parse(likeStates) : {};
       const storedState = parsedStates[postId];
-      
+
       if (storedState) {
         console.log(`[DialogramScreen] 📖 Retrieved stored like state for post ${postId}:`, storedState);
         return storedState;
@@ -66,25 +67,25 @@ const DialogramScreen = () => {
 
   const fetchFeed = useCallback(async (isRefresh = false) => {
     console.log('[DialogramScreen] 🔄 Fetching feed...', { isRefresh });
-    
+
     try {
       if (!isRefresh) {
         setLoading(true);
       }
-      
+
       const data = await Dialogram();
       console.log('[DialogramScreen] ✅ Feed fetched successfully:', data);
-      
+
       // Ensure data is an array and filter out invalid items
-      const validData = Array.isArray(data) 
-        ? data.filter(item => item && item._id) 
+      const validData = Array.isArray(data)
+        ? data.filter(item => item && item._id)
         : [];
-      
+
       console.log('[DialogramScreen] 📊 Valid posts:', validData.length);
-      
+
       // Check if current user has liked any of these posts
       const processedData = await processFeedWithUserLikes(validData);
-      
+
       console.log('[DialogramScreen] 📊 Raw API response analysis:');
       validData.forEach((post, index) => {
         console.log(`[DialogramScreen] 📋 Post ${index + 1}:`, {
@@ -104,14 +105,14 @@ const DialogramScreen = () => {
           userLikes: post.userLikes,
           user_likes: post.user_likes,
           // Check if there are any properties that might contain like info
-          possibleLikeProps: Object.keys(post).filter(key => 
-            key.toLowerCase().includes('like') || 
+          possibleLikeProps: Object.keys(post).filter(key =>
+            key.toLowerCase().includes('like') ||
             key.toLowerCase().includes('count') ||
             key.toLowerCase().includes('user')
           )
         });
       });
-      
+
       setFeed(processedData);
     } catch (error) {
       console.error('[DialogramScreen] ❌ Error fetching feed:', error);
@@ -145,32 +146,32 @@ const DialogramScreen = () => {
         console.log('[DialogramScreen] ⚠️ No user data found, skipping like state processing');
         return feedData;
       }
-      
+
       const parsedUserData = JSON.parse(userData);
       const currentUserId = parsedUserData._id || parsedUserData.id || parsedUserData.userId;
-      
+
       if (!currentUserId) {
         console.log('[DialogramScreen] ⚠️ No user ID found, skipping like state processing');
         return feedData;
       }
-      
+
       console.log('[DialogramScreen] 👤 Processing feed with user ID:', currentUserId);
-      
+
       // Since the feed API doesn't return like information, we need to check each post
       // For now, we'll use the optimistic updates from the state
       const processedFeed = await Promise.all(feedData.map(async (post) => {
         // First check stored like state
         const storedState = await getStoredLikeState(post._id);
-        
+
         // Check if current user has liked this post
         const currentUserIdStr = String(currentUserId);
-        const userLiked = post.likes && Array.isArray(post.likes) && 
+        const userLiked = post.likes && Array.isArray(post.likes) &&
           post.likes.some(likeId => String(likeId) === currentUserIdStr);
-        
+
         // Use stored state if available, otherwise use API data
         const finalIsLiked = storedState ? storedState.isLiked : userLiked;
         const finalLikesCount = storedState ? storedState.likesCount : (post.likesCount || 0);
-        
+
         console.log(`[DialogramScreen] 🔍 Post ${post._id}:`, {
           likesArray: post.likes,
           userLiked,
@@ -181,14 +182,14 @@ const DialogramScreen = () => {
           finalLikesCount,
           comparison: post.likes ? post.likes.map(id => `${String(id)} === ${currentUserIdStr} = ${String(id) === currentUserIdStr}`) : 'no likes array'
         });
-        
+
         return {
           ...post,
           isLiked: finalIsLiked, // Mark if current user has liked this post
           likesCount: finalLikesCount,
         };
       }));
-      
+
       console.log('[DialogramScreen] ✅ Feed processed with user like states');
       return processedFeed;
     } catch (error) {
@@ -212,7 +213,7 @@ const DialogramScreen = () => {
           Authorization: `Bearer ${userToken}`,
         },
       });
-      
+
       console.log(`[DialogramScreen] ✅ Like info for post ${postId}:`, response.data);
       return response.data;
     } catch (error) {
@@ -224,10 +225,10 @@ const DialogramScreen = () => {
   // Update likes in state when a post is liked/unliked
   const handleUpdateLike = useCallback(async (postId, isLiked, likesCount) => {
     console.log('[DialogramScreen] 💖 Updating like state:', { postId, isLiked, likesCount });
-    
+
     // Store the like state locally for persistence
     await storeLikeState(postId, isLiked, likesCount);
-    
+
     // Get current user ID for likes array management
     let currentUserId = null;
     try {
@@ -239,12 +240,12 @@ const DialogramScreen = () => {
     } catch (error) {
       console.error('[DialogramScreen] ❌ Error getting current user ID:', error);
     }
-    
+
     setFeed((prev) =>
       prev.map((post) => {
         if (post && post._id === postId) {
           console.log('[DialogramScreen] 🔄 Updating post:', post._id, 'isLiked:', isLiked, 'likesCount:', likesCount);
-          
+
           // Update likes array based on current user's action
           let updatedLikes = post.likes || [];
           if (currentUserId) {
@@ -258,10 +259,10 @@ const DialogramScreen = () => {
               updatedLikes = updatedLikes.filter(id => id !== currentUserId);
             }
           }
-          
-          return { 
-            ...post, 
-            isLiked: isLiked, 
+
+          return {
+            ...post,
+            isLiked: isLiked,
             likesCount: likesCount,
             likes: updatedLikes
           };
@@ -274,7 +275,7 @@ const DialogramScreen = () => {
   // Function to update a specific post's like information
   const updatePostLikeInfo = useCallback((postId, likeInfo) => {
     console.log('[DialogramScreen] 🔄 Updating post like info:', { postId, likeInfo });
-    
+
     setFeed((prev) =>
       prev.map((post) => {
         if (post && post._id === postId) {
@@ -296,7 +297,7 @@ const DialogramScreen = () => {
       console.log('[DialogramScreen] ⚠️ Invalid item in renderPost:', item);
       return null;
     }
-    
+
     return (
       <PostItem
         item={item}
@@ -308,20 +309,18 @@ const DialogramScreen = () => {
 
   if (loading) {
     return (
-      <View className={`flex-1 justify-center items-center ${
-        colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
-      }`}>
-        <StatusBar 
+      <View className={`flex-1 justify-center items-center ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
+        }`}>
+        <StatusBar
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
           backgroundColor={colorScheme === 'dark' ? '#000000' : '#ffffff'}
         />
-        <ActivityIndicator 
-          size="large" 
-          color={colorScheme === 'dark' ? 'white' : '#007AFF'} 
+        <ActivityIndicator
+          size="large"
+          color={colorScheme === 'dark' ? 'white' : '#007AFF'}
         />
-        <Text className={`mt-3 ${
-          colorScheme === 'dark' ? 'text-white' : 'text-black'
-        }`}>
+        <Text className={`mt-3 ${colorScheme === 'dark' ? 'text-white' : 'text-black'
+          }`}>
           Loading posts...
         </Text>
       </View>
@@ -330,20 +329,18 @@ const DialogramScreen = () => {
 
   if (!feed || feed.length === 0) {
     return (
-      <View className={`flex-1 justify-center items-center p-5 ${
-        colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
-      }`}>
-        <StatusBar 
+      <View className={`flex-1 justify-center items-center p-5 ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
+        }`}>
+        <StatusBar
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
           backgroundColor={colorScheme === 'dark' ? '#000000' : '#ffffff'}
         />
-        <Text className={`text-center mb-4 ${
-          colorScheme === 'dark' ? 'text-white' : 'text-black'
-        }`}>
+        <Text className={`text-center mb-4 ${colorScheme === 'dark' ? 'text-white' : 'text-black'
+          }`}>
           No posts available
         </Text>
-        <TouchableOpacity 
-          className="bg-blue-500 px-5 py-3 rounded-lg" 
+        <TouchableOpacity
+          className="bg-blue-500 px-5 py-3 rounded-lg"
           onPress={() => fetchFeed()}
         >
           <Text className="text-white font-bold">Retry</Text>
@@ -353,39 +350,44 @@ const DialogramScreen = () => {
   }
 
   return (
-<View className={`flex-1 ${
-      colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
-    }`}>
-      <StatusBar 
+
+    <View className={`flex-1  ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
+      }`}>
+
+      <StatusBar
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={colorScheme === 'dark' ? '#000000' : '#ffffff'}
       />
 
-   <Image
-  source={require("../assets/DialogramLogo.png")} 
-  className="w-full h-20"
-  resizeMode="contain"
-/>
-      <FlatList
-        data={feed}
-        renderItem={renderPost}
-        keyExtractor={(item) => item?._id || Math.random().toString()}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colorScheme === 'dark' ? 'white' : '#007AFF'}
-            colors={colorScheme === 'dark' ? ['white'] : ['#007AFF']}
-          />
-        }
-        initialNumToRender={5}
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        removeClippedSubviews={true}
-        contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }}
-      />
+      <SafeAreaView className='pb-10' >
+        <Image
+          source={require("../assets/DialogramLogo.png")}
+          className="w-full h-20"
+          resizeMode="contain"
+        />
+        <FlatList
+          data={feed}
+          renderItem={renderPost}
+          keyExtractor={(item) => item?._id || Math.random().toString()}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colorScheme === 'dark' ? 'white' : '#007AFF'}
+              colors={colorScheme === 'dark' ? ['white'] : ['#007AFF']}
+            />
+          }
+          initialNumToRender={5}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          removeClippedSubviews={true}
+          contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }}
+        />
+      </SafeAreaView>
+      
     </View>
+
   );
 };
 

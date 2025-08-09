@@ -274,28 +274,91 @@ export const getCities = async () => {
   }
 };
 
-export const getArea = async (cityId) => {
+// Fetch feed
+export const Dialogram = async () => {
   try {
-    const response = await apiClient.get(`/areas?city=${cityId}`);
-    return response.data;
+    // Get user token for authenticated request
+    const userToken = await AsyncStorage.getItem('userToken');
+    const headers = {};
+
+    if (userToken) {
+      headers.Authorization = `Bearer ${userToken}`;
+      console.log('[Dialogram API] 🔐 Using authenticated request');
+    } else {
+      console.log('[Dialogram API] ⚠️ No user token found, using unauthenticated request');
+    }
+
+    const res = await apiClient.get("/feeds", { headers });
+    console.log("[Dialogram API] ✅ Feed fetched:", res.data);
+
+    // Log the first post structure to debug
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      console.log('[Dialogram API] 📋 First post structure:', {
+        id: res.data[0]._id,
+        allProperties: Object.keys(res.data[0]),
+        hasLikes: 'likes' in res.data[0],
+        hasLikesCount: 'likesCount' in res.data[0],
+        hasIsLiked: 'isLiked' in res.data[0],
+        likesValue: res.data[0].likes,
+        likesCountValue: res.data[0].likesCount,
+        isLikedValue: res.data[0].isLiked
+      });
+    }
+
+    return res.data;
   } catch (error) {
-    console.error('❌ Google SSO API call failed:', {
-      message: error.message,
-      response: error.response?.data,
-    });
+    console.error("[Dialogram API] ❌ Error fetching feed:", error.response?.data || error.message);
+    throw error;
   }
 };
 
-export const postBusiness = async (payload) => {
+// Like/Unlike post
+export const DialogramLike = async (postId) => {
   try {
-    const response = await apiClient.post('/business/signup', payload)
-    return response.data;
+    console.log('[DialogramLike API] 🔄 Starting like/unlike process for post:', postId);
+
+    // Get user data from AsyncStorage
+    const userDataString = await AsyncStorage.getItem("userData");
+    console.log('[DialogramLike API] 📦 Raw user data from storage:', userDataString);
+
+    if (!userDataString) {
+      console.error('[DialogramLike API] ❌ No user data found in AsyncStorage');
+      throw new Error('User not authenticated. Please login again.');
+    }
+
+    const userData = JSON.parse(userDataString);
+    console.log('[DialogramLike API] 👤 Parsed user data:', userData);
+
+    // Check for user ID - try different possible properties
+    const userId = userData._id || userData.id || userData.userId;
+    const userType = "User";
+
+    console.log('[DialogramLike API] 🔍 Extracted user info:', { userId, userType });
+
+    if (!userId) {
+      console.error('[DialogramLike API] ❌ No user ID found in user data:', userData);
+      throw new Error('Invalid user data. Please login again.');
+    }
+
+    const payload = {
+      userId: userId,
+      userType: userType,
+    };
+
+    console.log('[DialogramLike API] 📤 Sending payload:', payload);
+
+    const res = await apiClient.put(`/feeds/${postId}/like`, payload);
+    console.log(`[DialogramLike API] ✅ Post ${postId} toggled like:`, res.data);
+    return res.data;
   } catch (error) {
-    console.error('❌ Google SSO API call failed:', {
+    console.error(`[DialogramLike API] ❌ Error for ${postId}:`, {
       message: error.message,
       response: error.response?.data,
+      status: error.response?.status,
     });
+    throw error;
   }
-}
+};
+
 
 export default apiClient;

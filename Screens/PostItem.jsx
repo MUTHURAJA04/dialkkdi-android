@@ -1,9 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
   ActivityIndicator,
   Alert,
   Animated,
@@ -34,7 +34,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const imageUrl = item.imageUrl || '';
   const description = item.description || '';
   const createdAt = item.createdAt || new Date();
-  
+
   // Get current user ID for like state detection
   const getCurrentUserId = useCallback(async () => {
     try {
@@ -62,12 +62,12 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       currentUserIdType: typeof currentUserId,
       likesArrayType: Array.isArray(item.likes) ? 'array' : typeof item.likes
     });
-    
+
     // First priority: Check if the current user's ID is in the likes array
     if (item.likes && Array.isArray(item.likes) && currentUserId) {
       // Convert both to strings for comparison to handle different ID formats
       const currentUserIdStr = String(currentUserId);
-      
+
       // Log the actual contents of the likes array
       console.log(`[PostItem] 🔍 Likes array contents:`, {
         likesArray: item.likes,
@@ -75,41 +75,41 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
         currentUserIdStr,
         currentUserIdType: typeof currentUserId
       });
-      
+
       const userLiked = item.likes.some(likeId => {
         const likeIdStr = String(likeId);
         const matches = likeIdStr === currentUserIdStr;
         console.log(`[PostItem] 🔍 Comparing: "${likeIdStr}" === "${currentUserIdStr}" = ${matches}`);
         return matches;
       });
-      
-      console.log(`[PostItem] ✅ User like check from likes array:`, { 
-        currentUserId: currentUserIdStr, 
-        userLiked, 
+
+      console.log(`[PostItem] ✅ User like check from likes array:`, {
+        currentUserId: currentUserIdStr,
+        userLiked,
         likesArray: item.likes.map(id => String(id)),
         comparison: item.likes.map(id => `${String(id)} === ${currentUserIdStr} = ${String(id) === currentUserIdStr}`)
       });
       return userLiked;
     }
-    
+
     // Second priority: Check if there are any likes and current user might be one of them
     if (item.likesCount && item.likesCount > 0 && currentUserId) {
       console.log(`[PostItem] ℹ️ Post has ${item.likesCount} likes, checking if current user is one of them`);
       // If we have likes but no likes array, we'll use the isLiked property
     }
-    
+
     // Third priority: Use isLiked property if available
     if (item.isLiked !== undefined) {
       console.log(`[PostItem] ℹ️ Using isLiked property:`, item.isLiked);
       return item.isLiked === true;
     }
-    
+
     // Fourth priority: If there are likes but no specific user info, assume current user hasn't liked
     if (item.likesCount && item.likesCount > 0) {
       console.log(`[PostItem] ℹ️ Post has ${item.likesCount} likes but no user-specific info, assuming current user hasn't liked`);
       return false;
     }
-    
+
     console.log(`[PostItem] ❌ No like state found for current user`);
     return false;
   }, [item.likes, item.isLiked, item.likesCount, currentUserId, postId]);
@@ -121,7 +121,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       const likeStates = await AsyncStorage.getItem('userLikeStates');
       const parsedStates = likeStates ? JSON.parse(likeStates) : {};
       const storedState = parsedStates[postId];
-      
+
       if (storedState) {
         console.log(`[PostItem] 📖 Using stored like state for post ${postId}:`, storedState);
         return {
@@ -129,7 +129,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           likesCount: storedState.likesCount
         };
       }
-      
+
       // Fallback to API data
       console.log(`[PostItem] ℹ️ No stored state, using API data for post ${postId}`);
       return {
@@ -158,7 +158,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       setFinalLikeState(state);
       console.log(`[PostItem] 🔄 Updated final like state for post ${postId}:`, state);
     };
-    
+
     updateFinalLikeState();
   }, [getFinalLikeState, postId]);
 
@@ -171,13 +171,13 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       const userId = await getCurrentUserId();
       if (userId) {
         console.log(`[PostItem] 👤 Current user loaded: ${userId}`);
-        
+
         // Check for stored like state for this post
         try {
           const likeStates = await AsyncStorage.getItem('userLikeStates');
           const parsedStates = likeStates ? JSON.parse(likeStates) : {};
           const storedState = parsedStates[postId];
-          
+
           if (storedState) {
             console.log(`[PostItem] 📖 Found stored like state for post ${postId}:`, storedState);
             // Force re-render with stored state
@@ -186,7 +186,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
         } catch (error) {
           console.error(`[PostItem] ❌ Error checking stored like state:`, error);
         }
-        
+
         // Force re-evaluation of like state after user ID is loaded
         console.log(`[PostItem] 🔄 Re-evaluating like state for user: ${userId}`);
       }
@@ -194,9 +194,9 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     loadUserAndCheckLikes();
   }, [getCurrentUserId, postId]);
 
-  console.log(`[PostItem] 📊 Post ${postId} final state:`, { 
-    isLiked, 
-    likesCount, 
+  console.log(`[PostItem] 📊 Post ${postId} final state:`, {
+    isLiked,
+    likesCount,
     currentUserId,
     likesArray: item.likes,
     originalIsLiked: item.isLiked,
@@ -210,20 +210,20 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     try {
       const userData = await AsyncStorage.getItem('userData');
       const userToken = await AsyncStorage.getItem('userToken');
-      
+
       if (!userData || !userToken) {
         console.log('[PostItem] ⚠️ User not authenticated');
         return false;
       }
-      
+
       const parsedUserData = JSON.parse(userData);
       const userId = parsedUserData._id || parsedUserData.id || parsedUserData.userId;
-      
+
       if (!userId) {
         console.log('[PostItem] ⚠️ No user ID found in user data');
         return false;
       }
-      
+
       console.log('[PostItem] ✅ User authenticated:', userId);
       return true;
     } catch (error) {
@@ -237,7 +237,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     // Reset animations
     heartScaleAnim.setValue(0);
     heartOpacityAnim.setValue(1);
-    
+
     // Create scale animation
     const scaleAnimation = Animated.spring(heartScaleAnim, {
       toValue: 1,
@@ -245,14 +245,14 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       tension: 100,
       friction: 8,
     });
-    
+
     // Create opacity animation
     const opacityAnimation = Animated.timing(heartOpacityAnim, {
       toValue: 0,
       duration: 800,
       useNativeDriver: true,
     });
-    
+
     // Run animations
     Animated.parallel([scaleAnimation, opacityAnimation]).start();
   }, [heartScaleAnim, heartOpacityAnim]);
@@ -261,30 +261,30 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const handleDoubleTap = useCallback(async () => {
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
-    
+
     if (lastTapRef.current && (now - lastTapRef.current) < DOUBLE_PRESS_DELAY) {
       console.log(`[PostItem] ❤️ Double tapped post: ${postId}, current like state:`, isLiked);
-      
+
       // Always show heart animation on double-tap
       triggerHeartAnimation();
-      
+
       // Check authentication first
       const isAuthenticated = await checkAuthentication();
       if (!isAuthenticated) {
         Alert.alert('Login Required', 'Please login to like posts.');
         return;
       }
-      
+
       // Double-tap only likes, never unlikes
       if (!isLiked) {
         try {
           console.log(`[PostItem] 📡 Calling DialogramLike API for post: ${postId}`);
           const response = await DialogramLike(postId);
           console.log(`[PostItem] ✅ Double-tap like API response:`, response);
-          
+
           // Update the like state based on API response message
           let newLikesCount;
-          
+
           if (response.message === 'Liked') {
             newLikesCount = likesCount + 1;
             console.log(`[PostItem] 🔄 Double-tap post was liked:`, { newLikesCount });
@@ -293,17 +293,17 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
             newLikesCount = likesCount + 1;
             console.log(`[PostItem] 🔄 Double-tap using fallback:`, { newLikesCount });
           }
-          
-          console.log(`[PostItem] 🔄 Double-tap liking post:`, { 
-            oldState: isLiked, 
-            newState: true, 
-            oldCount: likesCount, 
+
+          console.log(`[PostItem] 🔄 Double-tap liking post:`, {
+            oldState: isLiked,
+            newState: true,
+            oldCount: likesCount,
             newCount: newLikesCount,
             apiResponse: response
           });
-          
+
           onUpdateLike(postId, true, newLikesCount);
-          
+
         } catch (error) {
           console.error(`[PostItem] ❌ Double tap like failed for post ${postId}:`, error);
           if (error.message.includes('authenticated') || error.message.includes('login')) {
@@ -323,23 +323,23 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   // Handle manual like/unlike via heart button
   const handleHeartPress = useCallback(async () => {
     console.log(`[PostItem] 💖 Heart button pressed for post: ${postId}, current like state:`, isLiked);
-    
+
     // Check authentication first
     const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
       Alert.alert('Login Required', 'Please login to like posts.');
       return;
     }
-    
+
     try {
       console.log(`[PostItem] 📡 Calling DialogramLike API for post: ${postId}`);
       const response = await DialogramLike(postId);
       console.log(`[PostItem] ✅ Heart button like API response:`, response);
-      
+
       // Determine new like state based on API response message
       let newLikeState;
       let newLikesCount;
-      
+
       if (response.message === 'Liked') {
         newLikeState = true;
         newLikesCount = likesCount + 1;
@@ -354,18 +354,18 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
         newLikesCount = newLikeState ? likesCount + 1 : Math.max(0, likesCount - 1);
         console.log(`[PostItem] 🔄 Using fallback toggle:`, { oldState: isLiked, newState: newLikeState, newLikesCount });
       }
-      
-      console.log(`[PostItem] 🔄 Heart button updating like state:`, { 
-        oldState: isLiked, 
-        newState: newLikeState, 
-        oldCount: likesCount, 
+
+      console.log(`[PostItem] 🔄 Heart button updating like state:`, {
+        oldState: isLiked,
+        newState: newLikeState,
+        oldCount: likesCount,
         newCount: newLikesCount,
         apiResponse: response,
         willPersist: newLikeState ? 'YES - Heart will stay filled' : 'NO - Heart will be transparent'
       });
-      
+
       onUpdateLike(postId, newLikeState, newLikesCount);
-      
+
       // After updating, try to get fresh like information from server
       setTimeout(async () => {
         try {
@@ -377,7 +377,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
                 'Content-Type': 'application/json'
               }
             });
-            
+
             if (likeInfoResponse.ok) {
               const likeInfo = await likeInfoResponse.json();
               console.log(`[PostItem] 🔄 Fresh like info for post ${postId}:`, likeInfo);
@@ -389,7 +389,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           console.error(`[PostItem] ❌ Error getting fresh like info:`, error);
         }
       }, 1000); // Wait 1 second after like action
-      
+
     } catch (error) {
       console.error(`[PostItem] ❌ Heart button like failed for post ${postId}:`, error);
       if (error.message.includes('authenticated') || error.message.includes('login')) {
@@ -412,9 +412,9 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
   const formatTime = useCallback((timestamp) => {
     try {
-      return new Date(timestamp).toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      return new Date(timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch (error) {
       console.error('[PostItem] ❌ Error formatting time:', error);
@@ -445,21 +445,19 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   }, [businessName, description, imageUrl, postId]);
 
   return (
-    <View className={`rounded-xl mb-5 overflow-hidden shadow-md ${
-      colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-white'
-    }`}>
+    <View className={`rounded-xl mb-5 overflow-hidden shadow-md  ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-white'
+      }`}>
       {/* Header with business name */}
       <View className="p-3">
-        <Text className={`font-bold text-sm ${
-          colorScheme === 'dark' ? 'text-white' : 'text-black'
-        }`}>
+        <Text className={`font-bold text-sm ${colorScheme === 'dark' ? 'text-white' : 'text-black'
+          }`}>
           {businessName}
         </Text>
       </View>
 
       {/* Post Image with double tap handler */}
-      <TouchableOpacity 
-        activeOpacity={1} 
+      <TouchableOpacity
+        activeOpacity={1}
         onPress={handleDoubleTap}
         className="relative"
       >
@@ -470,19 +468,19 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           onLoadStart={handleImageLoadStart}
           onLoad={handleImageLoad}
         />
-        
+
         {/* Image loading indicator */}
         {imageLoading && (
           <View className="absolute inset-0 justify-center items-center bg-black/20">
-            <ActivityIndicator 
-              size="large" 
-              color={colorScheme === 'dark' ? 'white' : '#007AFF'} 
+            <ActivityIndicator
+              size="large"
+              color={colorScheme === 'dark' ? 'white' : '#007AFF'}
             />
           </View>
         )}
-        
+
         {/* Modern double-tap heart animation */}
-        <Animated.View 
+        <Animated.View
           className="absolute inset-0 justify-center items-center"
           style={{
             opacity: heartOpacityAnim,
@@ -490,11 +488,11 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           }}
         >
           <View className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-            <Heart 
-              fill="red" 
-              stroke="red" 
-              width={80} 
-              height={80} 
+            <Heart
+              fill="red"
+              stroke="red"
+              width={80}
+              height={80}
             />
           </View>
         </Animated.View>
@@ -502,48 +500,45 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
       {/* Actions */}
       <View className="flex-row p-3">
-        <TouchableOpacity 
-          className="mr-4" 
+        <TouchableOpacity
+          className="mr-4"
           onPress={handleHeartPress}
         >
-          <Heart 
+          <Heart
             fill={isLiked ? 'red' : 'transparent'}
-            stroke={isLiked ? 'red' : (colorScheme === 'dark' ? 'white' : 'black')} 
-            width={26} 
-            height={26} 
+            stroke={isLiked ? 'red' : (colorScheme === 'dark' ? 'white' : 'black')}
+            width={26}
+            height={26}
           />
         </TouchableOpacity>
         <TouchableOpacity
           className="ml-auto"
           onPress={handleSharePress}
         >
-          <Send 
-            stroke={colorScheme === 'dark' ? 'white' : 'black'} 
-            width={26} 
-            height={26} 
+          <Send
+            stroke={colorScheme === 'dark' ? 'white' : 'black'}
+            width={26}
+            height={26}
           />
         </TouchableOpacity>
       </View>
 
       {/* Likes */}
-      <Text className={`px-3 font-bold ${
-        colorScheme === 'dark' ? 'text-white' : 'text-black'
-      }`}>
+      <Text className={`px-3 font-bold ${colorScheme === 'dark' ? 'text-white' : 'text-black'
+        }`}>
         {likesCount} likes
       </Text>
 
       {/* Description */}
-      <Text className={`px-3 mt-1 ${
-        colorScheme === 'dark' ? 'text-white' : 'text-black'
-      }`}>
+      <Text className={`px-3 mt-1 ${colorScheme === 'dark' ? 'text-white' : 'text-black'
+        }`}>
         <Text className="font-bold">{businessName} </Text>
         {description}
       </Text>
 
       {/* Time */}
-      <Text className={`px-3 mt-1 mb-3 text-xs ${
-        colorScheme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'
-      }`}>
+      <Text className={`px-3 mt-1 mb-3 text-xs ${colorScheme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'
+        }`}>
         {formatTime(createdAt)}
       </Text>
     </View>
