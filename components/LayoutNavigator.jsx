@@ -13,6 +13,7 @@ import BusinessListScreen from '../Screens/BusinessListScreen';
 import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
 import ForgotPassword from '../Screens/Forgetpassword';
 import VerifyOtp from '../Screens/VerifyOtp';
+import DialogramScreen from '../Screens/DialogramScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -33,7 +34,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="BusinessRegister" component={BusinessRegister} />
       <Stack.Screen name="BusinessStep2" component={BusinessStep2} />
       <Stack.Screen name="BusinessStep3" component={BusinessStep3} />
-
+      <Stack.Screen name="DialogramScreen" component={DialogramScreen} />
 
 
       <Stack.Screen name="UserRegister" component={UserRegister} />

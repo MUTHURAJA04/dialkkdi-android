@@ -61,8 +61,8 @@ export default function HeroSlide() {
   }, []);
 
   return (
-    <SafeAreaView className="bg-white">
-      <View className="w-full">
+    <SafeAreaView className="bg-white" style={{ zIndex: 0 }}>
+  <View className="w-full">
         <FlatList
           ref={flatListRef}
           data={extendedImages}

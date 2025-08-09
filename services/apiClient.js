@@ -159,6 +159,36 @@ export const getCategories = async () => {
 
 
 
+// Get search suggestions
+export const getSearchSuggestions = async (query) => {
+  try {
+    const response = await apiClient.get('/business/searchsuggestions', {
+      params: { query } // Make sure this matches your backend expectation
+    });
+    return response.data?.suggestions || { categories: [], businesses: [] };
+  } catch (error) {
+    console.error("❌ Search Suggestions API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Search businesses
+export const searchBusinesses = async (query) => {
+  try {
+    const response = await apiClient.get('/business/search', {
+      params: { query }
+    });
+    return response.data?.businesses || [];
+  } catch (error) {
+    console.error("❌ Search Businesses API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+
+
 export const businessList = async (categoryId) => {
   try {
     const response = await apiClient.get(`/business/category/${categoryId}`);
@@ -244,5 +274,28 @@ export const getCities = async () => {
   }
 };
 
+export const getArea = async (cityId) => {
+  try {
+    const response = await apiClient.get(`/areas?city=${cityId}`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+};
+
+export const postBusiness = async (payload) => {
+  try {
+    const response = await apiClient.post('/business/signup', payload)
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+}
 
 export default apiClient;
