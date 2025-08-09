@@ -273,6 +273,17 @@ export const getCities = async () => {
     });
   }
 };
+export const getads = async () => {
+  try {
+    const response = await apiClient.get(`/advert-slot`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+};
 
 // Fetch feed
 export const Dialogram = async () => {

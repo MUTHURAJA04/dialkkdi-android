@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image,  TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
 import Video from 'react-native-video';
 import { SwiperFlatList } from 'react-native-swiper-flatlist';
 
@@ -56,12 +56,12 @@ const Products = ({ navigation }) => {
   return (
     <>
       <View className="flex flex-col items-center justify-center">
-        <Text className="text-2xl md:text-[32px] my-2 font-medium text-center">
+        <Text className="text-2xl md:text-[32px] mt-5 my-2 font-medium text-center">
           Top Products
         </Text>
 
         <View className="w-11/12 md:my-10 md:mt-4 mx-auto flex flex-col md:flex-row md:border md:border-gray-200 xl:min-h-[260px] 2xl:min-h-[260px] justify-between">
-          
+
           {isLargeScreen && (
             <View className="hidden md:block text-white w-full md:w-6/12 lg:w-5/12 xl:w-4/12">
               <Video
@@ -85,7 +85,7 @@ const Products = ({ navigation }) => {
                 data={products}
                 renderItem={({ item }) => (
                   <View style={{ width: itemWidth, marginRight: 8 }}>
-                    <View className="border border-gray-200 py-3 bg-white rounded-md shadow-md flex flex-col justify-start min-h-[220px]">
+                    <View className="border border-gray-200 py-3 bg-white rounded-md shadow-md flex flex-col justify-start ">
                       <Image
                         source={{ uri: item.image }}
                         style={{ width: '100%', height: 130, resizeMode: 'contain' }}

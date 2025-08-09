@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, Pressable, useWindowDimensions, ScrollView } from 'react-native';
+import { getCategories } from '../../services/apiClient';
+import { useNavigation } from '@react-navigation/native';
 
 const servicesData = [
   {
@@ -37,6 +39,10 @@ const servicesData = [
 const ServicesOn = () => {
   const { width } = useWindowDimensions();
 
+  const imgUrl = 'https://livecdn.dialkaraikudi.com/'
+
+  const navigation = useNavigation()
+
   const getNumColumns = () => {
     if (width >= 1280) return 5;
     if (width >= 1024) return 5;
@@ -47,6 +53,35 @@ const ServicesOn = () => {
 
   const numColumns = getNumColumns();
 
+  const [cat, setCat] = useState('')
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        console.log(response, "successfully ads Categories");
+
+        const products = response.filter(
+          (product) => product.categoryType === "service"
+        );
+
+        // Shuffle array
+        const shuffled = [...products].sort(() => Math.random() - 0.5);
+
+        // Pick first 6
+        setCat(shuffled.slice(0, 6));
+
+        console.log(shuffled.slice(0, 6), "random 6 Services.......");
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+
+
   const renderServiceItem = ({ item }) => (
     <Pressable
       style={{
@@ -56,7 +91,7 @@ const ServicesOn = () => {
         marginVertical: 8,
         flex: 1,
       }}
-      onPress={() => console.log(`Service clicked: ${item.name}`)}
+      onPress={() => navigation.navigate('BusinessListScreen', { categoryId: item._id })}
     >
       <View
         style={{
@@ -69,7 +104,7 @@ const ServicesOn = () => {
         }}
       >
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: `${imgUrl}${item.imageUrl}` }}
           style={{ width: '100%', height: '100%', resizeMode: 'cover' }}
         />
       </View>
@@ -83,7 +118,7 @@ const ServicesOn = () => {
         }}
         numberOfLines={1}
       >
-        {item.name}
+        {item.displayName}
       </Text>
       <View
         style={{
@@ -105,9 +140,9 @@ const ServicesOn = () => {
         </Text>
 
         <FlatList
-          data={servicesData}
+          data={cat}
           renderItem={renderServiceItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           numColumns={numColumns}
           columnWrapperStyle={{ justifyContent: 'space-around', marginVertical: 10 }}
           contentContainerStyle={{ marginTop: 10 }}

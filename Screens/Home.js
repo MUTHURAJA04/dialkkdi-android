@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Button, ScrollView } from 'react-native';
 import HeroSlide from './Home/HeroSlide';
 import Banner from './Home/Banner';
@@ -11,12 +11,29 @@ import Categories from './Home/Categories';
 import Seasonal from './Home/Seasonal';
 import LimitedOffers from './Home/LimitedOffers';
 import Recognized from './Home/Recognized';
+import { getads } from '../services/apiClient';
 
 
 const Home = ({ navigation }) => {
+
+
+  useEffect(() => {
+
+    const getAdverts = async () => {
+      try {
+        const response = await getads();
+        console.log(response, "successfully ads get");
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+    getAdverts();
+
+  }, [])
+
   return (
     <ScrollView>
-    <HeroSlide />
+      <HeroSlide />
       <Banner />
       <Products />
       <Services />
