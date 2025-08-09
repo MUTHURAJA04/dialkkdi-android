@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Share
+  Share,
+  Dimensions
 } from 'react-native';
 import { Heart, Send } from 'react-native-feather';
 import { DialogramLike } from '../services/apiClient';
@@ -17,6 +18,8 @@ const CDN_PREFIX = 'https://livecdn.dialkaraikudi.com/';
 
 const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const [imageLoading, setImageLoading] = useState(true);
+  const [imageAspectRatio, setImageAspectRatio] = useState(1);
+  const screenHeight = Dimensions.get('window').height;
   const [currentUserId, setCurrentUserId] = useState(null);
   const lastTapRef = useRef(null);
   const heartScaleAnim = useRef(new Animated.Value(0)).current;
@@ -32,6 +35,31 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const postId = item._id || '';
   const businessName = item.business?.businessName || 'Unknown Business';
   const imageUrl = item.imageUrl || '';
+  // Measure remote image to maintain correct aspect ratio
+  useEffect(() => {
+    let isMounted = true;
+    const uri = `${CDN_PREFIX}${imageUrl}`;
+    if (!imageUrl) return;
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (!isMounted) return;
+        if (width > 0 && height > 0) {
+          setImageAspectRatio(width / height);
+        } else {
+          setImageAspectRatio(1);
+        }
+      },
+      () => {
+        if (!isMounted) return;
+        setImageAspectRatio(1);
+      }
+    );
+    return () => {
+      isMounted = false;
+    };
+  }, [imageUrl]);
+
   const description = item.description || '';
   const createdAt = item.createdAt || new Date();
 
@@ -459,15 +487,25 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       <TouchableOpacity
         activeOpacity={1}
         onPress={handleDoubleTap}
-        className="relative"
+        className="relative flex justify-center items-center"
       >
+        <View className='absolute inset-0 w-full h-full bg-white' ></View>
         <Image
           source={{ uri: `${CDN_PREFIX}${imageUrl}` }}
-          className="w-full h-80"
-          resizeMode="cover"
+          style={{
+            width: '100%',
+            aspectRatio: imageAspectRatio || 1,
+            // Keep very short panoramas visible and very tall portraits constrained
+            minHeight: 180,
+            maxHeight: Math.round(screenHeight * 0.75),
+            backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'
+          }}
+          resizeMode="contain"
           onLoadStart={handleImageLoadStart}
           onLoad={handleImageLoad}
         />
+     
+    
 
         {/* Image loading indicator */}
         {imageLoading && (
