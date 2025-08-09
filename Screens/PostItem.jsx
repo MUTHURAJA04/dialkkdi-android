@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   ActivityIndicator,
   Alert,
-  Animated
+  Animated,
+  Share
 } from 'react-native';
 import { Heart, Send } from 'react-native-feather';
 import { DialogramLike } from '../services/apiClient';
@@ -421,6 +422,28 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     }
   }, []);
 
+  // Handle share action using native share menu
+  const handleSharePress = useCallback(async () => {
+    try {
+      const shareUrl = `https://dev.dialkaraikudi.com/feed/${postId}`;
+      const content = {
+        title: `${businessName} on Dialogram`,
+        message: `${description ? description + '\n' : ''}${shareUrl}`,
+        url: shareUrl,
+        subject: businessName,
+      };
+      const result = await Share.share(content);
+      if (result.action === Share.sharedAction) {
+        console.log(`[PostItem] ✅ Shared post ${postId}`, result.activityType);
+      } else if (result.action === Share.dismissedAction) {
+        console.log(`[PostItem] ❎ Share dismissed for post ${postId}`);
+      }
+    } catch (error) {
+      console.error(`[PostItem] ❌ Share failed for post ${postId}:`, error);
+      Alert.alert('Error', 'Failed to open share options.');
+    }
+  }, [businessName, description, imageUrl, postId]);
+
   return (
     <View className={`rounded-xl mb-5 overflow-hidden shadow-md ${
       colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-white'
@@ -491,7 +514,8 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => console.log(`[PostItem] 📤 Share button pressed for post: ${postId}`)}
+          className="ml-auto"
+          onPress={handleSharePress}
         >
           <Send 
             stroke={colorScheme === 'dark' ? 'white' : 'black'} 
