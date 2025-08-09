@@ -1,12 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, useColorScheme, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LogOut } from 'react-native-feather';
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
-  // Fetch user data from AsyncStorage
+  // Color scheme
+  const colors = {
+    light: {
+      background: '#f8fafc',
+      text: '#0f172a',
+      card: '#ffffff',
+      primary: '#3b82f6',
+      danger: '#ef4444',
+      border: '#e2e8f0',
+    },
+    dark: {
+      background: '#0f172a',
+      text: '#f8fafc',
+      card: '#1e293b',
+      primary: '#60a5fa',
+      danger: '#f87171',
+      border: '#334155',
+    },
+  };
+
+  const theme = isDarkMode ? colors.dark : colors.light;
+
+  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -15,7 +40,7 @@ const Profile = ({ navigation }) => {
           setUser(JSON.parse(storedData));
         }
       } catch (error) {
-        console.error('❌ Error loading user data:', error);
+        console.error('Error loading user data:', error);
       } finally {
         setLoading(false);
       }
@@ -26,85 +51,79 @@ const Profile = ({ navigation }) => {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('userData');
-    console.log('🚪 User logged out');
-    navigation.navigate('Login');
+    navigation.navigate('Landing');
   };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#121212', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#1E90FF" />
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+        <StatusBar
+          backgroundColor={theme.background}
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
   if (!user) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#ffff', justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: '#aaa', fontSize: 16 }}>No user data found</Text>
+      <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+        <StatusBar
+          backgroundColor={theme.background}
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        />
+        <Text className={`text-lg mb-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+          No user data found
+        </Text>
         <TouchableOpacity
-          style={{
-            backgroundColor: '#1E90FF',
-            paddingVertical: 10,
-            paddingHorizontal: 20,
-            borderRadius: 25,
-            marginTop: 20,
-          }}
-          onPress={() => navigation.navigate('Login')}
+          className={`py-3 px-6 rounded-full`}
+          style={{ backgroundColor: theme.primary }}
+          onPress={() => navigation.navigate('Landing')}
         >
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Go to Login</Text>
+          <Text className="text-white font-semibold">Go to Login</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#121212', padding: 20 }}>
-      {/* Profile Info */}
-      <View style={{ alignItems: 'center', marginTop: 50 }}>
-        <Image
-          source={{ uri: user.avatar || 'https://i.pravatar.cc/150?img=3' }}
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            marginBottom: 15,
-            borderWidth: 2,
-            borderColor: '#fff',
-          }}
-        />
-        <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>
-          {user.name || 'Guest User'}
-        </Text>
-        <Text style={{ fontSize: 14, color: '#aaa', marginBottom: 20 }}>
-          {user.email || 'No email provided'}
-        </Text>
+    <View className={`flex-1 ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+      <StatusBar
+        backgroundColor={theme.background}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      />
 
-        {/* Edit Profile */}
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#1E90FF',
-            paddingVertical: 10,
-            paddingHorizontal: 25,
-            borderRadius: 25,
-            marginBottom: 20,
-          }}
-          onPress={() => navigation.navigate('EditProfile')}
-        >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Edit Profile</Text>
-        </TouchableOpacity>
+      {/* Profile Content - Centered */}
+      <View className="flex-1 justify-center items-center px-6">
+        {/* Avatar */}
+        <View className={`mb-6 rounded-full p-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
+          <Image
+            source={{ uri: user.avatarUrl || 'https://i.pravatar.cc/300?u=' + (user.email || 'user') }}
+            className="w-32 h-32 rounded-full"
+          />
+        </View>
 
-        {/* Logout */}
+        {/* User Info */}
+        <View className="items-center mb-8">
+          <Text className={`text-2xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+            {user.name || 'Guest User'}
+          </Text>
+          <Text className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+            {user.email || 'No email provided'}
+          </Text>
+        </View>
+      </View>
+
+      {/* Logout Button */}
+      <View className="absolute bottom-10 left-0 right-0 px-6">
         <TouchableOpacity
-          style={{
-            backgroundColor: '#FF4D4D',
-            paddingVertical: 10,
-            paddingHorizontal: 25,
-            borderRadius: 25,
-          }}
+          className={`flex-row items-center justify-center py-4 rounded-xl mb-4`}
+          style={{ backgroundColor: theme.danger }}
           onPress={handleLogout}
         >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Logout</Text>
+          <LogOut color="white" width={20} height={20} />
+          <Text className="text-white font-semibold text-lg ml-2">Logout</Text>
         </TouchableOpacity>
       </View>
     </View>
