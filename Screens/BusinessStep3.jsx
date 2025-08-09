@@ -9,24 +9,30 @@ import {
   Image,
   Modal,
   Pressable,
+  Alert,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Input from '../components/CustomInput';
-
-
+import { postBusiness } from '../services/apiClient';
 
 const BusinessStep3 = () => {
   const navigation = useNavigation();
+
+  const route = useRoute();
+  const { formData } = route.params;
+  console.log(formData, "2 nd businessssss");
+
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [photos, setPhotos] = useState([]);
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAddPhoto = () => {
     if (photos.length >= 6) return;
-
     launchImageLibrary(
       {
         mediaType: 'photo',
@@ -46,7 +52,55 @@ const BusinessStep3 = () => {
     setPhotos(newPhotos);
   };
 
-  const [showPassword, setShowPassword] = useState(false);
+  const handleSubmit = async () => {
+    if (password.length < 6) {
+      return Alert.alert('Error', 'Password must be at least 6 characters long.');
+    }
+
+    if (password !== confirmPassword) {
+      return Alert.alert('Error', 'Passwords do not match.');
+    }
+
+    if (!agreed) {
+      return Alert.alert('Error', 'You must agree to the terms and conditions.');
+    }
+
+    if (photos.length === 0) {
+      return Alert.alert('Error', 'Please upload at least one business photo.');
+    }
+
+    try {
+      const form = new FormData();
+
+
+      // Append password
+      form.append('password', password);
+
+      // Append photos
+      photos.forEach((photo, index) => {
+        form.append('photos', {
+          uri: photo.uri,
+          name: photo.fileName || `photo_${index}.jpg`,
+          type: photo.type || 'image/jpeg',
+        });
+      });
+
+      const mergedData = {
+        ...formData,
+        password: form.password,
+        photos: form.photos
+      }
+
+      const response = await postBusiness(mergedData); // send raw FormData
+      console.log('Response:', form);
+
+      Alert.alert('Success', 'Registration complete!');
+      navigation.navigate('Landing');
+    } catch (error) {
+      console.log('Registration error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -59,14 +113,6 @@ const BusinessStep3 = () => {
           Step 3 of 3
         </Text>
 
-        {/* <TextInput
-          placeholder="Password"
-          secureTextEntry
-          placeholderTextColor="#999"
-          className="border border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800 bg-gray-50"
-          value={password}
-          onChangeText={setPassword}
-        /> */}
         <Input
           placeholder="Password"
           secureTextEntry
@@ -75,17 +121,10 @@ const BusinessStep3 = () => {
           onChangeText={setPassword}
         />
 
-        {/* <TextInput
+        <Input
           placeholder="Confirm Password"
-          secureTextEntry
-          placeholderTextColor="#999"
-          className="border border-gray-300 rounded-lg px-4 py-3 mb-6 text-gray-800 bg-gray-50"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
-        /> */}
-
-        <Input
-          placeholder="Password"
           placeholderTextColor="#aaa"
           isPassword
           showPassword={showPassword}
@@ -96,15 +135,11 @@ const BusinessStep3 = () => {
           Upload 1–6 photos of your business
         </Text>
 
-        {/* Selected Photos Preview */}
         {photos.length > 0 ? (
           <View className="flex-row flex-wrap gap-2 mb-4">
             {photos.map((photo, index) => (
               <View key={index} className="relative">
-                <Image
-                  source={{ uri: photo.uri }}
-                  className="w-20 h-20 rounded-md"
-                />
+                <Image source={{ uri: photo.uri }} className="w-20 h-20 rounded-md" />
                 <TouchableOpacity
                   onPress={() => handleRemovePhoto(index)}
                   className="absolute -top-2 -right-2 bg-red-600 rounded-full w-6 h-6 items-center justify-center"
@@ -118,29 +153,19 @@ const BusinessStep3 = () => {
           <Text className="text-gray-400 mb-4">No file chosen</Text>
         )}
 
-        {/* Add Photo Button */}
         <TouchableOpacity
           onPress={handleAddPhoto}
-          className={`py-3 rounded-lg mb-6 ${photos.length >= 6 ? 'bg-orange-300' : 'bg-orange-500'
-            }`}
+          className={`py-3 rounded-lg mb-6 ${photos.length >= 6 ? 'bg-orange-300' : 'bg-orange-500'}`}
         >
-          <Text className="text-white text-center font-semibold">
-            Add Photo
-          </Text>
+          <Text className="text-white text-center font-semibold">Add Photo</Text>
         </TouchableOpacity>
 
-        {/* Terms & Conditions with Modal */}
         <TouchableOpacity
           onPress={() => setAgreed(!agreed)}
           className="flex-row items-center mb-4"
         >
-          <View
-            className={`w-5 h-5 rounded border-2 mr-3 justify-center items-center ${agreed ? 'bg-orange-500 border-orange-500' : 'border-gray-400'
-              }`}
-          >
-            {agreed && (
-              <Text className="text-white text-xs">✓</Text>
-            )}
+          <View className={`w-5 h-5 rounded border-2 mr-3 justify-center items-center ${agreed ? 'bg-orange-500 border-orange-500' : 'border-gray-400'}`}>
+            {agreed && <Text className="text-white text-xs">✓</Text>}
           </View>
           <Pressable onPress={() => setShowTerms(true)}>
             <Text className="text-gray-700">
@@ -150,8 +175,6 @@ const BusinessStep3 = () => {
           </Pressable>
         </TouchableOpacity>
 
-
-        {/* Modal for Terms */}
         <Modal
           visible={showTerms}
           animationType="slide"
@@ -346,7 +369,6 @@ const BusinessStep3 = () => {
           </View>
         </Modal>
 
-        {/* Navigation Buttons */}
         <View className="flex-row justify-between mb-6">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -356,17 +378,14 @@ const BusinessStep3 = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={handleSubmit}
             disabled={!password || !confirmPassword || !agreed}
-            className={`px-6 py-3 rounded-lg ${!password || !confirmPassword || !agreed
-              ? 'bg-orange-300'
-              : 'bg-orange-500'
-              }`}
+            className={`px-6 py-3 rounded-lg ${!password || !confirmPassword || !agreed ? 'bg-orange-300' : 'bg-orange-500'}`}
           >
             <Text className="text-white font-semibold">Register</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Already have account */}
         <TouchableOpacity onPress={() => navigation.navigate('Landing')}>
           <Text className="text-sm text-orange-600 text-center">
             Already have an account? Login

@@ -64,7 +64,7 @@ export const googleSSOLogin = async (idToken) => {
       message: error.message,
       response: error.response?.data,
     });
-    throw error; 
+    throw error;
   }
 };
 
@@ -232,6 +232,40 @@ export const review = async (businessId, reviewData) => {
   }
 };
 
+export const getCities = async () => {
+  try {
+    const response = await apiClient.get('/cities');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+};
 
+export const getArea = async (cityId) => {
+  try {
+    const response = await apiClient.get(`/areas?city=${cityId}`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+};
+
+export const postBusiness = async (payload) => {
+  try {
+    const response = await apiClient.post('/business/signup', payload)
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+}
 
 export default apiClient;
