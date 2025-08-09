@@ -244,28 +244,5 @@ export const getCities = async () => {
   }
 };
 
-export const getArea = async (cityId) => {
-  try {
-    const response = await apiClient.get(`/areas?city=${cityId}`);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Google SSO API call failed:', {
-      message: error.message,
-      response: error.response?.data,
-    });
-  }
-};
-
-export const postBusiness = async (payload) => {
-  try {
-    const response = await apiClient.post('/business/signup', payload)
-    return response.data;
-  } catch (error) {
-    console.error('❌ Google SSO API call failed:', {
-      message: error.message,
-      response: error.response?.data,
-    });
-  }
-}
 
 export default apiClient;
