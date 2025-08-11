@@ -4,40 +4,6 @@ import Svg, { Path } from 'react-native-svg'; // Import Svg and Path from react-
 import { getCategories } from '../../services/apiClient';
 import { useNavigation } from '@react-navigation/native';
 
-const categoriesData = [
-  {
-    id: '1',
-    name: 'Home Appliances',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/6811cb3ffa997e0d57cb27a6/b28c8622035a7fe324bcd88f0ab4654b.jpg',
-  },
-  {
-    id: '2',
-    name: 'Electronics',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/681c583fb9662911ee836e30/e5ff1c2028235d1553c19521b78c96b4.jpg',
-  },
-  {
-    id: '3',
-    name: 'Electronics Store',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/687f78ffa255d651d298e9f8/379d8e01e004cb6d571ddde80f395db2.jpg',
-  },
-  {
-    id: '4',
-    name: 'Homemade Snacks',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/686b6840231e30ee4117d1a3/1c213f2a3aa2bc325709083bf24bbed2.jpg',
-  },
-  {
-    id: '5',
-    name: 'Photo Frames',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/68831021c6fde26b9b611ed1/bcf8c196a2dfd23c475bcd7392a1e7cc.jpg',
-  },
-  {
-    id: '6',
-    name: 'AC Dealers',
-    image: 'https://livecdn.dialkaraikudi.com/uploads/categories/687f799aa255d651d298ea0c/d9faebe39c49937effa76f7fa62d42c3.jpg',
-  },
-  // Add more categories as needed
-];
-
 const Categories = () => {
   const { width } = useWindowDimensions();
   const navigation = useNavigation();
@@ -118,11 +84,11 @@ const Categories = () => {
   );
 
   return (
-    <View className="w-full mx-auto bg-gradient-to-br from-blue-100 to-white px-4 sm:px-6 py-10 pt-4 my-6 rounded-lg overflow-hidden">
-      <View className="text-center mb-6">
+    <View className="w-full mx-auto bg-gradient-to-br from-blue-100 to-white px-4 sm:px-6  pt-4 my-6 rounded-lg overflow-hidden">
+      <View className="text-center mb-">
         <Text
-          className="text-2xl md:text-[32px] my-2 font-medium text-center"
-          style={{ fontFamily: 'Work Sans' }}
+          className="text-2xl md:text-[32px] my-2 font-semibold text-center"
+          // style={{ fontFamily: 'Work Sans' }}
         >
           Explore Categories
         </Text>

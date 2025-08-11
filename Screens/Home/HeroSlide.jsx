@@ -17,7 +17,7 @@ const extendedImages = [images[images.length - 1], ...images, images[0]];
 export default function HeroSlide() {
   const flatListRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const IMAGE_HEIGHT = 220; // ✅ Fixed height for slider
+  const IMAGE_HEIGHT = 130; // ✅ Fixed height for slider
 
   // ✅ Scroll to index
   const scrollTo = (index) => {

@@ -9,20 +9,20 @@ const Recognized = () => {
 
   return (
     <View className="flex flex-col items-center py-6 bg-blue-50">
-      <Text className="text-center text-3xl font-medium mb-6 text-red-900">
+      <Text className="text-center text-2xl font-medium mb-2">
         Recognized by
       </Text>
 
       <View
-        className="flex justify-center items-center gap-10"
+        className="flex flex-row justify-center items-center gap-10 px-10"
         style={{
-          flexDirection: isLargeScreen ? 'row' : 'column',
+          flexDirection: isLargeScreen ? 'column' : 'row',
           width: '100%',
           paddingHorizontal: 20,
         }}
       >
         {/* Startup India */}
-        <View style={{ width: 230, height: 100 }}>
+        <View style={{ width: 100, height: 100 }}>
           <Image
             source={{
               uri: "https://livecdn.dialkaraikudi.com/default/default_images/startup_india.png",
@@ -33,7 +33,7 @@ const Recognized = () => {
         </View>
 
         {/* DPIT */}
-        <View style={{ width: isLargeScreen ? 100 : 160, height: 100 }}>
+        <View style={{ width: isLargeScreen ? 250 : 50, height: 100 }}>
           <Image
             source={{
               uri: "https://livecdn.dialkaraikudi.com/default/default_images/dpit.png",
@@ -44,7 +44,7 @@ const Recognized = () => {
         </View>
 
         {/* Startup TN */}
-        <View style={{ width: 250, height: 100 }}>
+        <View style={{ width: 100, height: 100 }}>
           <Image
             source={{
               uri: "https://livecdn.dialkaraikudi.com/default/default_images/startup_tn.png",

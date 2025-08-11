@@ -72,14 +72,14 @@ const LimitedOffers = () => {
   return (
     <View className="w-full">
       {/* Title */}
-      <View className="w-11/12 mx-auto my-4 items-center">
+      <View className="w-11/12 mx-auto my-6 items-center">
         <Text className="text-2xl font-semibold text-gray-800 text-center">
           Limited Offers
         </Text>
       </View>
 
       {/* Offer Cards */}
-      <View className="px-5 w-full flex flex-col lg:flex-row justify-center items-center gap-3">
+      <View className="px-5 w-full flex flex-col lg:flex-row justify-center items-center gap-3 mt-2">
         {/* First Offer Card */}
         <Pressable className="w-full lg:w-6/12 relative overflow-hidden rounded-lg" style={{ height: imgHeight }}>
           <Animated.Image

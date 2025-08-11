@@ -26,46 +26,50 @@ const BusinessListScreen = () => {
   const [loading, setLoading] = useState(false);
 
 
-useEffect(() => {
-  const fetchBusinesses = async () => {
-    if (!categoryId) {
-      console.warn('⚠️ No category ID provided.');
-      return;
-    }
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      if (!categoryId) {
+        console.warn('⚠️ No category ID provided.');
+        return;
+      }
 
-    try {
-      setLoading(true);
-      const data = await businessList(categoryId); // Pass the categoryId
-      const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      try {
+        setLoading(true);
+        const data = await businessList(categoryId); // Pass the categoryId
+        const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
 
-      setBusinesses(list);
-      setFilteredBusinesses(list);
-      console.log("✅ Fetched businesses:", list);
-    } catch (error) {
-      console.error('❌ Error fetching businesses:', error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setBusinesses(list);
+        setFilteredBusinesses(list);
+        console.log("✅ Fetched businesses:", list);
+      } catch (error) {
+        console.error('❌ Error fetching businesses:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchBusinesses();
-}, [categoryId]);
+    fetchBusinesses();
+  }, [categoryId]);
 
   useEffect(() => {
     let sorted = [...businesses];
 
     switch (selectedSort) {
       case 'Name A-Z':
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) =>
+          (a.businessName || a.name || '').localeCompare(b.businessName || b.name || '')
+        );
         break;
       case 'Name Z-A':
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        sorted.sort((a, b) =>
+          (b.businessName || b.name || '').localeCompare(a.businessName || a.name || '')
+        );
         break;
       case 'Rating High-Low':
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        sorted.sort((a, b) => ((b.ratings ?? b.rating) || 0) - ((a.ratings ?? a.rating) || 0));
         break;
       case 'Rating Low-High':
-        sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+        sorted.sort((a, b) => ((a.ratings ?? a.rating) || 0) - ((b.ratings ?? b.rating) || 0));
         break;
       default:
         break;
@@ -74,70 +78,71 @@ useEffect(() => {
     setFilteredBusinesses(sorted);
   }, [selectedSort, businesses]);
 
+
   const handleNavigate = (item) => {
     console.log("item", item)
-        console.log("item_id", item._id)
+    console.log("item_id", item._id)
     navigation.navigate('BusinessDetailScreen', { business: item });
   };
 
 
-const CDN_PREFIX = 'https://livecdn.dialkaraikudi.com/';
+  const CDN_PREFIX = 'https://livecdn.dialkaraikudi.com/';
 
-const renderItem = ({ item }) => {
-  const rawImagePath = item.photos?.[0];
-  const imageUrl = rawImagePath
-    ? `${CDN_PREFIX}${rawImagePath}`
-    : 'https://via.placeholder.com/400x200.png?text=Business';
+  const renderItem = ({ item }) => {
+    const rawImagePath = item.photos?.[0];
+    const imageUrl = rawImagePath
+      ? `${CDN_PREFIX}${rawImagePath}`
+      : 'https://via.placeholder.com/400x200.png?text=Business';
 
-  console.log('📸 Raw image path from API:', rawImagePath);
-  console.log('🖼️ Final image URL:', imageUrl);
+    console.log('📸 Raw image path from API:', rawImagePath);
+    console.log('🖼️ Final image URL:', imageUrl);
+
+    return (
+      <TouchableOpacity
+        onPress={() => handleNavigate(item)}
+        className="bg-white rounded-2xl shadow-md mb-5 overflow-hidden"
+      >
+        {/* 🖼️ Image */}
+        <Image
+          source={{ uri: imageUrl }}
+          className="w-full h-44"
+          resizeMode="cover"
+        />
+
+        {/* ℹ️ Details */}
+        <View className="p-4 relative">
+          {/* 🏪 Name */}
+          <Text className="text-xl font-semibold text-black mb-1">
+            {item.businessName || item.name || 'Business Name'}
+          </Text>
+          {/* ⭐ Rating */}
+          <View className="flex-row items-end absolute right-5 top-5">
+            <Star color="#facc15" width={18} height={18} />
+            <Text className="ml-1 text-yellow-500 font-medium text-sm">
+              {item.ratings?.toFixed(1) || 'N/A'}
+            </Text>
+          </View>
+          {/* 📍 Enlarged Address */}
+          <View className="flex-row items-start mb-2">
+            <MapPin color="#6b7280" width={16} height={16} className="mt-1" />
+            <Text
+              className="ml-2 text-base text-gray-700 leading-5 flex-1"
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {item.address?.formattedAddress || 'No address available'}
+            </Text>
+          </View>
+
+
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
 
   return (
-    <TouchableOpacity
-      onPress={() => handleNavigate(item)}
-      className="bg-white rounded-2xl shadow-md mb-5 overflow-hidden"
-    >
-      {/* 🖼️ Image */}
-      <Image
-        source={{ uri: imageUrl }}
-        className="w-full h-44"
-        resizeMode="cover"
-      />
-
-      {/* ℹ️ Details */}
-      <View className="p-4 relative">
-        {/* 🏪 Name */}
-        <Text className="text-xl font-semibold text-black mb-1">
-          {item.businessName || item.name || 'Business Name'}
-        </Text>
-   {/* ⭐ Rating */}
-        <View className="flex-row items-end absolute right-5 top-5">
-          <Star color="#facc15" width={18} height={18} />
-          <Text className="ml-1 text-yellow-500 font-medium text-sm">
-            {item.ratings?.toFixed(1) || 'N/A'}
-          </Text>
-        </View>
-        {/* 📍 Enlarged Address */}
-        <View className="flex-row items-start mb-2">
-          <MapPin color="#6b7280" width={16} height={16} className="mt-1" />
-          <Text
-            className="ml-2 text-base text-gray-700 leading-5 flex-1"
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {item.address?.formattedAddress || 'No address available'}
-          </Text>
-        </View>
-
-     
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-
-  return (
-    <View className="flex-1 bg-gray-100 p-4">
+    <View className="flex-1 bg-gray-100 px-4 pt-4">
       {/* Sort Button */}
       <View className="flex-row justify-end mb-3">
         <TouchableOpacity
@@ -188,9 +193,8 @@ const renderItem = ({ item }) => {
                 className="py-2"
               >
                 <Text
-                  className={`text-base ${
-                    selectedSort === opt ? 'text-blue-600 font-semibold' : 'text-black'
-                  }`}
+                  className={`text-base ${selectedSort === opt ? 'text-blue-600 font-semibold' : 'text-black'
+                    }`}
                 >
                   {opt}
                 </Text>

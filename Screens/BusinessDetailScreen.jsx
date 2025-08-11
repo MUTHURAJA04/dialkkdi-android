@@ -10,7 +10,7 @@ import {
   Dimensions,
   ActivityIndicator,
   StatusBar,
-  Animated, 
+  Animated,
 } from 'react-native';
 import { Star, MapPin, Phone, MessageCircle } from 'react-native-feather';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -98,9 +98,9 @@ const BusinessDetailScreen = () => {
     return {
       day: dayName,
       isOpen: timing.isOpen,
-      timing: timing.isOpen 
-        ? timing.openTime === '00:00' && timing.closeTime === '00:00' 
-          ? '12:00 AM - 12:00 AM' 
+      timing: timing.isOpen
+        ? timing.openTime === '00:00' && timing.closeTime === '00:00'
+          ? '12:00 AM - 12:00 AM'
           : `${formatTime(timing.openTime)} - ${formatTime(timing.closeTime)}`
         : 'Closed'
     };
@@ -150,47 +150,51 @@ const BusinessDetailScreen = () => {
     );
   }
 
-const handleReviewSubmit = async (newReview) => {
-  try {
-    // 🔁 API call: only pass rating and comment
-    const response = await review(businessData._id, {
-      rating: newReview.rating,
-      comment: newReview.comment,
-    });
+  const handleReviewSubmit = async (newReview) => {
+    try {
+      console.log("first dataaaaaaa", newReview)
+      // 🔁 API call: only pass rating and comment
+      const response = await review(businessData._id, {
+        rating: newReview.rating,
+        comment: newReview.comment,
+        oldUser: newReview.isOldUser,
+        reviewId: newReview.reviewId
+      });
 
-    console.log('✅ Review submitted to server:', response);
+      console.log('✅ Review submitted to server:', response);
 
-    // 🔄 Use server response or fallback to newReview
-    const savedReview = {
-      user: { name: newReview.name || 'You' }, // fallback if API doesn't return user name
-      rating: response.rating || newReview.rating,
-      comment: response.comment || newReview.comment,
-      createdAt: response.createdAt || new Date().toISOString(),
-    };
+      // 🔄 Use server response or fallback to newReview
+      const savedReview = {
+        user: { name: newReview.name || 'You' }, // fallback if API doesn't return user name
+        rating: response.rating || newReview.rating,
+        comment: response.comment || newReview.comment,
+        createdAt: response.createdAt || new Date().toISOString(),
+      };
 
-    // 🧠 Update business state with new review
-    setBusinessData(prev => ({
-      ...prev,
-      reviews: [...prev.reviews, savedReview],
-      reviewCount: prev.reviewCount + 1,
-      ratings: calculateNewAverage(prev.ratings, prev.reviewCount, newReview.rating),
-    }));
-  } catch (error) {
-    console.error('❌ Failed to submit review:', error);
-    // Optionally show a toast or alert
-    Alert.alert('Failed to submit review', error.message || 'Please try again later.');
-  }
-};
+      // 🧠 Update business state with new review
+      setBusinessData(prev => ({
+        ...prev,
+        reviews: [...prev.reviews, savedReview],
+        reviewCount: prev.reviewCount + 1,
+        ratings: calculateNewAverage(prev.ratings, prev.reviewCount, newReview.rating),
+      }));
+      
+    } catch (error) {
+      console.error('❌ Failed to submit review:', error);
+      // Optionally show a toast or alert
+      Alert.alert('Failed to submit review', error.message || 'Please try again later.');
+    }
+  };
 
 
-// Helper function to calculate new average rating
-const calculateNewAverage = (currentAvg, currentCount, newRating) => {
-  return ((currentAvg * currentCount) + newRating) / (currentCount + 1);
-};
+  // Helper function to calculate new average rating
+  const calculateNewAverage = (currentAvg, currentCount, newRating) => {
+    return ((currentAvg * currentCount) + newRating) / (currentCount + 1);
+  };
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-      
+
         {/* Header Image */}
         <View className="relative">
           <Image
@@ -198,8 +202,8 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
             className="w-full h-64"
             resizeMode="cover"
           />
-          
-          
+
+
         </View>
 
         {/* Content */}
@@ -220,7 +224,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
                   {Math.round(businessData.ratings) ?? 'N/A'} ({businessData.reviewCount} reviews)
                 </Text>
               </View>
-              
+
               <View className="bg-blue-100 px-2 py-1 rounded-full">
                 <Text className="text-blue-700 text-xs font-medium">
                   Today: {getTodayTiming()}
@@ -239,7 +243,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
               <Phone width={18} height={18} color="#3b82f6" />
               <Text className="text-blue-600 ml-2 font-medium">Call</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               onPress={openWhatsApp}
               className="flex-1 bg-green-50 p-3 rounded-lg flex-row items-center justify-center"
@@ -306,9 +310,9 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
           {/* Categories */}
           <View className="mb-6">
             <Text className="text-lg font-bold text-gray-900 mb-2">Categories</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
               className="py-1"
               contentContainerStyle={{ paddingRight: 20 }}
             >
@@ -334,9 +338,9 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
           {businessData.photos?.length > 1 && (
             <View className="mb-8">
               <Text className="text-lg font-bold text-gray-900 mb-2">Gallery</Text>
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false} 
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
                 className="py-1"
                 contentContainerStyle={{ paddingRight: 20 }}
               >
@@ -358,11 +362,11 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
           )}
 
           {/* Reviews Section */}
-      <ReviewsSection 
-  reviews={businessData.reviews || []} 
-  overallRating={businessData.ratings || 0} 
-  onReviewSubmit={handleReviewSubmit}
-/>
+          <ReviewsSection
+            reviews={businessData.reviews || []}
+            overallRating={businessData.ratings || 0}
+            onReviewSubmit={handleReviewSubmit}
+          />
         </View>
       </ScrollView>
 
@@ -397,7 +401,7 @@ const calculateNewAverage = (currentAvg, currentCount, newRating) => {
             }}
           />
 
-         
+
 
           <View className="absolute bottom-20 left-0 right-0 flex-row justify-center">
             {businessData.photos.slice(1).map((_, idx) => (

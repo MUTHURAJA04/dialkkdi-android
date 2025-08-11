@@ -41,7 +41,7 @@ const Bottom = () => {
 
   return (
     <View 
-      className="flex-row justify-around items-center absolute bottom-0 left-0 right-0 py-3"
+      className="flex-row justify-around items-center py-3"
       style={{
         backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
         borderTopWidth: 1,

@@ -2,7 +2,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
+const API_BASE_URL = 'https://api.dialkaraikudi.com';
 
 // Axios instance
 const apiClient = axios.create({
@@ -218,9 +218,6 @@ export const getBusinessById = async (businessId) => {
   }
 };
 
-
-
-
 export const review = async (businessId, reviewData) => {
   try {
     // ⬇️ Get user and token from storage
@@ -234,33 +231,45 @@ export const review = async (businessId, reviewData) => {
 
     const user = JSON.parse(userData);
 
-    // ⬇️ Build the final payload
+    // Build the payload
     const payload = {
-      ...reviewData,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
       user: user.id,
       business: businessId,
     };
 
-    console.log('📤 Review payload:', payload);
+    console.log('📤 Review payload:', payload, reviewData);
 
-    const response = await apiClient.post('/reviews', payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    let response;
+    if (reviewData.oldUser === true && reviewData.reviewId) {
+      // 🔄 Update existing review
+      response = await apiClient.put(`/reviews/${reviewData.reviewId}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } else {
+      // 🆕 Create new review
+      response = await apiClient.post('/reviews', payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
 
     console.log('✅ Review submitted successfully:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Review API failed:', {
       message: error.message,
-      url: '/reviews',
       response: error.response?.data,
       status: error.response?.status,
     });
     throw error;
   }
 };
+
 
 export const getCities = async () => {
   try {
