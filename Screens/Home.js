@@ -35,13 +35,13 @@ const Home = ({ navigation }) => {
     <ScrollView>
       <HeroSlide />
       <Banner />
-      <Products />
-      <Services />
+      {/* <Products /> */}
+      {/* <Services /> */}
       <ServicesOn />
-      <ProductOffers />
+      {/* <ProductOffers /> */}
       <Categories />
       {/* <VideoSlide /> */}
-      <Seasonal />
+      {/* <Seasonal /> */}
       <LimitedOffers />
       <Recognized />
       {/* <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} /> */}

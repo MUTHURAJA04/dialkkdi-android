@@ -44,7 +44,7 @@ const ServicesOn = () => {
   const navigation = useNavigation()
 
   const getNumColumns = () => {
-    if (width >= 1280) return 5;
+    if (width >= 1280) return 5; 
     if (width >= 1024) return 5;
     if (width >= 768) return 4;
     if (width >= 640) return 3;

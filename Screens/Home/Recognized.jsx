@@ -14,7 +14,7 @@ const Recognized = () => {
       </Text>
 
       <View
-        className="justify-center items-center gap-10"
+        className="flex justify-center items-center gap-10"
         style={{
           flexDirection: isLargeScreen ? 'row' : 'column',
           width: '100%',
