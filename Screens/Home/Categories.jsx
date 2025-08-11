@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable, FlatList, useWindowDimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg'; // Import Svg and Path from react-native-svg
+import { getCategories } from '../../services/apiClient';
+import { useNavigation } from '@react-navigation/native';
 
 const categoriesData = [
   {
@@ -38,6 +40,37 @@ const categoriesData = [
 
 const Categories = () => {
   const { width } = useWindowDimensions();
+  const navigation = useNavigation();
+
+  const [cat, setCat] = useState('')
+
+  const imgUrl = 'https://livecdn.dialkaraikudi.com/'
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        console.log(response, "successfully ads Categories");
+
+        const products = response.filter(
+          (product) => product.categoryType === "product"
+        );
+
+        // Shuffle array
+        const shuffled = [...products].sort(() => Math.random() - 0.5);
+
+        // Pick first 6
+        setCat(shuffled.slice(0, 6));
+
+        console.log(shuffled.slice(0, 6), "random 6 Products.......");
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
 
   // Determine numColumns based on screen width for responsive grid
   const getNumColumns = () => {
@@ -59,17 +92,17 @@ const Categories = () => {
         marginHorizontal: numColumns === 2 ? 10 : numColumns === 3 ? 12 : numColumns === 4 ? 16 : 10, // Approximate gap
         marginBottom: numColumns === 2 ? 20 : numColumns === 3 ? 24 : numColumns === 4 ? 32 : 20, // Approximate gap
       }}
-      onPress={() => console.log(`Category clicked: ${item.name}`)}
+      onPress={() => navigation.navigate('BusinessListScreen', { categoryId: item._id })}
     >
       <Image
-        alt={item.name}
+        alt={item.displayName}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        source={{ uri: item.image }}
+        source={{ uri: `${imgUrl}${item.imageUrl}` }}
         resizeMode="cover"
       />
       <View className="absolute top-0 w-full bg-gradient-to-b from-black/60 to-transparent px-3 py-2 text-white text-sm font-semibold z-10 text-center">
         <Text className="text-white text-sm font-semibold text-center truncate" numberOfLines={1}>
-          {item.name}
+          {item.displayName}
         </Text>
       </View>
       <View className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition duration-500">
@@ -97,7 +130,7 @@ const Categories = () => {
 
       <View className="w-11/12 mx-auto mt-8">
         <FlatList
-          data={categoriesData}
+          data={cat}
           renderItem={renderCategoryItem}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}

@@ -24,40 +24,48 @@ const BusinessDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { business } = route.params;
-  const [businessData, setBusinessData] = useState(null);
+  const [businessData, setBusinessData] = useState(business);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const galleryRef = useRef(null);
 
+
   useEffect(() => {
-    const fetchBusinessDetail = async () => {
-      if (!business?._id) {
-        setError('No business ID provided');
+    if (business && business._id) {
+      if (business.fullDetailsAvailable) {
+        setBusinessData(business);
         setLoading(false);
-        return;
+      } else {
+        // fetch full data
+        (async () => {
+          setLoading(true);
+          try {
+            const response = await getBusinessById(business._id);
+            if (response.success) {
+              setBusinessData({
+                ...response.data.business,
+                reviews: response.data.reviews || []
+              });
+            } else {
+              setError('Failed to fetch business details');
+            }
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        })();
       }
+    } else {
+      setError('Business data not found');
+      setLoading(false);
+    }
+  }, [business]);
 
-      try {
-        setLoading(true);
-        const response = await getBusinessById(business._id);
-        if (response?.success) {
-          setBusinessData({
-            ...response.data.business,
-            reviews: response.data.reviews || []
-          });
-        } else {
-          setError('Failed to fetch business details');
-        }
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchBusinessDetail();
-  }, [business?._id]);
+
+
 
   const getFullImageUrl = url => url?.startsWith('http') ? url : `${IMAGE_PREFIX}${url}`;
 
