@@ -13,6 +13,7 @@ import {
 import { Heart, Send } from 'react-native-feather';
 import { DialogramLike } from '../services/apiClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const CDN_PREFIX = 'https://livecdn.dialkaraikudi.com/';
 
@@ -35,6 +36,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const postId = item._id || '';
   const businessName = item.business?.businessName || 'Unknown Business';
   const imageUrl = item.imageUrl || '';
+
   // Measure remote image to maintain correct aspect ratio
   useEffect(() => {
     let isMounted = true;
@@ -472,13 +474,21 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     }
   }, [businessName, description, imageUrl, postId]);
 
+  const navigate = useNavigation()
+
+  const navi = () => {
+    navigate.navigate('BusinessDetailScreen', { business: item?.business })
+  }
+
   return (
     <View className={`rounded-xl mb-5 overflow-hidden shadow-md  ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-white'
       }`}>
       {/* Header with business name */}
       <View className="p-3">
         <Text className={`font-bold text-sm ${colorScheme === 'dark' ? 'text-white' : 'text-black'
-          }`}>
+          }`}
+          onPress={navi}
+        >
           {businessName}
         </Text>
       </View>
@@ -504,8 +514,8 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           onLoadStart={handleImageLoadStart}
           onLoad={handleImageLoad}
         />
-     
-    
+
+
 
         {/* Image loading indicator */}
         {imageLoading && (

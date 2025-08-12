@@ -126,11 +126,11 @@ const Header = () => {
       className={`p-3 flex-row items-center justify-between ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
       onPress={() => navigateToSuggestion(item)}
     >
-      <View className="flex-row items-center flex-1">
+      <View className="flex-row items-center flex-1 gap-2">
         {item.type === "category" ? (
-          <Search width={18} height={18} color="#64748B" className="mr-3" />
+          <Search width={16} height={18} color="#64748B" className="mr-3" />
         ) : (
-          <ShoppingBag width={18} height={18} color="#3B82F6" className="mr-3" />
+          <ShoppingBag width={16} height={18} color="#3B82F6" className="mr-3" />
         )}
         <Text className="text-gray-800 flex-1" numberOfLines={1}>{item.name}</Text>
       </View>

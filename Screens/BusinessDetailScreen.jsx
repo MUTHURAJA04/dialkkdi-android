@@ -24,6 +24,9 @@ const BusinessDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { business } = route.params;
+
+  console.log(business, "get business");
+
   const [businessData, setBusinessData] = useState(business);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,10 +65,6 @@ const BusinessDetailScreen = () => {
       setLoading(false);
     }
   }, [business]);
-
-
-
-
 
   const getFullImageUrl = url => url?.startsWith('http') ? url : `${IMAGE_PREFIX}${url}`;
 
@@ -152,8 +151,9 @@ const BusinessDetailScreen = () => {
 
   const handleReviewSubmit = async (newReview) => {
     try {
-      console.log("first dataaaaaaa", newReview)
-      // 🔁 API call: only pass rating and comment
+      console.log("first dataaaaaaa", newReview);
+
+      // 🔁 Send review to API
       const response = await review(businessData._id, {
         rating: newReview.rating,
         comment: newReview.comment,
@@ -163,25 +163,17 @@ const BusinessDetailScreen = () => {
 
       console.log('✅ Review submitted to server:', response);
 
-      // 🔄 Use server response or fallback to newReview
-      const savedReview = {
-        user: { name: newReview.name || 'You' }, // fallback if API doesn't return user name
-        rating: response.rating || newReview.rating,
-        comment: response.comment || newReview.comment,
-        createdAt: response.createdAt || new Date().toISOString(),
-      };
+      // ✅ Fetch updated business details after review
+      const updated = await getBusinessById(businessData._id);
+      if (updated.success) {
+        setBusinessData({
+          ...updated.data.business,
+          reviews: updated.data.reviews || []
+        });
+      }
 
-      // 🧠 Update business state with new review
-      setBusinessData(prev => ({
-        ...prev,
-        reviews: [...prev.reviews, savedReview],
-        reviewCount: prev.reviewCount + 1,
-        ratings: calculateNewAverage(prev.ratings, prev.reviewCount, newReview.rating),
-      }));
-      
     } catch (error) {
       console.error('❌ Failed to submit review:', error);
-      // Optionally show a toast or alert
       Alert.alert('Failed to submit review', error.message || 'Please try again later.');
     }
   };
@@ -319,12 +311,12 @@ const BusinessDetailScreen = () => {
               {(businessData.categories || []).map(cat => (
                 <View
                   key={cat._id}
-                  className="flex-row items-center bg-gray-100 px-4 py-2 rounded-full mr-3"
+                  className="flex-row items-center bg-gray-100 px-4 py-2 rounded-full"
                 >
                   {cat.iconUrl && (
                     <Image
                       source={{ uri: cat.iconUrl }}
-                      className="w-5 h-5 mr-2"
+                      className=" h-5"
                       resizeMode="contain"
                     />
                   )}
@@ -377,7 +369,7 @@ const BusinessDetailScreen = () => {
         onRequestClose={closeImageModal}
       >
         <StatusBar barStyle="dark-content" backgroundColor="#000" />
-        <View className="flex-1 bg-black/90 justify-center">
+        <View className="bg-black/90 relative">
           <Animated.FlatList
             ref={galleryRef}
             data={businessData.photos.slice(1)}
@@ -386,11 +378,10 @@ const BusinessDetailScreen = () => {
             showsHorizontalScrollIndicator={false}
             initialScrollIndex={selectedImageIndex}
             renderItem={({ item }) => (
-              <View className="w-screen h-96 justify-center items-center">
+              <View className="w-screen h-screen justify-center items-center bg-black">
                 <Image
                   source={{ uri: getFullImageUrl(item) }}
-                  className="w-full h-full"
-                  resizeMode="contain"
+                  style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
                 />
               </View>
             )}
@@ -401,13 +392,12 @@ const BusinessDetailScreen = () => {
             }}
           />
 
-
-
           <View className="absolute bottom-20 left-0 right-0 flex-row justify-center">
             {businessData.photos.slice(1).map((_, idx) => (
               <View
                 key={idx}
-                className={`w-2 h-2 rounded-full mx-1 ${idx === selectedImageIndex ? 'bg-white' : 'bg-white/50'}`}
+                className={`w-2 h-2 rounded-full mx-1 ${idx === selectedImageIndex ? 'bg-white' : 'bg-white/50'
+                  }`}
               />
             ))}
           </View>

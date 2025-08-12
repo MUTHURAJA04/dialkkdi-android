@@ -35,7 +35,7 @@ export const ReviewsSection = ({ reviews = [], overallRating = 0, onReviewSubmit
           comment: existingReview.comment || '',
           name: existingReview.user?.name || ''
         });
-        setIsWritingReview(true); // auto open in edit mode
+        // setIsWritingReview(true); // auto open in edit mode
       }
     }
   }, [currentUserId, reviews]);
@@ -62,7 +62,6 @@ export const ReviewsSection = ({ reviews = [], overallRating = 0, onReviewSubmit
     console.log(existingReview, "existingReview");
 
 
-    // Call API with `isOldUser` flag
     await onReviewSubmit({
       rating: newReview.rating,
       comment: newReview.comment,
