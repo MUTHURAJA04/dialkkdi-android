@@ -11,11 +11,13 @@ import {
   ActivityIndicator,
   StatusBar,
   Animated,
+  Button
 } from 'react-native';
-import { Star, MapPin, Phone, MessageCircle } from 'react-native-feather';
+import { Star, MapPin, Phone, MessageCircle, Heart } from 'react-native-feather';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { getBusinessById, review } from '../services/apiClient';
+import { addToFavourites, checkFavoriteStatus, getBusinessById, removeFromFavourites, review } from '../services/apiClient';
 import { ReviewsSection } from './ReviewsSection';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const IMAGE_PREFIX = 'https://livecdn.dialkaraikudi.com/';
 const { width: screenWidth } = Dimensions.get('window');
@@ -32,7 +34,7 @@ const BusinessDetailScreen = () => {
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const galleryRef = useRef(null);
-
+  const [isFavourite, setIsFavourite] = useState(false);
 
   useEffect(() => {
     if (business && business._id) {
@@ -65,6 +67,21 @@ const BusinessDetailScreen = () => {
       setLoading(false);
     }
   }, [business]);
+
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        const status = await checkFavoriteStatus(businessData._id);
+        setIsFavourite(status.favourited);
+        console.log(status, "14254125");
+
+      } catch (error) {
+        console.error("❌ Failed to check favorite status:", error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [businessData._id]);
 
   const getFullImageUrl = url => url?.startsWith('http') ? url : `${IMAGE_PREFIX}${url}`;
 
@@ -104,6 +121,21 @@ const BusinessDetailScreen = () => {
         : 'Closed'
     };
   });
+
+  const toggleFavourite = async () => {
+    try {
+
+      if (isFavourite) {
+        await removeFromFavourites(businessData._id);
+        setIsFavourite(false);
+      } else {
+        await addToFavourites(businessData._id);
+        setIsFavourite(true);
+      }
+    } catch (err) {
+      console.error('Favourite toggle failed:', err.message);
+    }
+  }
 
   const openWhatsApp = () => {
     const phoneNumber = businessData?.contactDetails?.phone?.replace(/\D/g, '');
@@ -194,14 +226,21 @@ const BusinessDetailScreen = () => {
             className="w-full h-64"
             resizeMode="cover"
           />
-
-
         </View>
 
         {/* Content */}
         <View className="px-4 pt-4 pb-8">
           {/* Business Info */}
-          <View className="mb-4">
+          <View className="mb-4 relative">
+            <View className='absolute right-0 z-10'>
+              <TouchableOpacity onPress={toggleFavourite}>
+                <Heart
+                  size={30}
+                  color={isFavourite ? "red" : "black"}
+                  fill={isFavourite ? "red" : "none"} // 🔹 Fill when favourite
+                />
+              </TouchableOpacity>
+            </View>
             <Text className="text-2xl font-bold text-gray-900">
               {businessData.businessName}
             </Text>

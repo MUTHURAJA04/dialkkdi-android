@@ -380,5 +380,161 @@ export const DialogramLike = async (postId) => {
   }
 };
 
+// Add to Favourites
+export const addToFavourites = async (businessId) => {
+  try {
+    // Get token & user data from storage
+    const token = await AsyncStorage.getItem("userToken");
+    const userDataString = await AsyncStorage.getItem("userData");
+
+
+    if (!token || !userDataString) {
+      throw new Error("User not authenticated. Please log in.");
+    }
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData._id || userData.id;
+
+    if (!userId) {
+      throw new Error("Invalid user data: No user ID found.");
+    }
+
+    // Payload for API
+    const payload = {
+      user: userId,
+      business: businessId
+    };
+
+    console.log("[addToFavourites] 📤 Sending:", payload);
+
+    // Send POST request
+    const res = await apiClient.post("/favourites/add", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[addToFavourites] ✅ Success:", res.data);
+    return res.data;
+
+  } catch (error) {
+    console.error("[addToFavourites] ❌ Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const removeFromFavourites = async (businessId) => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) throw new Error('Not authenticated');
+    const userDataString = await AsyncStorage.getItem("userData");
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData._id || userData.id;
+
+    const payload = {
+      user: userId,
+      business: businessId
+    };
+
+    const response = await apiClient.post(
+      '/favourites/remove',
+      payload,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('❌ Remove from Favourites API failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const checkFavoriteStatus = async (businessId) => {
+  try {
+    // Get token & user data from storage
+    const token = await AsyncStorage.getItem("userToken");
+    const userDataString = await AsyncStorage.getItem("userData");
+
+    if (!token || !userDataString) {
+      throw new Error("User not authenticated. Please log in.");
+    }
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData._id || userData.id;
+
+    if (!userId) {
+      throw new Error("Invalid user data: No user ID found.");
+    }
+
+    console.log("[checkFavoriteStatus] 📤 Sending params:", {
+      user: userId,
+      business: businessId,
+    });
+
+    // Send GET request
+    const res = await apiClient.get("/favourites/check", {
+      params: {
+        user: userId,
+        business: businessId,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[checkFavoriteStatus] ✅ Success:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error(
+      "[checkFavoriteStatus] ❌ Error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const getFavoriteStatus = async () => {
+  try {
+    // Get token & user data from storage
+    const token = await AsyncStorage.getItem("userToken");
+    const userDataString = await AsyncStorage.getItem("userData");
+
+    if (!token || !userDataString) {
+      throw new Error("User not authenticated. Please log in.");
+    }
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData._id || userData.id;
+
+    if (!userId) {
+      throw new Error("Invalid user data: No user ID found.");
+    }
+
+    console.log("[checkFavoriteStatus] 📤 Sending params:", {
+      user: userId,
+    });
+
+    // Send GET request
+    const res = await apiClient.get(`favourites/user?user=${userId}`, {
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[checkFavoriteStatus] ✅ Success:", res.data.data);
+    return res.data.data;
+  } catch (error) {
+    console.error(
+      "[checkFavoriteStatus] ❌ Error:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 
 export default apiClient;
