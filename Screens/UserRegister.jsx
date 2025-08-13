@@ -21,20 +21,35 @@ const UserRegister = ({ navigation }) => {
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
-  
-
-
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^[6-9]\d{9}$/;
+  const passwordRegex = /^\S{8,}$/;
 
 
   /** ✅ Handle Register */
   const handleRegister = async () => {
     console.log('🔹 [START] handleRegister triggered');
 
-    if (!name || !email || !phone || !password || !confirmPassword) {
+    if (!name && !email && !phone && !password && !confirmPassword) {
       Alert.alert('Error', 'Please fill all fields');
       console.warn('⚠️ Validation failed: Missing fields');
+      return;
+    }
+
+    if (!email) {
+      Alert.alert('Error', 'Please enter a email address');
+      return;
+    }
+    if (!name) {
+      Alert.alert('Error', 'Please enter a name');
+      return;
+    }
+    if (!phone) {
+      Alert.alert('Error', 'Please enter a phone number');
+      return;
+    }
+    if (!password) {
+      Alert.alert('Error', 'Please enter a password');
       return;
     }
 
@@ -46,7 +61,21 @@ const UserRegister = ({ navigation }) => {
 
     // ✅ Phone validation
     if (!phoneRegex.test(phone)) {
-      Alert.alert('Error', 'Please enter a valid phone number (10 digits starting with 6-9)');
+      Alert.alert('Error', 'Please enter a valid phone number');
+      return;
+    }
+    if (!passwordRegex.test(password)) {
+      Alert.alert('Error', 'Please enter a valid Password');
+      return;
+    }
+
+    if (name.length < 3) {
+      Alert.alert('Error', 'Nmae must be at least 3 characters long');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters long');
       return;
     }
 
@@ -111,6 +140,7 @@ const UserRegister = ({ navigation }) => {
         value={name}
         onChangeText={setName}
         placeholderTextColor="#999"
+        maxLength={30}
       />
 
       {/* Email Input */}
@@ -129,6 +159,7 @@ const UserRegister = ({ navigation }) => {
         value={phone}
         onChangeText={setPhone}
         placeholderTextColor="#999"
+        maxLength={10}
       />
 
       {/* Password Input */}
@@ -138,6 +169,7 @@ const UserRegister = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
         placeholderTextColor="#999"
+        maxLength={15}
       />
 
       {/* Confirm Password Input */}

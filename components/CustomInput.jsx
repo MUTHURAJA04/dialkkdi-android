@@ -12,6 +12,7 @@ const Input = ({
     togglePasswordVisibility,
     keyboardType,
     error,
+    maxLength,
     ...props
 }) => {
     return (
@@ -24,6 +25,7 @@ const Input = ({
                     onChangeText={onChangeText}
                     secureTextEntry={isPassword && !showPassword}
                     keyboardType={keyboardType}
+                    maxLength={maxLength}
                     {...props}
                 />
                 {isPassword && (
