@@ -536,5 +536,18 @@ export const getFavoriteStatus = async () => {
   }
 };
 
+export const civicFeeds = async () => {
+  try {
+    const response = await apiClient.get(`/civicfeeds`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ civicFeeds API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+    return null;
+  }
+};
+
 
 export default apiClient;
