@@ -17,7 +17,7 @@ import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
 import ForgotPassword from '../Screens/Forgetpassword';
 import VerifyOtp from '../Screens/VerifyOtp';
 import DialogramScreen from '../Screens/DialogramScreen';
-import TalkofTown from '../Screens/TalkofTown';
+import TalkofTown from '../Screens/TalkOftheTown/TalkofTown';
 
 
 const Stack = createNativeStackNavigator();

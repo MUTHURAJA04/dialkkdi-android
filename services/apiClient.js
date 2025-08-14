@@ -549,5 +549,160 @@ export const civicFeeds = async () => {
   }
 };
 
+export const civicLikeUnlike = async (postId) => {
+  try {
+    console.log('[civicLikeUnlike API] 🔄 Starting like/unlike process for post:', postId);
+
+    // Get user data from AsyncStorage
+    const userDataString = await AsyncStorage.getItem("userData");
+    console.log('[civicLikeUnlike API] 📦 Raw user data from storage:', userDataString);
+
+    if (!userDataString) {
+      console.error('[civicLikeUnlike API] ❌ No user data found in AsyncStorage');
+      throw new Error('User not authenticated. Please login again.');
+    }
+
+    const userData = JSON.parse(userDataString);
+    console.log('[civicLikeUnlike API] 👤 Parsed user data:', userData);
+
+    // Check for user ID - try different possible properties
+    const userId = userData._id || userData.id || userData.userId;
+    const userType = "User";
+
+    console.log('[civicLikeUnlike API] 🔍 Extracted user info:', { userId, userType });
+
+    if (!userId) {
+      console.error('[civicLikeUnlike API] ❌ No user ID found in user data:', userData);
+      throw new Error('Invalid user data. Please login again.');
+    }
+
+    const payload = {
+      userId: userId,
+      userType: userType,
+    };
+
+    console.log('[civicLikeUnlike API] 📤 Sending payload:', payload);
+
+    const res = await apiClient.patch(`/civicfeeds/${postId}/like`, payload);
+    console.log(`[civicLikeUnlike API] ✅ Post ${postId} toggled like:`, res.data);
+    return res.data;
+  } catch (error) {
+    console.error(`[civicLikeUnlike API] ❌ Error for ${postId}:`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
+export const civicComments = async (postId, text) => {
+  try {
+    console.log('[civicComments API] 🔄 Starting civicComments process for post:', postId);
+
+    // Get user data and token from AsyncStorage
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userToken = await AsyncStorage.getItem("userToken");
+    console.log('[civicComments API] 📦 Raw user data from storage:', userDataString);
+
+    if (!userDataString || !userToken) {
+      console.error('[civicComments API] ❌ No user data or token found in AsyncStorage');
+      throw new Error('User not authenticated. Please login again.');
+    }
+
+    const userData = JSON.parse(userDataString);
+    console.log('[civicComments API] 👤 Parsed user data:', userData);
+
+    // Check for user ID - try different possible properties
+    const userId = userData._id || userData.id || userData.userId;
+    const userType = "User";
+
+    console.log('[civicComments API] 🔍 Extracted user info:', { userId, userType });
+
+    if (!userId) {
+      console.error('[civicComments API] ❌ No user ID found in user data:', userData);
+      throw new Error('Invalid user data. Please login again.');
+    }
+
+    const payload = {
+      userId: userId,
+      userType: userType,
+      name: userData.name,
+      postId: postId,
+      text: text,
+    };
+
+    console.log('[civicComments API] 📤 Sending payload:', payload);
+
+    const res = await apiClient.post(`/civicfeeds/${postId}/add-comment`, payload, {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    console.log(`[civicComments API] ✅ Post ${postId} Comments:`, res.data);
+    return res.data;
+  } catch (error) {
+    console.error(`[civicComments API] ❌ Error for ${postId}:`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
+export const GetComments = async (postId) => {
+  try {
+    const response = await apiClient.get(`/civicfeeds/${postId}/comments`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ GetComments API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+    return null;
+  }
+};
+
+export const deleteComment = async (commentId) => {
+  try {
+    console.log(`[DeleteComment API] 🔄 Deleting comment: ${commentId}`);
+
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userToken = await AsyncStorage.getItem("userToken");
+
+    if (!userDataString || !userToken) {
+      throw new Error("User not authenticated. Please login again.");
+    }
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData._id || userData.id || userData.userId;
+
+    if (!userId) {
+      throw new Error("Invalid user data. Please login again.");
+    }
+
+    const res = await apiClient.delete(
+      `/civicfeeds/delete-comment/${commentId}?user=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+
+    console.log(`[DeleteComment API] ✅ Comment deleted:`, res.data);
+    return res.data;
+  } catch (error) {
+    console.error(`[DeleteComment API] ❌ Delete failed:`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
+
 
 export default apiClient;
