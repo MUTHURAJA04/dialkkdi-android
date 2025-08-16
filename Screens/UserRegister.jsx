@@ -212,10 +212,10 @@ const UserRegister = ({ navigation }) => {
         >
           {agreed && <Text className="text-white text-xs">✓</Text>}
         </View>
-        <Pressable onPress={() => setShowTerms(true)}>
+        <Pressable >
           <Text className="text-gray-700 text-start">
             I agree to the{' '}
-            <Text className="underline text-orange-600">Terms and Conditions</Text>
+            <Text className="underline text-orange-600" onPress={() => setShowTerms(true)}>Terms and Conditions</Text>
           </Text>
         </Pressable>
       </TouchableOpacity>

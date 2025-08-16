@@ -66,8 +66,8 @@ const Categories = () => {
         source={{ uri: `${imgUrl}${item.imageUrl}` }}
         resizeMode="cover"
       />
-      <View className="absolute top-0 w-full bg-gradient-to-b from-black/60 to-transparent px-3 py-2 text-white text-sm font-semibold z-10 text-center">
-        <Text className="text-white text-sm font-semibold text-center truncate" numberOfLines={1}>
+      <View className="absolute top-0 w-full bg-white/40 px-3 py-2 text-white text-sm font-semibold z-10 text-center">
+        <Text className="text-black text-sm font-semibold text-center truncate" numberOfLines={1}>
           {item.displayName}
         </Text>
       </View>
@@ -88,7 +88,7 @@ const Categories = () => {
       <View className="text-center mb-">
         <Text
           className="text-2xl md:text-[32px] my-2 font-semibold text-center"
-          // style={{ fontFamily: 'Work Sans' }}
+        // style={{ fontFamily: 'Work Sans' }}
         >
           Explore Categories
         </Text>

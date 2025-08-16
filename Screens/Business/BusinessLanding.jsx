@@ -45,11 +45,18 @@ const BusinessLanding = () => {
         navigation.replace('Landing');
     };
 
+    const handleHome = () => {
+        navigation.replace('Home')
+    }
+
     return (
         <Tab.Navigator
             screenOptions={{
                 headerRight: () => (
-                    <Button title="Logout" color="red" onPress={handleLogout} />
+                    <View className='flex-row gap-2 pr-2'>
+                        <Button title="Home" color="green" onPress={handleHome} />
+                        <Button title="Logout" color="red" onPress={handleLogout} />
+                    </View>
                 ),
             }}
         >

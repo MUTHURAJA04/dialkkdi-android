@@ -179,10 +179,10 @@ const BusinessStep3 = () => {
           <View className={`w-5 h-5 rounded border-2 mr-3 justify-center items-center ${agreed ? 'bg-orange-500 border-orange-500' : 'border-gray-400'}`}>
             {agreed && <Text className="text-white text-xs">✓</Text>}
           </View>
-          <Pressable onPress={() => setShowTerms(true)}>
+          <Pressable >
             <Text className="text-gray-700">
               I agree to the{' '}
-              <Text className="underline text-sky-500">Terms and Conditions</Text>
+              <Text className="underline text-sky-500" onPress={() => setShowTerms(true)}>Terms and Conditions</Text>
             </Text>
           </Pressable>
         </TouchableOpacity>
