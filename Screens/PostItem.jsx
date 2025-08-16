@@ -497,9 +497,22 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       <TouchableOpacity
         activeOpacity={1}
         onPress={handleDoubleTap}
-        className="relative flex justify-center items-center"
+        className="relative flex justify-center items-center overflow-hidden"
       >
-        <View className='absolute inset-0 w-full h-full bg-white' ></View>
+        {/* Blurred background image */}
+        <Image 
+          source={{ uri: `${CDN_PREFIX}${imageUrl}` }} 
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'
+          }}
+          blurRadius={20}
+          resizeMode="cover"
+        />
+        
+        {/* Main image */}
         <Image
           source={{ uri: `${CDN_PREFIX}${imageUrl}` }}
           style={{
@@ -508,7 +521,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
             // Keep very short panoramas visible and very tall portraits constrained
             minHeight: 180,
             maxHeight: Math.round(screenHeight * 0.75),
-            backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'
+            backgroundColor: 'transparent'
           }}
           resizeMode="contain"
           onLoadStart={handleImageLoadStart}

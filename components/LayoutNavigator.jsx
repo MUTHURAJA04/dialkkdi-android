@@ -17,7 +17,7 @@ import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
 import ForgotPassword from '../Screens/Forgetpassword';
 import VerifyOtp from '../Screens/VerifyOtp';
 import DialogramScreen from '../Screens/DialogramScreen';
-import BusinessLanding from '../Screens/Business/BusinessLanding';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -90,6 +90,12 @@ const LayoutNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {/* Public screens */}
       <Stack.Screen name="Landing" component={Landing} />
+      <Stack.Screen name="BusinessRegister" component={withAuthGuard(BusinessRegister)} />
+      <Stack.Screen name="BusinessStep2" component={withAuthGuard(BusinessStep2)} />
+      <Stack.Screen name="BusinessStep3" component={withAuthGuard(BusinessStep3)} />
+      <Stack.Screen name="DialogramScreen" component={withAuthGuard(DialogramScreen)} />
+
+      <Stack.Screen name="Profile" component={withAuthGuard(Profile)} />
       <Stack.Screen name="UserRegister" component={UserRegister} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
