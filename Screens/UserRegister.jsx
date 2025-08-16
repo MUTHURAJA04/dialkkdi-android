@@ -20,15 +20,21 @@ const UserRegister = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  const type = 'user'
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^[6-9]\d{9}$/;
-  const passwordRegex = /^\S{8,}$/;
+  const passwordRegex = /^(?!.*[ .])[A-Za-z0-9!@#$%^&*()_+\-={}[\]|:;"'<>,?/]{8,20}$/;
+  const nameRegex = /^[A-Za-z\s]+$/;
 
 
   /** ✅ Handle Register */
   const handleRegister = async () => {
     console.log('🔹 [START] handleRegister triggered');
+
 
     if (!name && !email && !phone && !password && !confirmPassword) {
       Alert.alert('Error', 'Please fill all fields');
@@ -56,6 +62,10 @@ const UserRegister = ({ navigation }) => {
     // ✅ Email validation
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+    if (!nameRegex.test(name)) {
+      Alert.alert('Error', 'Please enter a valid Name');
       return;
     }
 
@@ -122,7 +132,7 @@ const UserRegister = ({ navigation }) => {
       contentContainerStyle={{
         flexGrow: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        // alignItems: 'center',
         padding: 20,
       }}
       className="bg-white flex-1"
@@ -145,7 +155,7 @@ const UserRegister = ({ navigation }) => {
 
       {/* Email Input */}
       <Input
-        placeholder="Email Address"
+        placeholder="Enter your Email Address"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
@@ -167,9 +177,15 @@ const UserRegister = ({ navigation }) => {
         placeholder="Enter password"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          const cleanedText = text.replace(/[ .,]/g, '');
+          setPassword(cleanedText);
+        }}
         placeholderTextColor="#999"
         maxLength={15}
+        showPassword={showPassword}
+        togglePasswordVisibility={() => setShowPassword((prev) => !prev)}
+        isPassword
       />
 
       {/* Confirm Password Input */}
@@ -177,8 +193,12 @@ const UserRegister = ({ navigation }) => {
         placeholder="Re-enter password"
         secureTextEntry
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(text) => {
+          const cleanedText = text.replace(/[ .,]/g, '');
+          setConfirmPassword(cleanedText);
+        }}
         placeholderTextColor="#999"
+
       />
 
       {/* Agree to Terms */}
@@ -193,7 +213,7 @@ const UserRegister = ({ navigation }) => {
           {agreed && <Text className="text-white text-xs">✓</Text>}
         </View>
         <Pressable onPress={() => setShowTerms(true)}>
-          <Text className="text-gray-700">
+          <Text className="text-gray-700 text-start">
             I agree to the{' '}
             <Text className="underline text-orange-600">Terms and Conditions</Text>
           </Text>
@@ -213,7 +233,7 @@ const UserRegister = ({ navigation }) => {
         Already have an account?{' '}
         <Text
           className="text-orange-600 underline"
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('Login', { type })}
         >
           Login
         </Text>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StatusBar, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { resendRegisterOtp, verifyOtpAndCreateAccount } from '../services/apiClient';
 
-const VerifyOtp = ({ route }) => {
-  const { email } = route.params || {}; // ✅ Get email from previous screen
+const VerifyOtp = () => {
+  // const { email } = route.params || {}; // ✅ Get email from previous screen
+  const route = useRoute();
+  const { email, type } = route.params;
   const [otp, setOtp] = useState('');
   const navigation = useNavigation();
 
@@ -16,8 +18,8 @@ const VerifyOtp = ({ route }) => {
     }
 
     try {
-      console.log('📡 Sending OTP verification:', { email, otp });
-      const response = await verifyOtpAndCreateAccount(email, otp);
+      console.log('📡 Sending OTP verification:', { email, otp, type });
+      const response = await verifyOtpAndCreateAccount(email, otp, type);
       console.log('✅ OTP Verified:', response);
 
       Alert.alert('Success', 'Account created successfully!');
@@ -32,7 +34,7 @@ const VerifyOtp = ({ route }) => {
   const handleResendOtp = async () => {
     try {
       console.log('📡 Resending OTP to:', email);
-      const response = await resendRegisterOtp(email);
+      const response = await resendRegisterOtp(email, type);
       console.log('✅ OTP Resent:', response);
 
       Alert.alert('Success', 'A new OTP has been sent to your email.');
@@ -41,6 +43,7 @@ const VerifyOtp = ({ route }) => {
       Alert.alert('Failed', error.response?.data?.message || 'Unable to resend OTP');
     }
   };
+
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-white px-6">

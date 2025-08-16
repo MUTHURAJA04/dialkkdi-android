@@ -53,6 +53,7 @@ const BusinessStep3 = () => {
   };
 
   const handleSubmit = async () => {
+    // Basic validations
     if (password.length < 6) {
       return Alert.alert('Error', 'Password must be at least 6 characters long.');
     }
@@ -72,35 +73,46 @@ const BusinessStep3 = () => {
     try {
       const form = new FormData();
 
+      // Append all fields from formData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          form.append(key, value);
+        }
+      });
 
       // Append password
       form.append('password', password);
 
-      // Append photos
+      // Append each photo
       photos.forEach((photo, index) => {
         form.append('photos', {
           uri: photo.uri,
-          name: photo.fileName || `photo_${index}.jpg`,
+          name: photo.fileName || `photo_${index + 1}.jpg`,
           type: photo.type || 'image/jpeg',
         });
       });
 
-      const mergedData = {
-        ...formData,
-        password: form.password,
-        photos: form.photos
-      }
+      // Send to API
+      const response = await postBusiness(form);
 
-      const response = await postBusiness(mergedData); // send raw FormData
-      console.log('Response:', form);
+      const type = 'business'
+      const email = formData.email
+
+      console.log('✅ Registration Response:', response, email);
 
       Alert.alert('Success', 'Registration complete!');
-      navigation.navigate('Landing');
+      navigation.navigate('VerifyOtp', { email, type });
+
     } catch (error) {
-      console.log('Registration error:', error);
+      console.error('❌ Registration Error:', {
+        message: error.message,
+        details: error.response?.data,
+      });
       Alert.alert('Error', 'Something went wrong. Please try again.');
     }
   };
+
+
 
   return (
     <View className="flex-1 bg-white">
@@ -386,9 +398,12 @@ const BusinessStep3 = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Landing')}>
+        <TouchableOpacity onPress={() => navigation.navigate(('Login'), { type: 'business' })}>
           <Text className="text-sm text-orange-600 text-center">
-            Already have an account? Login
+            Already have an account?
+            <Text className="underline"
+              onPress={() => navigation.navigate('Login', { type })}
+            >Login</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>

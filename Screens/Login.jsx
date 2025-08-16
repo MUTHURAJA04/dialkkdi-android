@@ -16,9 +16,14 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import Input from '../components/CustomInput';
 import { googleSSOLogin, loginWithEmail } from '../services/apiClient'; // ✅ Added login API
 
-const Login = ({ type, onClose }) => {
+const Login = ({ route }) => {
+
   const navigation = useNavigation();
+  const { type } = route.params;
   const title = type === 'business' ? 'Business Login' : 'User Login';
+
+  console.log(type);
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,6 +65,7 @@ const Login = ({ type, onClose }) => {
 
   /** ✅ Handle Email/Password Login */
   const handleEmailLogin = async () => {
+
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
@@ -67,12 +73,18 @@ const Login = ({ type, onClose }) => {
 
     try {
       console.log(' Calling login API with:', { email, password });
-      const result = await loginWithEmail(email, password);
+      const result = await loginWithEmail(email, password, type);
 
       if (result?.token) {
-        console.log(' Email login success:', result);
-        Alert.alert('Welcome!', `Logged in as ${result.user.name}`);
-        navigation.navigate('Home');
+        if (type == 'user') {
+          console.log(' Email login success:', result);
+          Alert.alert('Welcome!', `Logged in as ${result.name} `);
+          navigation.navigate('Home');
+        } else {
+          console.log(' Email login success:', result);
+          Alert.alert('Welcome!', `Logged in as ${result?.business?.name} `);
+          navigation.navigate('BusinessLanding');
+        }
       } else {
         console.warn(' Login failed:', result?.message);
         Alert.alert('Login Failed', result?.message || 'Invalid credentials');
@@ -160,7 +172,7 @@ const Login = ({ type, onClose }) => {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword', { type })}>
                 <Text className="text-sm text-orange-600 font-semibold underline">
                   Forgot Password?
                 </Text>
@@ -170,12 +182,12 @@ const Login = ({ type, onClose }) => {
           </View>
 
           {/* Close Button */}
-          <View className="items-center mb-6">
+          {/* <View className="items-center mb-6">
             <TouchableOpacity onPress={onClose} className="flex-row items-center space-x-2">
               <X color="#888" width={22} height={22} />
               <Text className="text-gray-600 text-sm">Close</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

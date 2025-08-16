@@ -95,16 +95,38 @@ export const signupUser = async (name, email, phone, password) => {
 
 
 /** Email/Password Login */
-export const loginWithEmail = async (email, password) => {
+export const loginWithEmail = async (email, password, type) => {
   console.log(' loginWithEmail() called with:', { email, password });
   try {
-    const response = await apiClient.post('/user/login', {
-      email,
-      password,
-    });
+    if (type == 'user') {
+      const response = await apiClient.post('/user/login', {
+        email,
+        password,
+      });
 
-    console.log(' Email/Password Login Success:', response.data);
-    return response.data;
+      const { token, user } = response.data;
+
+      console.log(' Email/Password Login Success:', response.data);
+
+      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userData', JSON.stringify(user));
+      return response.data;
+    } else {
+      const response = await apiClient.post('/business/login', {
+        email,
+        password,
+      });
+      console.log(' Email/Password Login Success:', response.data);
+
+      const { token, business } = response.data;
+
+      await AsyncStorage.setItem('businessToken', token);
+      await AsyncStorage.setItem('businessData', JSON.stringify(business));
+      console.log(business, "1234567");
+
+
+      return response.data;
+    }
   } catch (error) {
     console.error('Email/Password Login API failed:', {
       message: error.message,
@@ -116,13 +138,24 @@ export const loginWithEmail = async (email, password) => {
 
 
 /** ✅ Verify OTP & Create Account */
-export const verifyOtpAndCreateAccount = async (email, otp) => {
+export const verifyOtpAndCreateAccount = async (email, otp, type) => {
   try {
-    const response = await apiClient.post('/user/verifyOtpAndCreateAccount', {
-      email,
-      otp,
-    });
-    return response.data;
+    console.log(type);
+
+    if (type = 'business') {
+      const response = await apiClient.post('/business/verifyOtpAndCreateBusiness', {
+        email,
+        otp,
+      });
+      return response.data;
+    } else {
+      const response = await apiClient.post('/user/verifyOtpAndCreateAccount', {
+        email,
+        otp,
+      });
+      return response.data;
+    }
+
   } catch (error) {
     console.error('Verify OTP & Create Account API Error:', error.response?.data || error.message);
     throw error;
@@ -130,12 +163,20 @@ export const verifyOtpAndCreateAccount = async (email, otp) => {
 };
 
 /** ✅ Resend OTP (Signup) */
-export const resendRegisterOtp = async (email) => {
+export const resendRegisterOtp = async (email, type) => {
   try {
-    const response = await apiClient.post('/user/resendregisterotp', {
-      email,
-    });
-    return response.data;
+    if (type = 'business') {
+      const response = await apiClient.post('/business/resendBusinessOtp', {
+        email,
+      });
+      return response.data;
+    } else {
+      const response = await apiClient.post('/user/resendregisterotp', {
+        email,
+      });
+      return response.data;
+    }
+
   } catch (error) {
     console.error('Resend OTP API Error:', error.response?.data || error.message);
     throw error;
@@ -535,6 +576,32 @@ export const getFavoriteStatus = async () => {
     throw error;
   }
 };
+
+export const getArea = async (cityId) => {
+  try {
+    const response = await apiClient.get(`/areas?city=${cityId}`);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Google SSO API call failed:', {
+      message: error.message,
+      response: error.response?.data,
+    });
+  }
+};
+
+export const postBusiness = async (payload) => {
+  try {
+    const response = await apiClient.post('/business/signup', payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    },
+    )
+    return response.data;
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
 
 
 export default apiClient;

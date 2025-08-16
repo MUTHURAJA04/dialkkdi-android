@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import { X } from 'react-native-feather';
 import { useNavigation } from '@react-navigation/native';
-import Input from '../components/CustomInput'; // Your custom input component
-import { categories } from './categories'; // Your category data
+import Input from '../components/CustomInput';
 import { getCategories } from '../services/apiClient';
+import { ChevronUp, ChevronDown } from 'react-native-feather';
 
 const BusinessRegister = () => {
   const navigation = useNavigation();
@@ -20,6 +20,9 @@ const BusinessRegister = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [openSegments, setOpenSegments] = useState({});
+  const [activeSegmentId, setActiveSegmentId] = useState(null); // New state to track the active segment
 
   // Form state
   const [businessName, setBusinessName] = useState('');
@@ -33,6 +36,35 @@ const BusinessRegister = () => {
     ownerName: /^[a-zA-Z ]{2,50}$/,
     phone: /^[6-9]\d{9}$/,
     email: /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/,
+  };
+
+  const toggleSubcategory = (categoryId, segmentId) => {
+    setSelected((prev) => {
+      // If the category is already selected, unselect it
+      if (prev.includes(categoryId)) {
+        const newSelection = prev.filter((id) => id !== categoryId);
+        // If the last item from the segment is unselected, reset the active segment
+        if (newSelection.length === 0) {
+          setActiveSegmentId(null);
+        }
+        return newSelection;
+      }
+
+      // If no segment is active yet and we have space, make the selection
+      if (!activeSegmentId && prev.length < 4) {
+        setActiveSegmentId(segmentId);
+        return [...prev, categoryId];
+      }
+
+      // If a segment is already active and the new selection is from the same segment and we have space
+      if (activeSegmentId && segmentId === activeSegmentId && prev.length < 4) {
+        return [...prev, categoryId];
+      }
+
+      // Otherwise, prevent the selection
+      Alert.alert('Selection Restricted', 'You can only select categories from the same segment.');
+      return prev;
+    });
   };
 
   const handleNext = () => {
@@ -61,7 +93,6 @@ const BusinessRegister = () => {
       return;
     }
 
-    // If all inputs are valid, navigate to next screen with data
     const formData = {
       businessName,
       ownerName,
@@ -70,29 +101,18 @@ const BusinessRegister = () => {
       categories: selected,
     };
 
+    console.log('Form Data:', formData);
     navigation.navigate('BusinessStep2', { formData });
-    console.log(formData, "form Data Datas");
-
   };
 
-  const toggleSubcategory = (subcategory) => {
-    const isSelected = selected.includes(subcategory);
-    if (isSelected) {
-      setSelected((prev) => prev.filter((item) => item !== subcategory));
-    } else if (selected.length < 4) {
-      setSelected((prev) => [...prev, subcategory]);
-    }
-  };
-
+  const type = 'business';
 
   useEffect(() => {
-    console.log('useEffect triggered for fetching categories');
     const fetchCategories = async () => {
       try {
-        console.log('Starting to fetch categories...');
         const response = await getCategories();
-        console.log('Raw API response:', response);
-
+        console.log('Full API response:', response);
+        setCategories(response || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -100,6 +120,44 @@ const BusinessRegister = () => {
 
     fetchCategories();
   }, []);
+
+  const filteredGroupedCategories = useMemo(() => {
+    const filtered = categories.filter((category) => {
+      const categoryName = category.displayName || category.categoryName;
+      const segmentName = category.businessSegment?.name;
+      const searchTerm = search.toLowerCase();
+
+      return (
+        categoryName?.toLowerCase().includes(searchTerm) ||
+        segmentName?.toLowerCase().includes(searchTerm)
+      );
+    });
+
+    const grouped = filtered.reduce((acc, current) => {
+      const segmentId = current.businessSegment?._id || 'others';
+      const segmentName = current.businessSegment?.name || 'Other Categories';
+
+      if (!acc[segmentId]) {
+        acc[segmentId] = {
+          _id: segmentId,
+          name: segmentName,
+          subcategories: [],
+        };
+      }
+      acc[segmentId].subcategories.push(current);
+
+      return acc;
+    }, {});
+
+    return Object.values(grouped);
+  }, [categories, search]);
+
+  const toggleSegment = (id) => {
+    setOpenSegments((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   return (
     <View className="flex-1 p-4 pt-16 bg-white">
@@ -116,14 +174,15 @@ const BusinessRegister = () => {
         value={businessName}
         onChangeText={setBusinessName}
       />
-
       <Input
         placeholder="Enter owner name"
         placeholderTextColor="#aaa"
         value={ownerName}
-        onChangeText={setOwnerName}
+        onChangeText={(text) => {
+          const onlyLetters = text.replace(/[^A-Za-z\s]/g, '');
+          setOwnerName(onlyLetters);
+        }}
       />
-
       <Input
         placeholder="Enter phone number"
         keyboardType="phone-pad"
@@ -131,7 +190,6 @@ const BusinessRegister = () => {
         value={phone}
         onChangeText={setPhone}
       />
-
       <Input
         placeholder="Enter email"
         keyboardType="email-address"
@@ -140,14 +198,13 @@ const BusinessRegister = () => {
         onChangeText={setEmail}
       />
 
+      {/* Category Selector */}
       <TouchableOpacity
         className="w-full border border-gray-300 rounded-lg px-4 py-4 mb-4"
         onPress={() => setModalVisible(true)}
       >
         <Text className="text-gray-500">
-          {selected.length > 0
-            ? `${selected.length} selected`
-            : 'Select Categories'}
+          {selected.length > 0 ? `${selected.length} selected` : 'Select Categories'}
         </Text>
       </TouchableOpacity>
 
@@ -160,11 +217,14 @@ const BusinessRegister = () => {
       </TouchableOpacity>
 
       {/* Navigate to login */}
-      <Text
-        className="text-orange-600 text-center mt-3"
-        onPress={() => navigation.navigate('Landing')}
-      >
-        Already have an account? <Text className="underline">Login</Text>
+      <Text className="text-orange-600 text-center mt-3">
+        Already have an account?{' '}
+        <Text
+          className="underline"
+          onPress={() => navigation.navigate('Login', { type })}
+        >
+          Login
+        </Text>
       </Text>
 
       {/* Modal for Category Selection */}
@@ -174,7 +234,7 @@ const BusinessRegister = () => {
             onPress={() => setModalVisible(false)}
             className="absolute top-6 right-6 z-10 bg-orange-500 rounded-full p-1"
           >
-            <X color="white" width={24} height={24} />
+            <X color="#64748B" width={24} height={24} />
           </TouchableOpacity>
 
           <Text className="text-xl font-bold mb-4 text-orange-600 mt-12">
@@ -189,32 +249,48 @@ const BusinessRegister = () => {
           />
 
           <ScrollView>
-            {categories.map((cat) => {
-              const filteredSubs = cat.subcategories.filter((sub) =>
-                sub.toLowerCase().includes(search.toLowerCase())
-              );
-              if (filteredSubs.length === 0) return null;
-
-              return (
-                <View key={cat.name} className="mb-4">
-                  <Text className="font-semibold text-lg mb-1 text-gray-800">
-                    {cat.name}
-                  </Text>
-                  {filteredSubs.map((sub) => (
-                    <TouchableOpacity
-                      key={sub}
-                      className={`border rounded-md px-3 py-2 mb-2 ${selected.includes(sub)
-                        ? 'bg-orange-100 border-orange-400'
-                        : 'border-gray-300'
-                        }`}
-                      onPress={() => toggleSubcategory(sub)}
-                    >
-                      <Text className="text-gray-800">{sub}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              );
-            })}
+            {filteredGroupedCategories.map((group) => (
+              <View key={group._id} className="mb-2">
+                <TouchableOpacity
+                  onPress={() => toggleSegment(group._id)}
+                  className={`flex-row items-center justify-between p-3 my-1 rounded-lg ${activeSegmentId && group._id !== activeSegmentId
+                      ? 'bg-gray-300'
+                      : 'bg-gray-100'
+                    }`}
+                  disabled={activeSegmentId && group._id !== activeSegmentId}
+                >
+                  <Text className={`font-bold text-gray-800 ${activeSegmentId && group._id !== activeSegmentId
+                      ? 'text-gray-500'
+                      : ''
+                    }`}>{group.name}</Text>
+                  {openSegments[group._id] ? <ChevronUp color="gray" /> : <ChevronDown color="gray" />}
+                </TouchableOpacity>
+                {openSegments[group._id] && (
+                  <View className="flex-row flex-wrap p-2">
+                    {group.subcategories.map((sub) => {
+                      const isDisabled = activeSegmentId && group._id !== activeSegmentId;
+                      return (
+                        <TouchableOpacity
+                          key={sub._id}
+                          className={`border rounded-full px-4 py-2 m-1 ${selected.includes(sub._id)
+                              ? 'bg-orange-100 border-orange-400'
+                              : isDisabled
+                                ? 'bg-gray-200 border-gray-300'
+                                : 'border-gray-300'
+                            }`}
+                          onPress={() => toggleSubcategory(sub._id, group._id)}
+                          disabled={isDisabled}
+                        >
+                          <Text className={`text-gray-700 ${isDisabled ? 'text-gray-400' : ''}`}>
+                            {sub.displayName || sub.categoryName}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            ))}
           </ScrollView>
 
           <TouchableOpacity

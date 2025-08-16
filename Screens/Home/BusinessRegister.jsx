@@ -124,7 +124,7 @@ const BusinessRegister = () => {
             onPress={() => setModalVisible(false)}
             className="absolute top-6 right-6 z-10 bg-orange-500 rounded-full p-1"
           >
-            <X color="white" width={24} height={24} />
+            <X color="#64748B" width={24} height={24} />
           </TouchableOpacity>
 
           <Text className="text-xl font-bold mb-4 text-orange-600 mt-12">

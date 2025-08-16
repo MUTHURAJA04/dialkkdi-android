@@ -185,9 +185,12 @@ const BusinessStep2 = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Landing')}>
+        <TouchableOpacity onPress={() => navigation.navigate(('Login'), { type: 'business' })}>
           <Text className="text-sm text-orange-600 text-center">
-            Already have an account? Login
+            Already have an account?
+            <Text className="underline"
+              onPress={() => navigation.navigate('Login', { type })}
+            >Login</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView >

@@ -17,14 +17,22 @@ const extendedImages = [images[images.length - 1], ...images, images[0]];
 export default function HeroSlide() {
   const flatListRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const IMAGE_HEIGHT = 130; // ✅ Fixed height for slider
+  const [imageHeights, setImageHeights] = useState({});
 
-  // ✅ Scroll to index
+  // ✅ Preload and calculate heights
+  useEffect(() => {
+    images.forEach((uri) => {
+      Image.getSize(uri, (width, height) => {
+        const scaledHeight = (height / width) * screenWidth;
+        setImageHeights((prev) => ({ ...prev, [uri]: scaledHeight }));
+      });
+    });
+  }, []);
+
   const scrollTo = (index) => {
     flatListRef.current?.scrollToIndex({ index: index + 1, animated: true });
   };
 
-  // ✅ Handle visible items
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       const currentIndex = viewableItems[0].index;
@@ -44,16 +52,13 @@ export default function HeroSlide() {
     }
   }).current;
 
-  // ✅ Auto-slide every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       scrollTo(activeIndex === images.length - 1 ? 0 : activeIndex + 1);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [activeIndex]);
 
-  // ✅ Initial scroll
   useEffect(() => {
     setTimeout(() => {
       flatListRef.current?.scrollToIndex({ index: 1, animated: false });
@@ -62,16 +67,18 @@ export default function HeroSlide() {
 
   return (
     <SafeAreaView className="bg-white" style={{ zIndex: 0 }}>
-  <View className="w-full">
+      <View className="w-full">
         <FlatList
           ref={flatListRef}
           data={extendedImages}
           renderItem={({ item }) => (
             <Image
               source={{ uri: item }}
-              style={{ width: screenWidth, height: IMAGE_HEIGHT }}
-              className="w-full rounded-md"
-              resizeMode="cover"   // ✅ Ensures full image is visible (no crop)
+              style={{
+                width: screenWidth,
+                height: imageHeights[item] || 200, // default until loaded
+              }}
+              resizeMode="cover"
             />
           )}
           horizontal

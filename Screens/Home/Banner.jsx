@@ -67,7 +67,7 @@ const Banner = () => {
       return 'https://via.placeholder.com/100';
     }
     const finalUrl = url.startsWith('http') ? url : `${CDN_PREFIX}/${url}`;
-  
+
     return finalUrl;
   };
 
@@ -161,11 +161,11 @@ const Banner = () => {
               <ShoppingBag width={20} height={20} color="#3b82f6" />
               <Text className="text-lg font-bold text-gray-900 ml-2">Products</Text>
             </View>
-            <TouchableOpacity 
-              onPress={() => handleSeeAll(products, 'All Products')} 
+            <TouchableOpacity
+              onPress={() => handleSeeAll(products, 'All Products')}
               className="flex-row items-center"
             >
-              <Text className="text-blue-500 text-sm mr-1">See all</Text>
+              <Text className="text-blue-500 text-sm mr-1">See All</Text>
               <ChevronRight width={16} height={16} color="#3b82f6" />
             </TouchableOpacity>
           </View>
@@ -195,11 +195,11 @@ const Banner = () => {
               <Tool width={20} height={20} color="#6366f1" />
               <Text className="text-lg font-bold text-gray-900 ml-2">Services</Text>
             </View>
-            <TouchableOpacity 
-              onPress={() => handleSeeAll(services, 'All Services')} 
+            <TouchableOpacity
+              onPress={() => handleSeeAll(services, 'All Services')}
               className="flex-row items-center"
             >
-              <Text className="text-indigo-500 text-sm mr-1">See all</Text>
+              <Text className="text-indigo-500 text-sm mr-1">See All</Text>
               <ChevronRight width={16} height={16} color="#6366f1" />
             </TouchableOpacity>
           </View>
@@ -236,7 +236,7 @@ const Banner = () => {
         <View className="flex-1 bg-white">
           <View className="flex-row justify-between items-center py-4 px-6 border-b border-gray-100">
             <Text className="text-xl font-bold text-gray-900">{modalTitle}</Text>
-           
+
           </View>
 
           {viewMode === 'grid' ? (
@@ -260,15 +260,15 @@ const Banner = () => {
           )}
         </View>
 
-      <View className="items-center">
-  <TouchableOpacity 
-    onPress={() => setModalVisible(false)} 
-    className="flex-row items-center gap-2 p-2 rounded-full bg-gray-100 mb-3"
-  >
-    <X width={20} height={20} color="#4b5563" />
-    <Text className="text-gray-600 text-base font-medium">Close</Text>
-  </TouchableOpacity>
-</View>
+        <View className="items-center">
+          <TouchableOpacity
+            onPress={() => setModalVisible(false)}
+            className="flex-row items-center gap-2 p-2 rounded-full bg-gray-100 mb-3"
+          >
+            <X width={20} height={20} color="#64748B" />
+            <Text className="text-gray-600 text-base font-medium">Close</Text>
+          </TouchableOpacity>
+        </View>
 
       </Modal>
     </View>
