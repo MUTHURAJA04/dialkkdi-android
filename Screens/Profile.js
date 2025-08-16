@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
+  const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [favourites, setFavourites] = useState([]);
   const colorScheme = useColorScheme();
@@ -26,8 +27,11 @@ const Profile = ({ navigation }) => {
     const fetchUser = async () => {
       try {
         const storedData = await AsyncStorage.getItem('userData');
+        const businessData = await AsyncStorage.getItem('businessData');
         if (storedData) {
           setUser(JSON.parse(storedData));
+        } else {
+          setBusiness(JSON.parse(businessData))
         }
       } catch (error) {
         console.error('Error loading user data:', error);

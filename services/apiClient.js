@@ -770,5 +770,48 @@ export const deleteComment = async (commentId) => {
 };
 
 
+export const getbusinessDashboard = async () => {
+  try {
+    console.log("Get business Dashboard");
+
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessToken = await AsyncStorage.getItem("businessToken");
+
+    console.log(businessDataString, businessToken, "1214245");
+
+
+    if (!businessDataString || !businessToken) {
+      throw new Error("User not authenticated. Please login again.");
+    }
+
+    const businessData = JSON.parse(businessDataString);
+    const businessId = businessData.id
+
+    if (!businessId) {
+      throw new Error("Invalid user data. Please login again.");
+    }
+
+    const res = await apiClient.get(
+      `/business/dashboard/${businessId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${businessToken}`,
+        },
+      }
+    );
+
+    console.log(`[Get Dashboard API] ✅ Comment deleted:`, res.data);
+    return res.data;
+
+  } catch (error) {
+    console.error(`[Get Dashboard API] ❌ Delete failed:`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+}
+
 
 export default apiClient;
