@@ -4,17 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { Home, User, Instagram, MessageCircle, Play } from 'react-native-feather';
-import { getbusinessDashboard } from '../../services/apiClient';
+import { getbusinessDashboard, getbusinessDetails } from '../../services/apiClient';
 import DashboardCharts from './Dashboard';
+import BusinessProfileScreen from './BusinessProfile/BusinessProfileScreen';
+import ImageUpload from './Dilogram/Upload';
 
 const Tab = createBottomTabNavigator();
 
-
-const BusinessProfileScreen = () => (
-    <View className="flex-1 justify-center items-center bg-white">
-        <Text>Business Profile</Text>
-    </View>
-);
 
 const AddOn = () => (
     <View className="flex-1 justify-center items-center bg-white">
@@ -38,6 +34,7 @@ const BusinessLanding = () => {
     const navigation = useNavigation();
 
     const [dashboard, setDashboard] = useState(null);
+    const [businessPanel, setBusinessPanel] = useState(null);
 
     useEffect(() => {
         const getDashBoard = async () => {
@@ -51,6 +48,21 @@ const BusinessLanding = () => {
         };
         getDashBoard();
     }, [])
+
+    useEffect(() => {
+        const getBusinessDetails = async () => {
+            try {
+                const response = await getbusinessDetails();
+                console.log(response, "sucessfully business Data");
+                setBusinessPanel(response)
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getBusinessDetails();
+    }, [])
+
+
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('businessData');
@@ -82,11 +94,12 @@ const BusinessLanding = () => {
             </Tab.Screen>
             <Tab.Screen
                 name="Business Profile"
-                component={BusinessProfileScreen}
                 options={{
                     tabBarIcon: ({ color }) => <User color={color} width={20} height={20} />,
                 }}
-            />
+            >
+                {() => <BusinessProfileScreen businessPanel={businessPanel} />}
+            </Tab.Screen>
             <Tab.Screen
                 name="Advert"
                 component={AddOn}
@@ -96,11 +109,12 @@ const BusinessLanding = () => {
             />
             <Tab.Screen
                 name="Dialogram"
-                component={DialogramScreen}
                 options={{
                     tabBarIcon: ({ color }) => <Instagram color={color} width={20} height={20} />,
                 }}
-            />
+            >
+                {() => <ImageUpload />}
+            </Tab.Screen>
             <Tab.Screen
                 name="Talk of the Town"
                 component={TalkScreen}

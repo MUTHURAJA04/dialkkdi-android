@@ -813,5 +813,134 @@ export const getbusinessDashboard = async () => {
   }
 }
 
+export const getbusinessDetails = async () => {
+  try {
+    console.log("Get business Dashboard");
+
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessToken = await AsyncStorage.getItem("businessToken");
+
+    console.log(businessDataString, businessToken, "1214245");
+
+
+    if (!businessDataString || !businessToken) {
+      throw new Error("User not authenticated. Please login again.");
+    }
+
+    const businessData = JSON.parse(businessDataString);
+    const businessId = businessData.id
+
+    if (!businessId) {
+      throw new Error("Invalid user data. Please login again.");
+    }
+
+    const res = await apiClient.get(
+      `/business/getbusinessforpanel/${businessId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${businessToken}`,
+        },
+      }
+    );
+
+    console.log(`[Get Dashboard API] ✅ Comment deleted:`, res.data);
+    return res.data.data;
+
+  } catch (error) {
+    console.error(`[Get Dashboard API] ❌ Delete failed:`, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+}
+
+
+export const postFeed = async (payload) => {
+  try {
+    console.log(payload, "12553");
+
+    const response = await apiClient.post('/feeds', payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    },
+    )
+    if (response) {
+      return { success: true, data: response.data };
+    } else {
+      return { success: false, error: "Unknown error" };
+    }
+
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
+export const getBusinessFeed = async (businessId) => {
+  try {
+
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessData = JSON.parse(businessDataString);
+    const businessId = businessData.id
+
+    const response = await apiClient.get(`/feeds/business/${businessId}`)
+    console.log(response, "get particular business feed");
+
+    return response.data;
+
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
+
+export const getBusinessFeedDelete = async (postId) => {
+  try {
+
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessData = JSON.parse(businessDataString);
+    const businessId = businessData.id
+
+    console.log(postId);
+
+    const response = await apiClient.delete(`/feeds/${postId}?businessId=${businessId}`)
+    console.log(response, "Delete Successfully ");
+    return response.data;
+
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
+export const updatefeed = async (editPostId, formData) => {
+  try {
+    const response = await apiClient.put(`/feed/${editPostId}/edit`, formData);
+
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response data" };
+    }
+  } catch (error) {
+    if (error.response) {
+      // server returned an error
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+      // no response received
+      return { success: false, message: "No response from server" };
+    } else {
+      // other errors
+      return { success: false, message: error.message };
+    }
+  }
+};
+
+
+
+
 
 export default apiClient;
