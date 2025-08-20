@@ -46,7 +46,10 @@ const DashboardCharts = ({ dashboard }) => {
     };
 
     const createdDate = dashboard.business.createdDate;
-    const onlyDate = new Date(createdDate).toISOString().split("T")[0];
+    const dateObj = new Date(createdDate);
+
+    const onlyDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1)
+        .toString().padStart(2, "0")}-${dateObj.getFullYear()}`;
 
     // -------------------- RENDER VIEWS CHART --------------------
     const renderViewsChart = () => {
@@ -169,7 +172,7 @@ const DashboardCharts = ({ dashboard }) => {
                     {dashboard.business.businessName}
                 </Text>
                 <Text>
-                   Your Dialkaraikudi Journey Started on {onlyDate}
+                    Your Dialkaraikudi Journey Started on {onlyDate}
                 </Text>
             </View>
 

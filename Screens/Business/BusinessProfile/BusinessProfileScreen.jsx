@@ -29,14 +29,18 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     }
 
     const Img_Url = "https://livecdn.dialkaraikudi.com";
+
     const createdDate = businessPanel.business.createdDate;
-    const onlyDate = new Date(createdDate).toISOString().split("T")[0];
+    const dateObj = new Date(createdDate);
+    const onlyDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1)
+        .toString().padStart(2, "0")}-${dateObj.getFullYear()}`;
+
     const days = Object.entries(businessPanel.business.businessTimings);
+
 
     const sortedReviews = [...businessPanel.reviews].sort((a, b) =>
         sortOrder === "highest" ? b.rating - a.rating : a.rating - b.rating
     );
-
     const handleSave = (updatedData) => {
         console.log("Updated Form Data:", updatedData);
         // API call ku send panna logic inga podanum
@@ -95,13 +99,13 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                         GST No: <Text className="font-medium text-gray-600">{businessPanel.business.gst || "-"}</Text>
                     </Text>
                     <Text className="font-semibold text-gray-800">
-                        Phone No: <Text className="font-medium text-gray-600">{businessPanel.business.contactDetails.phone}</Text>
+                        Phone No: <Text className="font-medium text-gray-600">{businessPanel.business.contactDetails?.phone}</Text>
                     </Text>
                     <Text className="font-semibold text-gray-800">
-                        WhatsApp: <Text className="font-medium text-gray-600">{businessPanel.business.contactDetails.whatsup || "-"}</Text>
+                        WhatsApp: <Text className="font-medium text-gray-600">{businessPanel.business.contactDetails?.whatsup || "-"}</Text>
                     </Text>
                     <Text className="font-semibold text-gray-800">
-                        Address: <Text className="font-medium text-gray-600">{businessPanel.business.address.formattedAddress}</Text>
+                        Address: <Text className="font-medium text-gray-600">{businessPanel.business.address?.formattedAddress}</Text>
                     </Text>
                 </View>
             </View>

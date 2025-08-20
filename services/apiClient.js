@@ -602,6 +602,34 @@ export const postBusiness = async (payload) => {
     console.error('❌ API Error:', error.response?.data || error.message);
   }
 }
+
+export const editBusiness = async (payload) => {
+  const businessDataString = await AsyncStorage.getItem("businessData");
+  const token = await AsyncStorage.getItem('businessToken');
+  const businessData = JSON.parse(businessDataString);
+  const businessId = businessData.id
+  try {
+    const response = await apiClient.put(`/business/${businessId}`, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
+      }
+    },
+    )
+    if (response) {
+      return { success: true, data: response.data };
+    } else {
+      return { success: false, error: "Unknown error" };
+    }
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
 export const civicFeeds = async () => {
   try {
     const response = await apiClient.get(`/civicfeeds`);
