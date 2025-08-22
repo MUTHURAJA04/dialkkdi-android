@@ -77,25 +77,52 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     };
 
     // Handle images update
-    const handleImagesUpdate = async (newImages) => {
+    const handleImagesUpdate = async (update) => {
         try {
-            console.log('📤 [BusinessProfileScreen] Updating images:', {
+            const isArrayPayload = Array.isArray(update);
+            if (isArrayPayload) {
+                console.log('📤 [BusinessProfileScreen] Updating images (full replace):', {
+                    currentCount: images.length,
+                    newCount: update.length,
+                });
+
+                const payload = { photos: update };
+                const response = await editBusiness(payload);
+
+                if (response.success) {
+                    console.log('✅ [BusinessProfileScreen] Images replaced successfully');
+                    setImages(update);
+                    setImagesEditVisible(false);
+                    Alert.alert("Success! 🎉", "Images updated successfully!");
+                    await handleBusinessUpdated();
+                } else {
+                    console.error('❌ [BusinessProfileScreen] Images update failed:', response.error);
+                    Alert.alert("Error", response.error || "Failed to update images");
+                }
+                return;
+            }
+
+            const addPhotos = update?.addPhotos || [];
+            const removePhotos = update?.removePhotos || [];
+
+            console.log('📤 [BusinessProfileScreen] Updating images (delta):', {
                 currentCount: images.length,
-                newCount: newImages.length,
-                newImages: newImages.slice(0, 3) // Log first 3 for debugging
+                addCount: addPhotos.length,
+                removeCount: removePhotos.length,
+                addPreview: addPhotos.slice ? addPhotos.slice(0, 2) : addPhotos,
+                removePreview: removePhotos.slice ? removePhotos.slice(0, 2) : removePhotos,
             });
-            
-            const payload = { photos: newImages };
+
+            const payload = { addPhotos, removePhotos };
             const response = await editBusiness(payload);
-            
+
             if (response.success) {
-                console.log('✅ [BusinessProfileScreen] Images updated successfully');
-                setImages(newImages);
+                console.log('✅ [BusinessProfileScreen] Image changes applied successfully');
                 setImagesEditVisible(false);
                 Alert.alert("Success! 🎉", "Images updated successfully!");
                 await handleBusinessUpdated();
             } else {
-                console.error('❌ [BusinessProfileScreen] Images update failed:', response.error);
+                console.error('❌ [BusinessProfileScreen] Image changes failed:', response.error);
                 Alert.alert("Error", response.error || "Failed to update images");
             }
         } catch (error) {

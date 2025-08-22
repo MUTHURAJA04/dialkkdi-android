@@ -20,8 +20,6 @@ import {
     getArea,
     getbusinessDetails,
     getCities,
-    uploadBusinessImage,
-    deleteBusinessImage,
 } from "../../../services/apiClient";
 
 // Constants
@@ -545,169 +543,102 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => {
     const [localImages, setLocalImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [uploadingImages, setUploadingImages] = useState([]);
+    const [originalImages, setOriginalImages] = useState([]);
+    const [photosToAdd, setPhotosToAdd] = useState([]);
+    const [photosToRemove, setPhotosToRemove] = useState([]);
 
-    // Build full image URL - handles both server URLs and local file URIs
     const resolveImageUri = (src) => {
         if (!src) return null;
-        
-        // If it's already a full URL (http/https), return as is
-        if (src.startsWith("http")) {
-            return src;
-        }
-        
-        // If it's a local file URI (file://), return as is
-        if (src.startsWith("file://")) {
-            return src;
-        }
-        
-        // If it's a relative path, add the IMAGE_PREFIX
+        if (src.startsWith("http")) return src;
+        if (src.startsWith("file://")) return src;
         return `${IMAGE_PREFIX}${src}`;
     };
 
     useEffect(() => {
         if (visible) {
-            console.log('🖼️ [ImagesEditModal] Modal opened with images:', { 
-                count: images?.length || 0, 
-                images: images 
-            });
+            console.log('🖼️ [ImagesEditModal] Modal opened with images:', { count: images?.length || 0, images });
             setLocalImages([...images]);
-            setUploadingImages([]);
+            setOriginalImages([...images]);
+            setPhotosToAdd([]);
+            setPhotosToRemove([]);
         }
     }, [visible, images]);
 
     const handleAddImage = () => {
-        const options = {
-            mediaType: "photo",
-            quality: 0.8,
-            maxWidth: 1024,
-            maxHeight: 1024,
-        };
-
-        launchImageLibrary(options, async (response) => {
+        const options = { mediaType: "photo" };
+        launchImageLibrary(options, (response) => {
             if (response.didCancel || !response.assets?.[0]?.uri) return;
-
-            const newImage = response.assets[0];
-            console.log('📸 [ImagesEditModal] New image selected:', {
-                uri: newImage.uri,
-                type: newImage.type,
-                size: newImage.fileSize
-            });
-            
-            // Add to local images immediately for UI feedback
-            setLocalImages((prev) => {
-                const updated = [...prev, newImage.uri];
-                console.log('📸 [ImagesEditModal] Added to local images:', {
-                    count: updated.length,
-                    images: updated
-                });
-                return updated;
-            });
-
-            // Mark as uploading
-            setUploadingImages(prev => [...prev, newImage.uri]);
-
-            // Upload to server
-            try {
-                console.log('📤 [ImagesEditModal] Uploading image to server:', newImage.uri);
-                const uploadResult = await uploadBusinessImage(newImage.uri);
-                
-                if (uploadResult.success) {
-                    console.log('✅ [ImagesEditModal] Image uploaded successfully:', uploadResult.data);
-                    
-                    // Replace local URI with server path
-                    setLocalImages((prev) => {
-                        const updated = prev.map(img => 
-                            img === newImage.uri ? uploadResult.data.imagePath : img
-                        );
-                        console.log('✅ [ImagesEditModal] Updated with server path:', {
-                            count: updated.length,
-                            images: updated
-                        });
-                        return updated;
-                    });
-                } else {
-                    console.error('❌ [ImagesEditModal] Upload failed:', uploadResult.error);
-                    Alert.alert("Upload Failed", uploadResult.error || "Failed to upload image");
-                    
-                    // Remove from local images if upload failed
-                    setLocalImages((prev) => prev.filter(img => img !== newImage.uri));
-                }
-            } catch (error) {
-                console.error('❌ [ImagesEditModal] Upload error:', error);
-                Alert.alert("Upload Error", "Failed to upload image. Please try again.");
-                
-                // Remove from local images if upload failed
-                setLocalImages((prev) => prev.filter(img => img !== newImage.uri));
-            } finally {
-                // Remove from uploading list
-                setUploadingImages(prev => prev.filter(img => img !== newImage.uri));
+            const picked = response.assets[0].uri;
+            if (!picked.startsWith('http')) {
+                Alert.alert("Unsupported", "Please provide a public image URL. This API accepts only URLs via addPhotos.");
+                return;
             }
+            setLocalImages(prev => [...prev, picked]);
+            setPhotosToAdd(prev => [...prev, picked]);
+            console.log('➕ [ImagesEditModal] Queued for addPhotos:', picked);
         });
     };
 
+    const toRelativePath = (src) => {
+        if (!src) return null;
+        if (src.startsWith('file://')) return null;
+        if (src.startsWith('http')) {
+            // Strip IMAGE_PREFIX if present
+            if (src.startsWith(IMAGE_PREFIX)) {
+                return src.substring(IMAGE_PREFIX.length);
+            }
+            return src; // unknown host, send as-is
+        }
+        return src; // already relative
+    };
+
     const handleRemoveImage = (index) => {
-        const imageToRemove = localImages[index];
-        console.log('🗑️ [ImagesEditModal] Removing image at index:', index, 'Image:', imageToRemove);
-        
+        const src = localImages[index];
+        const relative = toRelativePath(src);
         Alert.alert("Remove Image", "Are you sure you want to remove this image?", [
             { text: "Cancel", style: "cancel" },
             {
                 text: "Remove",
                 style: "destructive",
-                onPress: async () => {
-                    // If it's a server image (not a local file URI), delete from server
-                    if (imageToRemove && !imageToRemove.startsWith('file://')) {
-                        try {
-                            console.log('🗑️ [ImagesEditModal] Deleting from server:', imageToRemove);
-                            const deleteResult = await deleteBusinessImage(imageToRemove);
-                            
-                            if (deleteResult.success) {
-                                console.log('✅ [ImagesEditModal] Image deleted from server successfully');
-                            } else {
-                                console.error('❌ [ImagesEditModal] Server delete failed:', deleteResult.error);
-                                Alert.alert("Delete Warning", "Image removed locally but failed to delete from server");
-                            }
-                        } catch (error) {
-                            console.error('❌ [ImagesEditModal] Delete error:', error);
-                            Alert.alert("Delete Error", "Failed to delete image from server");
-                        }
+                onPress: () => {
+                    setLocalImages(prev => prev.filter((_, i) => i !== index));
+                    // Un-queue from adds if it was newly added
+                    setPhotosToAdd(prev => prev.filter(u => u !== src && u !== relative));
+                    // Queue removal only if it existed originally
+                    const existed = originalImages.includes(src) || originalImages.includes(relative);
+                    if (existed && relative) {
+                        setPhotosToRemove(prev => [...prev, relative]);
+                        console.log('➖ [ImagesEditModal] Queued removePhotos (relative):', relative);
                     }
-                    
-                    // Remove from local state
-                    setLocalImages((prev) => {
-                        const updated = prev.filter((_, i) => i !== index);
-                        console.log('🗑️ [ImagesEditModal] Image removed from local state, updated count:', updated.length);
-                        return updated;
-                    });
                 },
             },
         ]);
     };
 
     const handleSave = async () => {
-        if (localImages.length === 0) {
-            Alert.alert("Error", "Please add at least one image");
+        // Nothing to change
+        if (photosToAdd.length === 0 && photosToRemove.length === 0) {
+            Alert.alert("No Changes", "You didn't add or remove any images.");
             return;
         }
-
-        // Check if any images are still uploading
-        if (uploadingImages.length > 0) {
-            Alert.alert("Please Wait", "Some images are still uploading. Please wait for them to complete.");
-            return;
-        }
-
-        console.log('💾 [ImagesEditModal] Saving images:', {
-            count: localImages.length,
-            images: localImages
-        });
-
+        const payload = {
+            addPhotos: photosToAdd,
+            removePhotos: photosToRemove,
+        };
+        console.log('💾 [ImagesEditModal] Submitting image changes via editBusiness:', payload);
         setIsSubmitting(true);
         try {
-            await onUpdate(localImages);
-        } catch (error) {
-            console.error('❌ [ImagesEditModal] Save failed:', error);
-            Alert.alert("Error", "Failed to save images. Please try again.");
+            // Let parent route this to editBusiness, or call directly if parent passes nothing
+            if (onUpdate) {
+                await onUpdate(payload);
+            } else {
+                await editBusiness(payload);
+            }
+            Alert.alert("Success", "Images updated successfully.");
+            onClose && onClose();
+        } catch (e) {
+            console.error('❌ [ImagesEditModal] Failed to update images:', e);
+            Alert.alert("Error", "Failed to update images. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -716,119 +647,59 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
     if (!visible) return null;
 
     return (
-        <Modal
-            visible={visible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
             <View className="flex-1 bg-black/50 justify-center items-center">
-                <View
-                    className="bg-white w-11/12 rounded-2xl p-5"
-                    style={{ maxHeight: "90%", minHeight: "60%" }}
-                >
-                    {/* Header */}
+                <View className="bg-white w-11/12 rounded-2xl p-5" style={{ maxHeight: "90%", minHeight: "60%" }}>
                     <View className="flex-row items-center justify-between mb-4">
                         <Text className="text-xl font-bold text-gray-800">Edit Images</Text>
-                        <TouchableOpacity
-                            onPress={onClose}
-                            className="p-2 rounded-full bg-gray-100"
-                        >
+                        <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
                             <X size={24} color="#6B7280" />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Images Grid */}
                     <View className="flex-1">
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={{ flexGrow: 1 }}
-                        >
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                             <View className="flex-row flex-wrap gap-3 mb-4">
-                                {/* Existing Images */}
                                 {localImages.map((src, index) => {
                                     const resolved = resolveImageUri(src);
-                                    const isUploading = uploadingImages.includes(src);
-                                    const isLocalFile = src?.startsWith('file://');
-                                    
-                                    console.log('🖼️ [ImagesEditModal] Rendering thumbnail:', { 
-                                        index, 
-                                        originalSrc: src, 
-                                        resolvedUri: resolved,
-                                        isLocalFile,
-                                        isServerUrl: src?.startsWith('http'),
-                                        isUploading
-                                    });
-                                    
+                                    console.log('🖼️ [ImagesEditModal] Thumbnail:', { index, src, resolved });
                                     return (
                                         <View key={index} className="relative">
                                             <Image
                                                 source={{ uri: resolved }}
                                                 className="w-24 h-24 rounded-lg bg-gray-200"
                                                 resizeMode="cover"
-                                                onLoad={() => console.log('✅ [ImagesEditModal] Thumbnail loaded successfully:', { index, resolved })}
-                                                onError={(e) => console.warn('❌ [ImagesEditModal] Thumbnail load failed:', { 
-                                                    index, 
-                                                    resolved, 
-                                                    error: e?.nativeEvent?.error,
-                                                    originalSrc: src
-                                                })}
                                             />
-                                            
-                                            {/* Upload Progress Overlay */}
-                                            {isUploading && (
-                                                <View className="absolute inset-0 bg-black/50 rounded-lg justify-center items-center">
-                                                    <ActivityIndicator color="white" size="small" />
-                                                    <Text className="text-white text-xs mt-1">Uploading...</Text>
-                                                </View>
-                                            )}
-                                            
-                                            {/* Remove Button */}
-                                            <TouchableOpacity
-                                                onPress={() => handleRemoveImage(index)}
-                                                className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
-                                                hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-                                                disabled={isUploading}
-                                            >
+                                            <TouchableOpacity onPress={() => handleRemoveImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
                                                 <Trash2 size={16} color="white" />
                                             </TouchableOpacity>
                                         </View>
                                     );
                                 })}
 
-                                {/* Add Image Button */}
-                                <TouchableOpacity
-                                    onPress={handleAddImage}
-                                    className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50"
-                                >
+                                <TouchableOpacity onPress={handleAddImage} className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50">
                                     <Plus size={24} color="#9CA3AF" />
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Image Count */}
                             <View className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-2">
                                 <Text className="text-sm text-blue-700 text-center">
-                                    {localImages.length} image
-                                    {localImages.length !== 1 ? "s" : ""} selected
+                                    {localImages.length} image{localImages.length !== 1 ? "s" : ""} selected
                                 </Text>
+                            </View>
+
+                            {/* Debug */}
+                            <View className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                                <Text className="text-[12px] text-yellow-700">addPhotos: {photosToAdd.length}</Text>
+                                <Text className="text-[12px] text-yellow-700">removePhotos: {photosToRemove.length}</Text>
                             </View>
                         </ScrollView>
 
-                        {/* Action Buttons */}
                         <View className="flex-row gap-3 mt-4">
-                            <TouchableOpacity
-                                onPress={onClose}
-                                className="flex-1 bg-gray-200 rounded-xl py-3 items-center"
-                                disabled={isSubmitting}
-                            >
+                            <TouchableOpacity onPress={onClose} className="flex-1 bg-gray-200 rounded-xl py-3 items-center" disabled={isSubmitting}>
                                 <Text className="text-gray-700 font-semibold">Cancel</Text>
                             </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={handleSave}
-                                className="flex-1 bg-blue-500 rounded-xl py-3 items-center"
-                                disabled={isSubmitting || localImages.length === 0}
-                            >
+                            <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 rounded-xl py-3 items-center" disabled={isSubmitting}>
                                 {isSubmitting ? (
                                     <ActivityIndicator color="white" size="small" />
                                 ) : (

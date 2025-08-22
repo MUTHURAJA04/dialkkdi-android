@@ -607,7 +607,6 @@ export const editBusiness = async (payload) => {
   try {
     const businessDataString = await AsyncStorage.getItem("businessData");
     const token = await AsyncStorage.getItem('businessToken');
-    
     if (!businessDataString || !token) {
       throw new Error("Business not authenticated. Please login again.");
     }
@@ -649,106 +648,7 @@ export const editBusiness = async (payload) => {
   }
 }
 
-// Upload business image
-export const uploadBusinessImage = async (imageUri) => {
-  try {
-    const businessDataString = await AsyncStorage.getItem("businessData");
-    const token = await AsyncStorage.getItem('businessToken');
-    
-    if (!businessDataString || !token) {
-      throw new Error("Business not authenticated. Please login again.");
-    }
-    
-    const businessData = JSON.parse(businessDataString);
-    const businessId = businessData.id;
-    
-    if (!businessId) {
-      throw new Error("Invalid business data. Please login again.");
-    }
 
-    console.log('📤 [uploadBusinessImage] Uploading image:', { businessId, imageUri });
-
-    // Create form data for image upload
-    const formData = new FormData();
-    formData.append('image', {
-      uri: imageUri,
-      type: 'image/jpeg',
-      name: 'business-image.jpg'
-    });
-
-    const response = await apiClient.post(`/business/${businessId}/upload-image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      }
-    });
-
-    console.log('✅ [uploadBusinessImage] Success response:', response.data);
-    
-    if (response && response.data) {
-      return { success: true, data: response.data };
-    } else {
-      return { success: false, error: "Unknown error" };
-    }
-  } catch (error) {
-    console.error('❌ [uploadBusinessImage] API Error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    return {
-      success: false,
-      error: error.response?.data || error.message,
-    };
-  }
-}
-
-// Delete business image
-export const deleteBusinessImage = async (imagePath) => {
-  try {
-    const businessDataString = await AsyncStorage.getItem("businessData");
-    const token = await AsyncStorage.getItem('businessToken');
-    
-    if (!businessDataString || !token) {
-      throw new Error("Business not authenticated. Please login again.");
-    }
-    
-    const businessData = JSON.parse(businessDataString);
-    const businessId = businessData.id;
-    
-    if (!businessId) {
-      throw new Error("Invalid business data. Please login again.");
-    }
-
-    console.log('🗑️ [deleteBusinessImage] Deleting image:', { businessId, imagePath });
-
-    const response = await apiClient.delete(`/business/${businessId}/delete-image`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      data: { imagePath }
-    });
-
-    console.log('✅ [deleteBusinessImage] Success response:', response.data);
-    
-    if (response && response.data) {
-      return { success: true, data: response.data };
-    } else {
-      return { success: false, error: "Unknown error" };
-    }
-  } catch (error) {
-    console.error('❌ [deleteBusinessImage] API Error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    return {
-      success: false,
-      error: error.response?.data || error.message,
-    };
-  }
-}
 
 export const civicFeeds = async () => {
   try {
