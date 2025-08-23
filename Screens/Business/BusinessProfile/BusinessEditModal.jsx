@@ -12,9 +12,9 @@ import {
     ActivityIndicator,
     Image,
 } from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
 import { Picker } from "@react-native-picker/picker";
-import { X, Save, Edit3, Plus, Trash2, Clock } from "react-native-feather";
-import { launchImageLibrary } from 'react-native-image-picker';
+import { X, Save, Edit3, Plus, Trash2, Clock, } from "react-native-feather";
 import {
     editBusiness,
     getArea,
@@ -37,14 +37,14 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
     // Initialize form when modal opens or business changes
     useEffect(() => {
         console.log('🔄 [BusinessEditModal] useEffect triggered:', { visible, hasBusiness: !!business });
-        
+
         if (visible && business) {
             console.log('📥 [BusinessEditModal] Business data received:', business);
             console.log('📥 [BusinessEditModal] Contact details:', business.contactDetails);
             console.log('📥 [BusinessEditModal] Address details:', business.address);
-            
+
             setOriginalBusiness(business);
-            
+
             const newForm = {
                 businessName: business.businessName || "",
                 description: business.description || "",
@@ -57,7 +57,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                 area: business.address?.area?._id || "",
                 pincode: business.address?.pincode || "",
             };
-            
+
             console.log('📝 [BusinessEditModal] Form initialized with:', newForm);
             setForm(newForm);
         }
@@ -212,15 +212,15 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
             console.log('📤 [BusinessEditModal] Submitting payload:', payload);
             const response = await editBusiness(payload);
-            
+
             if (response.success) {
                 console.log('✅ [BusinessEditModal] Business updated successfully');
-                
+
                 // Call the callback to refresh parent component
                 if (onBusinessUpdated) {
                     await onBusinessUpdated();
                 }
-                
+
                 Alert.alert(
                     "Success! 🎉",
                     "Business details updated successfully!",
@@ -513,7 +513,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                         Cancel
                                     </Text>
                                 </TouchableOpacity>
-                                
+
                                 <TouchableOpacity
                                     onPress={handleSubmit}
                                     className="flex-1 bg-blue-500 rounded-xl py-4 items-center"
@@ -540,6 +540,8 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 };
 
 // Images Edit Modal Component
+// replace with your prefix
+
 export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => {
     const [localImages, setLocalImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -556,7 +558,6 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
 
     useEffect(() => {
         if (visible) {
-            console.log('🖼️ [ImagesEditModal] Modal opened with images:', { count: images?.length || 0, images });
             setLocalImages([...images]);
             setOriginalImages([...images]);
             setPhotosToAdd([]);
@@ -568,47 +569,50 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
         const options = { mediaType: "photo" };
         launchImageLibrary(options, (response) => {
             if (response.didCancel || !response.assets?.[0]?.uri) return;
+
             const picked = response.assets[0].uri;
-            if (!picked.startsWith('http')) {
-                Alert.alert("Unsupported", "Please provide a public image URL. This API accepts only URLs via addPhotos.");
-                return;
-            }
-            setLocalImages(prev => [...prev, picked]);
-            setPhotosToAdd(prev => [...prev, picked]);
-            console.log('➕ [ImagesEditModal] Queued for addPhotos:', picked);
+            setLocalImages((prev) => [...prev, picked]);
+            setPhotosToAdd((prev) => [...prev, picked]);
+            console.log("➕ Queued for add:", picked);
         });
     };
 
     const toRelativePath = (src) => {
         if (!src) return null;
-        if (src.startsWith('file://')) return null;
-        if (src.startsWith('http')) {
-            // Strip IMAGE_PREFIX if present
+        if (src.startsWith("file://")) return null;
+        if (src.startsWith("http")) {
             if (src.startsWith(IMAGE_PREFIX)) {
                 return src.substring(IMAGE_PREFIX.length);
             }
-            return src; // unknown host, send as-is
+            return src;
         }
-        return src; // already relative
+        return src;
     };
 
     const handleRemoveImage = (index) => {
         const src = localImages[index];
         const relative = toRelativePath(src);
+
         Alert.alert("Remove Image", "Are you sure you want to remove this image?", [
             { text: "Cancel", style: "cancel" },
             {
                 text: "Remove",
                 style: "destructive",
                 onPress: () => {
-                    setLocalImages(prev => prev.filter((_, i) => i !== index));
-                    // Un-queue from adds if it was newly added
-                    setPhotosToAdd(prev => prev.filter(u => u !== src && u !== relative));
+                    setLocalImages((prev) => prev.filter((_, i) => i !== index));
+
+                    // Remove from add queue if it was new
+                    setPhotosToAdd((prev) => prev.filter((u) => u !== src && u !== relative));
+
+                    // Normalize original images
+                    const normalizedOriginals = originalImages.map(
+                        (o) => toRelativePath(o) || o
+                    );
+
                     // Queue removal only if it existed originally
-                    const existed = originalImages.includes(src) || originalImages.includes(relative);
-                    if (existed && relative) {
-                        setPhotosToRemove(prev => [...prev, relative]);
-                        console.log('➖ [ImagesEditModal] Queued removePhotos (relative):', relative);
+                    if (normalizedOriginals.includes(relative)) {
+                        setPhotosToRemove((prev) => [...prev, relative]);
+                        console.log("➖ Queued for remove:", relative);
                     }
                 },
             },
@@ -616,53 +620,82 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
     };
 
     const handleSave = async () => {
-        // Nothing to change
         if (photosToAdd.length === 0 && photosToRemove.length === 0) {
             Alert.alert("No Changes", "You didn't add or remove any images.");
             return;
         }
-        const payload = {
-            addPhotos: photosToAdd,
-            removePhotos: photosToRemove,
-        };
-        console.log('💾 [ImagesEditModal] Submitting image changes via editBusiness:', payload);
+
+        const formData = new FormData();
+
+        // ✅ Add new photos
+        photosToAdd.forEach((photo, index) => {
+            formData.append("photos[]", {
+                uri: photo.uri || photo, // if from picker
+                name: photo.fileName || `photo_${index + 1}.jpg`,
+                type: photo.type || "image/jpeg",
+            });
+        });
+
+        // ✅ Removed photos (send details like id or path)
+        photosToRemove.forEach((photo) => {
+            formData.append("removePhotos[]", photo);
+        });
+
+        console.log("💾 Submitting payload:", {
+            add: photosToAdd,
+            remove: photosToRemove,
+        });
+
         setIsSubmitting(true);
         try {
-            // Let parent route this to editBusiness, or call directly if parent passes nothing
             if (onUpdate) {
-                await onUpdate(payload);
+                await onUpdate(formData);
             } else {
-                await editBusiness(payload);
+                await editBusiness(formData);
             }
             Alert.alert("Success", "Images updated successfully.");
             onClose && onClose();
         } catch (e) {
-            console.error('❌ [ImagesEditModal] Failed to update images:', e);
+            console.error("❌ Failed to update images:", e);
             Alert.alert("Error", "Failed to update images. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
+
     if (!visible) return null;
 
     return (
-        <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={onClose}
+        >
             <View className="flex-1 bg-black/50 justify-center items-center">
-                <View className="bg-white w-11/12 rounded-2xl p-5" style={{ maxHeight: "90%", minHeight: "60%" }}>
+                <View
+                    className="bg-white w-11/12 rounded-2xl p-5"
+                    style={{ maxHeight: "90%", minHeight: "60%" }}
+                >
                     <View className="flex-row items-center justify-between mb-4">
                         <Text className="text-xl font-bold text-gray-800">Edit Images</Text>
-                        <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
+                        <TouchableOpacity
+                            onPress={onClose}
+                            className="p-2 rounded-full bg-gray-100"
+                        >
                             <X size={24} color="#6B7280" />
                         </TouchableOpacity>
                     </View>
 
                     <View className="flex-1">
-                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+                        <ScrollView
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                        >
                             <View className="flex-row flex-wrap gap-3 mb-4">
                                 {localImages.map((src, index) => {
                                     const resolved = resolveImageUri(src);
-                                    console.log('🖼️ [ImagesEditModal] Thumbnail:', { index, src, resolved });
                                     return (
                                         <View key={index} className="relative">
                                             <Image
@@ -670,36 +703,45 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
                                                 className="w-24 h-24 rounded-lg bg-gray-200"
                                                 resizeMode="cover"
                                             />
-                                            <TouchableOpacity onPress={() => handleRemoveImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
+                                            <TouchableOpacity
+                                                onPress={() => handleRemoveImage(index)}
+                                                className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 shadow-md"
+                                            >
                                                 <Trash2 size={16} color="white" />
                                             </TouchableOpacity>
                                         </View>
                                     );
                                 })}
 
-                                <TouchableOpacity onPress={handleAddImage} className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50">
+                                <TouchableOpacity
+                                    onPress={handleAddImage}
+                                    className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50"
+                                >
                                     <Plus size={24} color="#9CA3AF" />
                                 </TouchableOpacity>
                             </View>
 
                             <View className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-2">
                                 <Text className="text-sm text-blue-700 text-center">
-                                    {localImages.length} image{localImages.length !== 1 ? "s" : ""} selected
+                                    {localImages.length} image
+                                    {localImages.length !== 1 ? "s" : ""} selected
                                 </Text>
-                            </View>
-
-                            {/* Debug */}
-                            <View className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                                <Text className="text-[12px] text-yellow-700">addPhotos: {photosToAdd.length}</Text>
-                                <Text className="text-[12px] text-yellow-700">removePhotos: {photosToRemove.length}</Text>
                             </View>
                         </ScrollView>
 
                         <View className="flex-row gap-3 mt-4">
-                            <TouchableOpacity onPress={onClose} className="flex-1 bg-gray-200 rounded-xl py-3 items-center" disabled={isSubmitting}>
+                            <TouchableOpacity
+                                onPress={onClose}
+                                className="flex-1 bg-gray-200 rounded-xl py-3 items-center"
+                                disabled={isSubmitting}
+                            >
                                 <Text className="text-gray-700 font-semibold">Cancel</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 rounded-xl py-3 items-center" disabled={isSubmitting}>
+                            <TouchableOpacity
+                                onPress={handleSave}
+                                className="flex-1 bg-blue-500 rounded-xl py-3 items-center"
+                                disabled={isSubmitting}
+                            >
                                 {isSubmitting ? (
                                     <ActivityIndicator color="white" size="small" />
                                 ) : (
@@ -713,6 +755,7 @@ export const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => 
         </Modal>
     );
 };
+
 
 // Business Timing Edit Modal Component
 export const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
@@ -735,14 +778,14 @@ export const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate })
                 count: Object.keys(timings).length,
                 openDays: Object.values(timings).filter(t => t.isOpen).length
             });
-            
+
             // Initialize with default timings if none exist
             const defaultTimings = {};
             days.forEach(day => {
-                defaultTimings[day] = timings[day] || { 
-                    isOpen: false, 
-                    openTime: "09:00", 
-                    closeTime: "18:00" 
+                defaultTimings[day] = timings[day] || {
+                    isOpen: false,
+                    openTime: "09:00",
+                    closeTime: "18:00"
                 };
             });
             setLocalTimings(defaultTimings);
@@ -812,7 +855,7 @@ export const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate })
                                 <Clock size={24} color="#3B82F6" />
                                 <Text className="text-xl font-bold text-gray-800 ml-3">Edit Business Timings</Text>
                             </View>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={handleClose}
                                 className="p-2 rounded-full bg-gray-100"
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -829,10 +872,10 @@ export const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate })
                                     Debug: {Object.keys(localTimings).length} days configured
                                 </Text>
                             </View>
-                            
+
                             {days.map((day) => {
                                 const dayTiming = localTimings[day] || { isOpen: false, openTime: "09:00", closeTime: "18:00" };
-                                
+
                                 return (
                                     <View key={day} className="mb-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
                                         <View className="flex-row items-center justify-between mb-3">
@@ -919,7 +962,7 @@ export const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate })
                         >
                             <Text className="text-gray-700 font-semibold">Cancel</Text>
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity
                             onPress={handleSave}
                             className="flex-1 bg-blue-500 rounded-xl py-3 items-center"
