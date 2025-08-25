@@ -606,37 +606,44 @@ export const postBusiness = async (payload) => {
 export const editBusiness = async (payload) => {
   try {
     const businessDataString = await AsyncStorage.getItem("businessData");
-    const token = await AsyncStorage.getItem('businessToken');
+    const token = await AsyncStorage.getItem("businessToken");
+
     if (!businessDataString || !token) {
       throw new Error("Business not authenticated. Please login again.");
     }
-    
+
     const businessData = JSON.parse(businessDataString);
     const businessId = businessData.id;
-    
+
     if (!businessId) {
       throw new Error("Invalid business data. Please login again.");
     }
 
-    console.log('📤 [editBusiness] Sending payload:', payload);
-    console.log('📤 [editBusiness] Business ID:', businessId);
+    // Detect FormData
+    const isFormData =
+      payload &&
+      typeof payload === "object" &&
+      (typeof FormData !== "undefined" && payload instanceof FormData);
 
-    const response = await apiClient.put(`/business/${businessId}`, payload, {
-      headers: {
-        'Content-Type': 'application/json', // Changed from multipart/form-data to application/json
-        Authorization: `Bearer ${token}`,
+    console.log("📤 [editBusiness] Payload type:", isFormData ? "FormData" : "JSON");
+
+    const response = await apiClient.put(
+      `/business/${businessId}`,
+      isFormData ? payload : JSON.stringify(payload),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(isFormData
+            ? { "Content-Type": "multipart/form-data" }
+            : { "Content-Type": "application/json" }),
+        },
+        transformRequest: (data) => data, // 👈 don’t let axios mess with FormData
       }
-    });
+    );
 
-    console.log('✅ [editBusiness] Success response:', response.data);
-    
-    if (response && response.data) {
-      return { success: true, data: response.data };
-    } else {
-      return { success: false, error: "Unknown error" };
-    }
+    return { success: true, data: response.data };
   } catch (error) {
-    console.error('❌ [editBusiness] API Error:', {
+    console.error("❌ [editBusiness] API Error:", {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
@@ -646,7 +653,7 @@ export const editBusiness = async (payload) => {
       error: error.response?.data || error.message,
     };
   }
-}
+};
 
 
 
