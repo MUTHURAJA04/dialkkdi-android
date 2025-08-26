@@ -14,12 +14,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LogOut, Heart } from 'react-native-feather';
 import { getFavoriteStatus } from '../services/apiClient';
 import { useNavigation } from '@react-navigation/native';
+import CivicCrud from './CivicCrud/CivicCrud';
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [favourites, setFavourites] = useState([]);
+  const [activeTab, setActiveTab] = useState("favourites"); // 👈 tab state
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
@@ -35,23 +37,18 @@ const Profile = ({ navigation }) => {
         }
       } catch (error) {
         console.error('Error loading user data:', error);
-      }
-      finally {
-        setLoading(false)
+      } finally {
+        setLoading(false);
       }
     };
 
     const fetchFavourites = async () => {
       try {
-        const getFav = await getFavoriteStatus(); // imported one
+        const getFav = await getFavoriteStatus();
         setFavourites(getFav);
-        console.log(getFav, "Got Favourites");
       } catch (error) {
         console.error('Error loading favourites:', error);
-      } finally {
-        setLoading(false)
       }
-
     };
 
     fetchUser();
@@ -71,16 +68,11 @@ const Profile = ({ navigation }) => {
       onPress={() => navigation.navigate('BusinessDetailScreen', { business: item?.business })}
       activeOpacity={0.8}
     >
-      {/* Image with heart icon */}
-      <View className="relative">
-        <Image
-          source={{ uri: `${imgUrl}${item.business.photos[0]}` }}
-          className="w-full h-40"
-          resizeMode="cover"
-        />
-      </View>
-
-      {/* Business details */}
+      <Image
+        source={{ uri: `${imgUrl}${item.business.photos[0]}` }}
+        className="w-full h-40"
+        resizeMode="cover"
+      />
       <View className="p-3">
         <Text className="text-base font-bold text-slate-900 dark:text-white mb-1">
           {item.business.businessName}
@@ -95,10 +87,6 @@ const Profile = ({ navigation }) => {
   if (loading) {
     return (
       <View className={`flex-1 justify-center items-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-        <StatusBar
-          backgroundColor={isDarkMode ? '#0f172a' : '#f8fafc'}
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        />
         <ActivityIndicator size="large" color={isDarkMode ? '#60a5fa' : '#3b82f6'} />
       </View>
     );
@@ -106,20 +94,13 @@ const Profile = ({ navigation }) => {
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-      <StatusBar
-        backgroundColor={isDarkMode ? '#0f172a' : '#f8fafc'}
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-      />
-
       {/* Profile Section */}
       <View className="items-center py-6 mt-3">
         <Image
           source={{
-            uri:
-              user?.avatarUrl ||
-              'https://i.pravatar.cc/300?u=' + (user?.email || 'user'),
+            uri: user?.avatarUrl || 'https://i.pravatar.cc/300?u=' + (user?.email || 'user'),
           }}
-          className="w-32 h-32 rounded-full mb-4"
+          className="w-24 h-24 rounded-full mb-4"
         />
         <Text className="text-2xl font-bold mb-1 text-slate-900 dark:text-white">
           {user?.name || 'Guest User'}
@@ -129,17 +110,39 @@ const Profile = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Favourites Section */}
-      <View className="px-4 flex-1">
-        <Text className="text-lg font-bold mb-3 text-slate-900 dark:text-white">
-          My Favourites
-        </Text>
-        <FlatList
-          data={favourites}
-          keyExtractor={(item) => item.id}
-          renderItem={renderFavouriteCard}
-          showsVerticalScrollIndicator={false}
-        />
+      {/* Tabs */}
+      <View className="flex-row mx-4 mb-4 bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden">
+        <TouchableOpacity
+          className={`flex-1 py-3 items-center ${activeTab === "favourites" ? "bg-blue-500" : ""}`}
+          onPress={() => setActiveTab("favourites")}
+        >
+          <Text className={`${activeTab === "favourites" ? "text-white font-semibold" : "text-slate-700 dark:text-slate-300"}`}>
+            My Favourites
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className={`flex-1 py-3 items-center ${activeTab === "choices" ? "bg-blue-500" : ""}`}
+          onPress={() => setActiveTab("choices")}
+        >
+          <Text className={`${activeTab === "choices" ? "text-white font-semibold" : "text-slate-700 dark:text-slate-300"}`}>
+            My Choices
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Tab Content */}
+      <View className="flex-1 px-4 py-2 ">
+        {activeTab === "favourites" ? (
+          <FlatList
+            data={favourites}
+            keyExtractor={(item) => item.id}
+            renderItem={renderFavouriteCard}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <CivicCrud />
+        )}
       </View>
 
       {/* Logout Button */}

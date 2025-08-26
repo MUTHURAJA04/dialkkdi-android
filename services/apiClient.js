@@ -684,7 +684,7 @@ export const civicFeedUser = async () => {
 
   const userDataString = await AsyncStorage.getItem("userData");
   const userData = JSON.parse(userDataString);
-  const userId = userData?._id;
+  const userId = userData?._id || userData?.id;
 
   console.log(businessId, userId);
 
@@ -740,7 +740,6 @@ export const civicFeedUpdate = async ({ posterId, formData }) => {
     throw error;
   }
 };
-
 
 export const civicPost = async (postData) => {
   // 1. Get user/business data from AsyncStorage

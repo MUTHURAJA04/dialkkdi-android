@@ -97,9 +97,24 @@ export default function CivicCrud() {
             // Note: The civicPost and civicFeedUpdate functions should handle FormData creation internally
             // as discussed in previous interactions. Pass the form state directly.
 
+            const formData = new FormData();
+
+            // ✅ Use form values directly
+            formData.append("title", form.title);
+            formData.append("description", form.description);
+
+            // ✅ Attach image correctly if selected
+            if (form.imageUrl && form.imageUrl.startsWith("file://")) {
+                formData.append("civic", {
+                    uri: form.imageUrl,
+                    name: `civic_${Date.now()}.jpg`,
+                    type: "image/jpeg",
+                });
+            }
+
             let response;
             if (editingId) {
-                response = await civicFeedUpdate({ posterId: editingId, postData: form });
+                response = await civicFeedUpdate({ posterId: editingId, formData });
                 Alert.alert("Success", "Post updated successfully");
             } else {
                 const payload = {
@@ -154,7 +169,7 @@ export default function CivicCrud() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-200">
             {/* Create Post Button (visible when form is closed) */}
             {!openForm && (
                 <View className="flex-row justify-end p-4">
@@ -176,13 +191,14 @@ export default function CivicCrud() {
 
             {/* Post Creation/Edit Form (visible when openForm is true) */}
             {openForm && (
-                <View className="bg-white mx-4 p-4 rounded-2xl shadow">
+                <View className="bg-white mx-4 p-4 mt-4 rounded-2xl shadow">
                     <Text className="text-xl font-semibold text-blue-600 mb-3">
                         {editingId ? "Edit Post" : "Create Post"}
                     </Text>
 
                     <TextInput
                         placeholder="Title"
+                        placeholderTextColor={"gray"}
                         value={form.title}
                         onChangeText={(t) => setForm({ ...form, title: t })}
                         className="border border-gray-300 rounded-lg px-3 py-2 mb-3"
@@ -190,6 +206,7 @@ export default function CivicCrud() {
 
                     <TextInput
                         placeholder="Description"
+                        placeholderTextColor={"gray"}
                         value={form.description}
                         onChangeText={(t) => setForm({ ...form, description: t })}
                         className="border border-gray-300 rounded-lg px-3 py-2 mb-3 h-24"
@@ -206,8 +223,12 @@ export default function CivicCrud() {
                     {form.imageUrl && (
                         <View className="flex-row justify-center mb-3">
                             <Image
-                                source={{ uri: getImageUrl(form.imageUrl) }}
-                                className="w-full h-48 rounded-lg" // Larger preview image
+                                source={{
+                                    uri: form.imageUrl
+                                        ? form.imageUrl
+                                        : getImageUrl(form.imageUrl)
+                                }}
+                                className="w-48 h-48 rounded-lg" // Larger preview image
                                 resizeMode="cover"
                             />
                         </View>
@@ -258,13 +279,12 @@ export default function CivicCrud() {
                             <Text className="text-lg mb-2 font-semibold">{item?.title}</Text>
 
                             {item?.imageUrl && (
-                                <View className=" w-40 h-40 bg-gray-200 rounded-xl mb-3 overflow-hidden justify-center items-center">
+                                <View className="w-40 h-40 bg-gray-200 rounded-xl mb-3 overflow-hidden justify-center items-center">
                                     <Image
                                         source={{ uri: getImageUrl(item?.imageUrl) }}
                                         className="w-full h-full"
                                         resizeMode="cover"
                                     />
-                                    {/* Optional: Add a subtle overlay or loading indicator here if needed */}
                                 </View>
                             )}
 

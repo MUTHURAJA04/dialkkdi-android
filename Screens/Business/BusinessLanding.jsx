@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, Text, Button, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
@@ -12,19 +12,27 @@ import CivicCrud from '../CivicCrud/CivicCrud';
 
 const Tab = createBottomTabNavigator();
 
+const AddOn = () => {
+    const handleOpenWebsite = () => {
+        Linking.openURL("https://www.dialkaraikudi.com"); // opens in browser
+    };
 
-const AddOn = () => (
-    <View className="flex-1 justify-center items-center bg-white">
-        <Text>Business Profile</Text>
-    </View>
-);
+    return (
+        <View className="flex-1 justify-center items-center bg-white">
+            <Text>Business Profile</Text>
+            <Text>Now under Working</Text>
+            <Text>If you Need Access pls Redirect Web Application</Text>
 
+            <TouchableOpacity
+                onPress={handleOpenWebsite}
+                className="mt-4 bg-blue-500 px-4 py-2 rounded-lg"
+            >
+                <Text className="text-white text-lg">Click here</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
 
-const TalkScreen = () => (
-    <View className="flex-1 justify-center items-center bg-white">
-        <Text>Talk of the Town</Text>
-    </View>
-);
 
 const BusinessLanding = () => {
     const navigation = useNavigation();
