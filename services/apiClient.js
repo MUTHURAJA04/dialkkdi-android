@@ -610,10 +610,10 @@ export const editBusiness = async (payload) => {
     if (!businessDataString || !token) {
       throw new Error("Business not authenticated. Please login again.");
     }
-    
+
     const businessData = JSON.parse(businessDataString);
     const businessId = businessData.id;
-    
+
     if (!businessId) {
       throw new Error("Invalid business data. Please login again.");
     }
@@ -629,7 +629,7 @@ export const editBusiness = async (payload) => {
     });
 
     console.log('✅ [editBusiness] Success response:', response.data);
-    
+
     if (response && response.data) {
       return { success: true, data: response.data };
     } else {
@@ -662,6 +662,72 @@ export const civicFeeds = async () => {
     return null;
   }
 };
+
+export const civicFeedUser = async () => {
+
+  const businessDataString = await AsyncStorage.getItem("businessData");
+  const businessData = JSON.parse(businessDataString);
+  const businessId = businessData?.id;
+
+  const userDataString = await AsyncStorage.getItem("userData");
+  const userData = JSON.parse(userDataString);
+  const userId = userData?._id;
+
+  console.log(businessId, userId);
+
+
+  try {
+    if (userId) {
+      const response = await apiClient.get(`/civicfeeds/poster/${userId}?type=User`)
+      return response.data;
+    } else {
+      const response = await apiClient.get(`/civicfeeds/poster/${businessId}?type=Business`)
+      return response.data;
+    }
+
+  } catch (error) {
+    console.error(`Dont fetch Cicic Post ❌ `, {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+  }
+}
+
+export const civicFeedUpdate = async ({ posterId, formData }) => {
+  try {
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessData = businessDataString ? JSON.parse(businessDataString) : null;
+    const businessId = businessData?.id;
+
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+    const userId = userData?.id;
+
+    let LoginId = businessId ? businessId : userId;
+    let isAdmin = businessId ? true : false;
+
+    // append userId & isAdmin into formData
+    formData.append("userId", LoginId);
+    formData.append("isAdmin", isAdmin);
+
+    const response = await apiClient.put(`/civicfeeds/${posterId}`, formData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Dont fetch Civic Post ❌", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
 
 export const civicLikeUnlike = async (postId) => {
   try {

@@ -1,17 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Dimensions, FlatList, SafeAreaView } from 'react-native';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Image,
+  Dimensions,
+  FlatList,
+  SafeAreaView,
+} from "react-native";
 
-const { width: screenWidth } = Dimensions.get('window');
+// ✅ Local images
+import Banner1 from "../../assets/Banners/Banner1.jpg";
+import Banner2 from "../../assets/Banners/Banner2.jpg";
+import Banner3 from "../../assets/Banners/Banner3.jpg";
+import Banner4 from "../../assets/Banners/Banner4.jpg";
+import Banner5 from "../../assets/Banners/Banner5.jpg";
 
-// ✅ Image URLs
-const images = [
-  'https://livecdn.dialkaraikudi.com/default/Hero_Banner/hero_banner1.jpg',
-  'https://livecdn.dialkaraikudi.com/default/Hero_Banner/hero_banner2.jpg',
-  'https://livecdn.dialkaraikudi.com/default/Hero_Banner/hero_banner3.jpg',
-  'https://livecdn.dialkaraikudi.com/default/Hero_Banner/hero_banner4.jpg',
-];
+const { width: screenWidth } = Dimensions.get("window");
 
-// ✅ Extended images for infinite loop
+// ✅ Image list
+const images = [Banner1, Banner2, Banner3, Banner4, Banner5];
+
+// ✅ Extended list for infinite loop
 const extendedImages = [images[images.length - 1], ...images, images[0]];
 
 export default function HeroSlide() {
@@ -19,13 +27,12 @@ export default function HeroSlide() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageHeights, setImageHeights] = useState({});
 
-  // ✅ Preload and calculate heights
+  // ✅ Pre-calc local image sizes
   useEffect(() => {
-    images.forEach((uri) => {
-      Image.getSize(uri, (width, height) => {
-        const scaledHeight = (height / width) * screenWidth;
-        setImageHeights((prev) => ({ ...prev, [uri]: scaledHeight }));
-      });
+    images.forEach((img) => {
+      const { width, height } = Image.resolveAssetSource(img);
+      const scaledHeight = (height / width) * screenWidth;
+      setImageHeights((prev) => ({ ...prev, [img]: scaledHeight }));
     });
   }, []);
 
@@ -38,7 +45,10 @@ export default function HeroSlide() {
       const currentIndex = viewableItems[0].index;
       if (currentIndex === 0) {
         setTimeout(() => {
-          flatListRef.current?.scrollToIndex({ index: images.length, animated: false });
+          flatListRef.current?.scrollToIndex({
+            index: images.length,
+            animated: false,
+          });
           setActiveIndex(images.length - 1);
         }, 50);
       } else if (currentIndex === extendedImages.length - 1) {
@@ -52,6 +62,7 @@ export default function HeroSlide() {
     }
   }).current;
 
+  // ✅ Auto-scroll every 3s
   useEffect(() => {
     const interval = setInterval(() => {
       scrollTo(activeIndex === images.length - 1 ? 0 : activeIndex + 1);
@@ -59,6 +70,7 @@ export default function HeroSlide() {
     return () => clearInterval(interval);
   }, [activeIndex]);
 
+  // ✅ Initial scroll to 1st real item
   useEffect(() => {
     setTimeout(() => {
       flatListRef.current?.scrollToIndex({ index: 1, animated: false });
@@ -66,17 +78,17 @@ export default function HeroSlide() {
   }, []);
 
   return (
-    <SafeAreaView className="bg-white" style={{ zIndex: 0 }}>
-      <View className="w-full">
+    <SafeAreaView style={{ backgroundColor: "white", zIndex: 0 }}>
+      <View style={{ width: "100%" }}>
         <FlatList
           ref={flatListRef}
           data={extendedImages}
           renderItem={({ item }) => (
             <Image
-              source={{ uri: item }}
+              source={item} // ✅ Local images use direct source
               style={{
                 width: screenWidth,
-                height: imageHeights[item] || 200, // default until loaded
+                height: imageHeights[item] || 200, // fallback 200 until resolved
               }}
               resizeMode="cover"
             />

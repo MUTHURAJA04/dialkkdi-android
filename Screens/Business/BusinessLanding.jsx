@@ -8,6 +8,7 @@ import { getbusinessDashboard, getbusinessDetails } from '../../services/apiClie
 import DashboardCharts from './Dashboard';
 import BusinessProfileScreen from './BusinessProfile/BusinessProfileScreen';
 import ImageUpload from './Dilogram/Upload';
+import CivicCrud from '../CivicCrud/CivicCrud';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,11 +19,6 @@ const AddOn = () => (
     </View>
 );
 
-const DialogramScreen = () => (
-    <View className="flex-1 justify-center items-center bg-white">
-        <Text>Dialogram</Text>
-    </View>
-);
 
 const TalkScreen = () => (
     <View className="flex-1 justify-center items-center bg-white">
@@ -117,11 +113,12 @@ const BusinessLanding = () => {
             </Tab.Screen>
             <Tab.Screen
                 name="Talk of the Town"
-                component={TalkScreen}
                 options={{
                     tabBarIcon: ({ color }) => <MessageCircle color={color} width={20} height={20} />,
                 }}
-            />
+            >
+                {() => <CivicCrud />}
+            </Tab.Screen>
         </Tab.Navigator>
     );
 };

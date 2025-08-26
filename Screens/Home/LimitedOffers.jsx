@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, Dimensions, Animated } from 'react-native';
+import Limited1 from '../../assets/Banners/Limited1.jpg'
+import Limited2 from '../../assets/Banners/Limited2.jpg'
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -13,15 +15,10 @@ const LimitedOffers = () => {
   const opacityAnim2b = useRef(new Animated.Value(0)).current;
 
   const images1 = [
-    "https://livecdn.dialkaraikudi.com/default/Limited_Offers/Limited Time Offer Sunland Oil.jpg",
-    "https://livecdn.dialkaraikudi.com/default/Limited_Offers/Limited_Time_Offer_Digitaly_Free_Internship_cyb24y.jpg",
+    Limited1, Limited2
   ];
   const [currentImageIndex1, setCurrentImageIndex1] = useState(0);
 
-  const images2 = [
-    "https://livecdn.dialkaraikudi.com/default/Limited_Offers/Limited_Time_Offer_Digitaly_Free_Internship_cyb24y.jpg",
-    "https://livecdn.dialkaraikudi.com/default/Limited_Offers/Limited Time Offer Sunland Oil.jpg",
-  ];
   const [currentImageIndex2, setCurrentImageIndex2] = useState(0);
 
   // Cross-fade for first card
@@ -35,7 +32,7 @@ const LimitedOffers = () => {
   // Cross-fade for second card
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex2((prev) => (prev + 1) % images2.length);
+      setCurrentImageIndex2((prev) => (prev + 1) % images1.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -83,13 +80,13 @@ const LimitedOffers = () => {
         {/* First Offer Card */}
         <Pressable className="w-full lg:w-6/12 relative overflow-hidden rounded-lg" style={{ height: imgHeight }}>
           <Animated.Image
-            source={{ uri: images1[0] }}
+            source={images1[0]}
             className="absolute w-full h-full"
             style={{ opacity: opacityAnim1a }}
             resizeMode="cover"
           />
           <Animated.Image
-            source={{ uri: images1[1] }}
+            source={images1[1]}
             className="absolute w-full h-full"
             style={{ opacity: opacityAnim1b }}
             resizeMode="cover"
@@ -99,13 +96,13 @@ const LimitedOffers = () => {
         {/* Second Offer Card */}
         <Pressable className="w-full lg:w-6/12 relative overflow-hidden rounded-lg" style={{ height: imgHeight }}>
           <Animated.Image
-            source={{ uri: images2[0] }}
+            source={images1[1]}
             className="absolute w-full h-full"
             style={{ opacity: opacityAnim2a }}
             resizeMode="contain"
           />
           <Animated.Image
-            source={{ uri: images2[1] }}
+            source={images1[0]}
             className="absolute w-full h-full"
             style={{ opacity: opacityAnim2b }}
             resizeMode="contain"
