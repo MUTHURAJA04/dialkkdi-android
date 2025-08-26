@@ -8,6 +8,8 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import { X, Plus, Trash2 } from "react-native-feather";
@@ -131,62 +133,71 @@ const ImagesEditModal = ({ visible, onClose, images = [], onUpdate }) => {
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50 justify-center items-center">
-        <View className="bg-white w-11/12 rounded-2xl p-5" style={{ maxHeight: "90%", minHeight: "60%" }}>
-          {/* Header */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xl font-bold text-gray-800">Edit Images</Text>
-            <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
-              <X size={24} color="#6B7280" />
-            </TouchableOpacity>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
+        <View className="flex-1 bg-black/50">
+          {/* Header (match BusinessEditModal) */}
+          <View className="flex-row items-center justify-between bg-white px-6 py-4 rounded-t-3xl mt-20">
+            <View className="flex-row items-center">
+              <Text className="text-xl font-bold text-gray-800">Edit Images</Text>
+            </View>
+        
           </View>
 
-          {/* Images Grid */}
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-            <View className="flex-row flex-wrap gap-3 mb-4">
-              {localImages.map((src, index) => {
-                const resolved = typeof src === "object" ? src.uri : src;
-                return (
-                  <View key={index} className="relative">
-                    <Image
-                      source={{ uri: resolveImageUri(resolved) }}
-                      className="w-24 h-24 rounded-lg bg-gray-200"
-                      resizeMode="cover"
-                    />
-                    <TouchableOpacity onPress={() => handleRemoveImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
-                      <Trash2 size={16} color="white" />
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
+          {/* Content container */}
+          <View className="flex-1 bg-white rounded-t-3xl -mt-2">
+            <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+              {/* Images Grid */}
+              <View className="flex-row flex-wrap gap-3 mb-4 pt-4">
+                {localImages.map((src, index) => {
+                  const resolved = typeof src === "object" ? src.uri : src;
+                  return (
+                    <View key={index} className="relative">
+                      <Image
+                        source={{ uri: resolveImageUri(resolved) }}
+                        className="w-24 h-24 rounded-lg bg-gray-200"
+                        resizeMode="cover"
+                      />
+                      <TouchableOpacity onPress={() => handleRemoveImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
+                        <Trash2 size={16} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
 
-              {/* Add Image Button (only if less than 6) */}
-              {localImages.length < 6 && (
-                <TouchableOpacity onPress={handleAddImage} className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50">
-                  <Plus size={24} color="#9CA3AF" />
+                {/* Add Image Button (only if less than 6) */}
+                {localImages.length < 6 && (
+                  <TouchableOpacity onPress={handleAddImage} className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg justify-center items-center bg-gray-50">
+                    <Plus size={24} color="#9CA3AF" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Image Count */}
+              <View className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-2">
+                <Text className="text-sm text-blue-700 text-center">
+                  {localImages.length} image{localImages.length !== 1 ? "s" : ""} selected
+                </Text>
+              </View>
+            </ScrollView>
+
+            {/* Footer (match BusinessEditModal) */}
+            <View className="px-6 pb-6 pt-4 border-t border-gray-200">
+              <View className="flex-row gap-3">
+                <TouchableOpacity onPress={onClose} className="flex-1 bg-gray-200 rounded-xl py-4 items-center" disabled={isSubmitting}>
+                  <Text className="text-gray-700 font-semibold text-base">Cancel</Text>
                 </TouchableOpacity>
-              )}
+                <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 rounded-xl py-4 items-center" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <ActivityIndicator color="white" size="small" />
+                  ) : (
+                    <Text className="text-white font-semibold text-base">Save Changes</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
-
-            {/* Image Count */}
-            <View className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-2">
-              <Text className="text-sm text-blue-700 text-center">
-                {localImages.length} image{localImages.length !== 1 ? "s" : ""} selected
-              </Text>
-            </View>
-          </ScrollView>
-
-          {/* Footer */}
-          <View className="flex-row gap-3 mt-4">
-            <TouchableOpacity onPress={onClose} className="flex-1 bg-gray-200 rounded-xl py-3 items-center" disabled={isSubmitting}>
-              <Text className="text-gray-700 font-semibold">Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 rounded-xl py-3 items-center" disabled={isSubmitting}>
-              {isSubmitting ? <ActivityIndicator color="white" size="small" /> : <Text className="text-white font-semibold">Save Changes</Text>}
-            </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

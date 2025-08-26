@@ -63,9 +63,14 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
     // Load areas when city changes
     useEffect(() => {
+        console.log('🏙️ [BusinessEditModal] City changed:', form.city);
+        // Reset area selection on city change
+        setForm(prev => ({ ...prev, area: "" }));
         if (form.city) {
+            console.log('📩 [BusinessEditModal] Loading areas for city:', form.city);
             loadAreas(form.city);
         } else {
+            console.log('🧹 [BusinessEditModal] City cleared, resetting areas');
             setAreas([]);
         }
     }, [form.city]);
@@ -81,12 +86,30 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
     const loadAreas = async (cityId) => {
         try {
+            console.log('📡 [BusinessEditModal] getArea request cityId:', cityId);
             const areaData = await getArea(cityId);
-            setAreas(areaData || []);
+            console.log('📥 [BusinessEditModal] getArea response:', areaData);
+            const parsed = Array.isArray(areaData?.data) ? areaData.data : (Array.isArray(areaData) ? areaData : []);
+            console.log('🧮 [BusinessEditModal] Areas parsed length:', parsed.length);
+            setAreas(parsed);
         } catch (error) {
             console.error("Failed to load areas:", error);
         }
     };
+
+    // Auto-select first area when areas list loads (per user request)
+    useEffect(() => {
+        if (form.city && areas.length > 0 && !form.area) {
+            const first = `${areas[0]._id || areas[0].id}`;
+            console.log('✅ [BusinessEditModal] Defaulting area to first item:', first);
+            setForm(prev => ({ ...prev, area: first }));
+        }
+    }, [areas, form.city]);
+
+    // Log area changes
+    useEffect(() => {
+        console.log('📌 [BusinessEditModal] form.area changed to:', form.area);
+    }, [form.area]);
 
     const handleChange = (field, value) => {
         console.log(`🔄 [BusinessEditModal] handleChange: ${field} = "${value}"`);
@@ -256,13 +279,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                 Edit Business Details
                             </Text>
                         </View>
-                        <TouchableOpacity
-                            onPress={handleCancel}
-                            className="p-2 rounded-full bg-gray-100"
-                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        >
-                            <X size={20} color="#6B7280" />
-                        </TouchableOpacity>
+                       
                     </View>
 
                     {/* Form Content */}
@@ -417,12 +434,13 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                 <View className="border border-gray-300 rounded-xl bg-gray-50 overflow-hidden">
                                     <Picker
                                         selectedValue={form.city || ""}
-                                        onValueChange={(value) => handleChange("city", value)}
+                                        onValueChange={(value, index) => { console.log('🛎️ [BusinessEditModal] City Picker changed:', value, 'at index', index); handleChange("city", value); }}
                                         style={{
                                             color: "#374151",
                                             fontSize: 16,
                                             height: Platform.OS === "ios" ? 200 : 50,
                                         }}
+                
                                     >
                                         <Picker.Item label="Select a city" value="" enabled={false} />
                                         {cities.map((city) => (
@@ -446,14 +464,16 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                 </Text>
                                 <View className="border border-gray-300 rounded-xl bg-gray-50 overflow-hidden">
                                     <Picker
-                                        selectedValue={form.area || ""}
-                                        onValueChange={(value) => handleChange("area", value)}
+                                        key={form.city || 'no-city'}
+                                        selectedValue={`${form.area || ""}`}
+                                        onValueChange={(value, index) => { const v = `${value}`; console.log('🛎️ [BusinessEditModal] Area Picker changed:', v, 'at index', index); handleChange("area", v); }}
                                         enabled={!!form.city}
                                         style={{
                                             color: "#374151",
                                             fontSize: 16,
                                             height: Platform.OS === "ios" ? 200 : 50,
                                         }}
+                                       
                                     >
                                         <Picker.Item
                                             label={form.city ? "Select an area" : "Select a city first"}
@@ -462,13 +482,14 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                         />
                                         {areas.map((area) => (
                                             <Picker.Item
-                                                key={area._id}
+                                                key={area._id || area.id}
                                                 label={area.name}
-                                                value={area._id}
+                                                value={`${area._id || area.id}`}
                                             />
                                         ))}
                                     </Picker>
                                 </View>
+                                <Text className="text-[11px] text-gray-400 mt-1">Areas loaded: {areas?.length || 0} | Selected: {form.area || 'none'}</Text>
                                 <Text className="text-xs text-gray-500 mt-1">
                                     Current: {business?.address?.area?.name || "Not set"}
                                 </Text>
@@ -516,7 +537,6 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                         <ActivityIndicator color="white" size="small" />
                                     ) : (
                                         <View className="flex-row items-center">
-                                            <Save size={18} color="white" />
                                             <Text className="text-white font-semibold text-base ml-2">
                                                 Save Changes
                                             </Text>
