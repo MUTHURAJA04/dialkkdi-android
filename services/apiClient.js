@@ -726,7 +726,7 @@ export const civicFeedUpdate = async ({ posterId, formData }) => {
 
     const response = await apiClient.put(`/civicfeeds/${posterId}`, formData, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
       },
     });
 
@@ -741,6 +741,86 @@ export const civicFeedUpdate = async ({ posterId, formData }) => {
   }
 };
 
+
+export const civicPost = async (postData) => {
+  // 1. Get user/business data from AsyncStorage
+  const businessDataString = await AsyncStorage.getItem("businessData");
+  const businessData = businessDataString ? JSON.parse(businessDataString) : null;
+
+  const userDataString = await AsyncStorage.getItem("userData");
+  const userData = userDataString ? JSON.parse(userDataString) : null;
+
+  let loginId = businessData?.id || userData?.id;
+  let userType = businessData ? "Business" : "User";
+
+  const dataToSend = new FormData();
+
+  dataToSend.append("title", postData.title);
+  dataToSend.append("description", postData.description);
+
+  if (postData.imageUrl && postData.imageUrl.startsWith('file://')) {
+    dataToSend.append("civic", {
+      uri: postData.imageUrl,
+      name: `civic_${Date.now()}.jpg`,
+      type: "image/jpeg",
+    });
+  }
+
+  dataToSend.append("posterType", userType);
+  dataToSend.append("postedBy", loginId);
+  dataToSend.append("isAdmin", false);
+
+  try {
+    console.log("👉 Sending Form Data:", dataToSend);
+    const response = await apiClient.post(`/civicfeeds`, dataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Civic Post failed:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+};
+
+export const civicPostDelete = async (postId) => {
+  try {
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessData = businessDataString ? JSON.parse(businessDataString) : null;
+    const businessId = businessData?.id;
+    const businessToken = await AsyncStorage.getItem("businessToken");
+
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+    const userId = userData?.id;
+    const userToken = await AsyncStorage.getItem("userToken");
+
+    let LoginId = businessId ? businessId : userId;
+    let token = businessToken ? businessToken : userToken;
+
+    const response = await apiClient.delete(`civicfeeds/${postId}?user=${LoginId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.error("Error ❌", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
+
+  }
+}
 
 export const civicLikeUnlike = async (postId) => {
   try {
