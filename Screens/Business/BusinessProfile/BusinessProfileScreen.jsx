@@ -9,8 +9,12 @@ import {
     FlatList,
     Alert,
 } from "react-native";
-import BusinessEditModal, { ImagesEditModal, BusinessTimingEditModal } from "./BusinessEditModal";
+import BusinessEditModal from "./BusinessEditModal";
+import ImagesEditModal from "./ImagesEditModal";
+import BusinessTimingEditModal from "./BusinessTimingEditModal";
 import { getbusinessDetails, editBusiness } from "../../../services/apiClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import apiClient from "../../../services/apiClient";
 
 const BusinessProfileScreen = ({ businessPanel }) => {
     // State management
@@ -77,54 +81,17 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     };
 
     // Handle images update
-    const handleImagesUpdate = async (update) => {
+    const handleImagesUpdate = async (formData) => {
         try {
-            const isArrayPayload = Array.isArray(update);
-            if (isArrayPayload) {
-                console.log('📤 [BusinessProfileScreen] Updating images (full replace):', {
-                    currentCount: images.length,
-                    newCount: update.length,
-                });
-
-                const payload = { photos: update };
-                const response = await editBusiness(payload);
-
-                if (response.success) {
-                    console.log('✅ [BusinessProfileScreen] Images replaced successfully');
-                    setImages(update);
-                    setImagesEditVisible(false);
-                    Alert.alert("Success! 🎉", "Images updated successfully!");
-                    await handleBusinessUpdated();
-                } else {
-                    console.error('❌ [BusinessProfileScreen] Images update failed:', response.error);
-                    Alert.alert("Error", response.error || "Failed to update images");
-                }
-                return;
-            }
-
-            const addPhotos = update?.addPhotos || [];
-            const removePhotos = update?.removePhotos || [];
-
-            console.log('📤 [BusinessProfileScreen] Updating images (delta):', {
-                currentCount: images.length,
-                addCount: addPhotos.length,
-                removeCount: removePhotos.length,
-                addPreview: addPhotos.slice ? addPhotos.slice(0, 2) : addPhotos,
-                removePreview: removePhotos.slice ? removePhotos.slice(0, 2) : removePhotos,
-            });
-
-            const payload = { addPhotos, removePhotos };
-            const response = await editBusiness(payload);
-
-            if (response.success) {
-                console.log('✅ [BusinessProfileScreen] Image changes applied successfully');
-                setImagesEditVisible(false);
-                Alert.alert("Success! 🎉", "Images updated successfully!");
-                await handleBusinessUpdated();
-            } else {
-                console.error('❌ [BusinessProfileScreen] Image changes failed:', response.error);
-                Alert.alert("Error", response.error || "Failed to update images");
-            }
+            console.log('📤 [BusinessProfileScreen] Received update from ImagesEditModal');
+            
+            // ImagesEditModal now handles the API call directly
+            // This function is kept for backward compatibility but simplified
+            console.log('✅ [BusinessProfileScreen] Images update completed by ImagesEditModal');
+            
+            // Refresh business data to get updated images
+            await handleBusinessUpdated();
+            
         } catch (error) {
             console.error('❌ [BusinessProfileScreen] Images update error:', {
                 message: error.message,
