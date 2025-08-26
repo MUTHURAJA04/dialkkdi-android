@@ -102,27 +102,22 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 className="flex-1"
             >
-                <View className="flex-1 bg-black/50 justify-center items-center">
-                    <View className="bg-white w-11/12 rounded-2xl p-5" style={{ maxHeight: '90%', minHeight: '60%' }}>
-                        {/* Header */}
-                        <View className="flex-row items-center justify-between mb-4">
-                            <View className="flex-row items-center">
-                                <Clock size={24} color="#3B82F6" />
-                                <Text className="text-xl font-bold text-gray-800 ml-3">Edit Business Timings</Text>
-                            </View>
-                            <TouchableOpacity 
-                                onPress={handleClose}
-                                className="p-2 rounded-full bg-gray-100"
-                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            >
-                                <X size={24} color="#6B7280" />
-                            </TouchableOpacity>
+                <View className="flex-1 bg-black/50">
+                    {/* Header (match BusinessEditModal) */}
+                    <View className="flex-row items-center justify-between bg-white px-6 py-4 rounded-t-3xl mt-20">
+                        <View className="flex-row items-center">
+                            <Clock size={24} color="#3B82F6" />
+                            <Text className="text-xl font-bold text-gray-800 ml-3">Edit Business Timings</Text>
                         </View>
+                
+                    </View>
 
+                    {/* Content container */}
+                    <View className="flex-1 bg-white rounded-t-3xl -mt-2">
                         {/* Timings List */}
-                        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                            {/* Debug Info */}
-                            <View className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4">
+                        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+                            {/* Debug Info (optional) */}
+                            <View className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4 mt-4">
                                 <Text className="text-sm text-yellow-700 text-center">
                                     Debug: {Object.keys(localTimings).length} days configured
                                 </Text>
@@ -206,29 +201,31 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
                                 );
                             })}
                         </ScrollView>
-                    </View>
 
-                    {/* Action Buttons */}
-                    <View className="flex-row gap-3 mt-4">
-                        <TouchableOpacity
-                            onPress={handleClose}
-                            className="flex-1 bg-gray-200 rounded-xl py-3 items-center"
-                            disabled={isSubmitting}
-                        >
-                            <Text className="text-gray-700 font-semibold">Cancel</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity
-                            onPress={handleSave}
-                            className="flex-1 bg-blue-500 rounded-xl py-3 items-center"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <ActivityIndicator color="white" size="small" />
-                            ) : (
-                                <Text className="text-white font-semibold">Save Changes</Text>
-                            )}
-                        </TouchableOpacity>
+                        {/* Footer (match BusinessEditModal) */}
+                        <View className="px-6 pb-6 pt-4 border-t border-gray-200">
+                            <View className="flex-row gap-3">
+                                <TouchableOpacity
+                                    onPress={handleClose}
+                                    className="flex-1 bg-gray-200 rounded-xl py-4 items-center"
+                                    disabled={isSubmitting}
+                                >
+                                    <Text className="text-gray-700 font-semibold text-base">Cancel</Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    onPress={handleSave}
+                                    className="flex-1 bg-blue-500 rounded-xl py-4 items-center"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <ActivityIndicator color="white" size="small" />
+                                    ) : (
+                                        <Text className="text-white font-semibold text-base">Save Changes</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </View>
                 </View>
             </KeyboardAvoidingView>
