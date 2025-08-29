@@ -19,6 +19,7 @@ import VerifyOtp from '../Screens/VerifyOtp';
 import DialogramScreen from '../Screens/DialogramScreen';
 import BusinessLanding from '../Screens/Business/BusinessLanding';
 import TalkofTown from '../Screens/TalkOftheTown/TalkofTown';
+import Checkout from '../Screens/Business/Adverts/Checkout';
 
 
 const Stack = createNativeStackNavigator();
@@ -97,6 +98,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
+      <Stack.Screen name="Checkout" component={Checkout} />
 
       {/* Auth-protected screens */}
       <Stack.Screen name="Home" component={withAuthGuard(withLayout(Home))} />

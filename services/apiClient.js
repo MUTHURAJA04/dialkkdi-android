@@ -1122,6 +1122,7 @@ export const getBusinessFeedDelete = async (postId) => {
     console.error('❌ API Error:', error.response?.data || error.message);
   }
 }
+
 export const updatefeed = async (editPostId, formData) => {
   try {
     const response = await apiClient.put(`/feed/${editPostId}/edit`, formData);
@@ -1146,7 +1147,40 @@ export const updatefeed = async (editPostId, formData) => {
 };
 
 
+export const fetchadverts = async () => {
+  try {
+    const response = await apiClient.get('/advertslots')
+    return response.data;
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
 
+export const createOrder = async (amount) => {
+  try {
+    const response = await apiClient.post('/payment/createorder', amount)
+    return response.data
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
 
+export const verifyPayment = async (data) => {
+  try {
+    const response = await apiClient.post('/payment/verifypayment', data)
+    return response.data
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
+
+export const assignSlot = async (data) => {
+  try {
+    const response = await apiClient.post('/advertslots/assignbusiness', data)
+    return response.data
+  } catch (error) {
+    console.error('❌ API Error:', error.response?.data || error.message);
+  }
+}
 
 export default apiClient;

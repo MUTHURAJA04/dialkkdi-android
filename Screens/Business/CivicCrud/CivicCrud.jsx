@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { civicFeedUpdate, civicFeedUser, civicPost } from "../../services/apiClient";
+import { civicFeedUpdate, civicFeedUser, civicPost } from "../../../services/apiClient";
 import { PlusCircle } from "react-native-feather";
 
 export default function CivicCrud() {
@@ -273,51 +273,65 @@ export default function CivicCrud() {
                     keyExtractor={(item, index) =>
                         item?._id?.toString() || item?.id?.toString() || index.toString()
                     }
-                    contentContainerStyle={{ paddingHorizontal: 16 }}
+                    contentContainerStyle={{ padding: 16 }}
                     renderItem={({ item }) => (
-                        <View className="bg-white p-4 rounded-xl mb-3 shadow">
-                            <Text className="text-lg mb-2 font-semibold">{item?.title}</Text>
-
-                            {item?.imageUrl && (
-                                <View className="w-40 h-40 bg-gray-200 rounded-xl mb-3 overflow-hidden justify-center items-center">
+                        <View className="bg-white rounded mb-6 shadow-xl overflow-hidden">
+                            <View className="relative">
+                                {item?.imageUrl ? (
                                     <Image
                                         source={{ uri: getImageUrl(item?.imageUrl) }}
-                                        className="w-full h-full"
+                                        className="w-full h-56"
                                         resizeMode="cover"
                                     />
+                                ) : (
+                                    <View className="w-full h-56 bg-gray-100 items-center justify-center">
+                                        <Text className="text-gray-400 italic">No Image</Text>
+                                    </View>
+                                )}
+
+                                <View className="absolute top-3 right-3">
+                                    <Text
+                                        className={`px-3 py-1 rounded-full text-xs font-bold shadow-md ${item?.status === "approved"
+                                            ? "bg-green-500 text-white"
+                                            : item?.status === "rejected"
+                                                ? "bg-red-500 text-white"
+                                                : "bg-yellow-500 text-white"
+                                            }`}
+                                    >
+                                        {item?.status?.toUpperCase()}
+                                    </Text>
                                 </View>
-                            )}
+                            </View>
 
-                            <Text className="text-sm my-2 text-gray-600">{item?.description}</Text>
+                            <View className="p-5">
+                                <Text className="text-xl font-bold text-gray-800 mb-2">
+                                    {item?.title}
+                                </Text>
 
-                            <Text
-                                className={`self-start px-2 py-1 rounded mt-1 mb-2 text-sm ${item?.status === "approved"
-                                    ? "bg-green-100 text-green-700"
-                                    : item?.status === "rejected"
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-yellow-100 text-yellow-700"
-                                    }`}
-                            >
-                                {item?.status}
-                            </Text>
+                                <Text className="text-gray-600 text-sm leading-relaxed mb-4">
+                                    {item?.description}
+                                </Text>
 
-                            <View className="flex-row gap-2 justify-between">
-                                <TouchableOpacity
-                                    className="border border-gray-400 px-3 py-1 rounded"
-                                    onPress={() => handleEdit(item)}
-                                >
-                                    <Text>Edit</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    className="bg-red-600 px-3 py-1 rounded"
-                                    onPress={() => setConfirmDelete(item._id)}
-                                >
-                                    <Text className="text-white">Delete</Text>
-                                </TouchableOpacity>
+                                <View className="flex-row justify-between">
+                                    <TouchableOpacity
+                                        className="flex-row items-center bg-gray-100 px-4 py-2 rounded"
+                                        onPress={() => handleEdit(item)}
+                                    >
+                                        <Text className="text-gray-700 font-semibold"> Edit</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        className="flex-row items-center bg-red-500 px-4 py-2 rounded"
+                                        onPress={() => setConfirmDelete(item._id)}
+                                    >
+                                        <Text className="text-white font-semibold"> Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     )}
                 />
+
             )}
 
 

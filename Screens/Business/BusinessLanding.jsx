@@ -3,36 +3,15 @@ import { View, Text, Button, ScrollView, TouchableOpacity, Linking } from 'react
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
-import { Home, User, Instagram, MessageCircle, Play } from 'react-native-feather';
+import { Home, User, Instagram, MessageCircle, Play, LogOut } from 'react-native-feather';
 import { getbusinessDashboard, getbusinessDetails } from '../../services/apiClient';
 import DashboardCharts from './Dashboard';
 import BusinessProfileScreen from './BusinessProfile/BusinessProfileScreen';
 import ImageUpload from './Dilogram/Upload';
-import CivicCrud from '../CivicCrud/CivicCrud';
+import CivicCrud from './CivicCrud/CivicCrud';
+import Addon from './Adverts/Addon';
 
 const Tab = createBottomTabNavigator();
-
-const AddOn = () => {
-    const handleOpenWebsite = () => {
-        Linking.openURL("https://www.dialkaraikudi.com"); // opens in browser
-    };
-
-    return (
-        <View className="flex-1 justify-center items-center bg-white">
-            <Text>Business Profile</Text>
-            <Text>Now under Working</Text>
-            <Text>If you Need Access pls Redirect Web Application</Text>
-
-            <TouchableOpacity
-                onPress={handleOpenWebsite}
-                className="mt-4 bg-blue-500 px-4 py-2 rounded-lg"
-            >
-                <Text className="text-white text-lg">Click here</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
 
 const BusinessLanding = () => {
     const navigation = useNavigation();
@@ -82,8 +61,18 @@ const BusinessLanding = () => {
             screenOptions={{
                 headerRight: () => (
                     <View className='flex-row gap-2 pr-2'>
-                        <Button title="Home" color="green" onPress={handleHome} />
-                        <Button title="Logout" color="red" onPress={handleLogout} />
+                        <TouchableOpacity
+                            onPress={handleHome}
+                            className='bg-green-600 text-white p-2 rounded-full'
+                        >
+                            <Home color={"white"} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleLogout}
+                            className='bg-orange-500 p-2 rounded-full'
+                        >
+                            <LogOut color={"white"} />
+                        </TouchableOpacity>
                     </View>
                 ),
             }}
@@ -106,7 +95,7 @@ const BusinessLanding = () => {
             </Tab.Screen>
             <Tab.Screen
                 name="Advert"
-                component={AddOn}
+                component={Addon}
                 options={{
                     tabBarIcon: ({ color }) => <Play color={color} width={20} height={20} />,
                 }}
