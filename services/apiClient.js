@@ -1152,34 +1152,129 @@ export const fetchadverts = async () => {
     const response = await apiClient.get('/advertslots')
     return response.data;
   } catch (error) {
-    console.error('❌ API Error:', error.response?.data || error.message);
+    if (error.response) {
+      // server returned an error
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+      // no response received
+      return { success: false, message: "No response from server" };
+    } else {
+      // other errors
+      return { success: false, message: error.message };
+    }
   }
 }
 
 export const createOrder = async (amount) => {
   try {
     const response = await apiClient.post('/payment/createorder', amount)
-    return response.data
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response data" };
+    }
   } catch (error) {
-    console.error('❌ API Error:', error.response?.data || error.message);
+    if (error.response) {
+      // server returned an error
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+      // no response received
+      return { success: false, message: "No response from server" };
+    } else {
+      // other errors
+      return { success: false, message: error.message };
+    }
   }
 }
 
 export const verifyPayment = async (data) => {
   try {
+
     const response = await apiClient.post('/payment/verifypayment', data)
-    return response.data
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response data" };
+    }
   } catch (error) {
-    console.error('❌ API Error:', error.response?.data || error.message);
+    if (error.response) {
+      // server returned an error
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+      // no response received
+      return { success: false, message: "No response from server" };
+    } else {
+      // other errors
+      return { success: false, message: error.message };
+    }
   }
 }
 
 export const assignSlot = async (data) => {
   try {
-    const response = await apiClient.post('/advertslots/assignbusiness', data)
-    return response.data
+
+    const token = await AsyncStorage.getItem("businessToken");
+
+    const response = await apiClient.post('/advertslots/assignbusiness', data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    )
+
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response data" };
+    }
+
   } catch (error) {
-    console.error('❌ API Error:', error.response?.data || error.message);
+
+    if (error.response) {
+
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+
+      return { success: false, message: "No response from server" };
+    } else {
+
+      return { success: false, message: error.message };
+    }
+  }
+}
+
+export const assignSlotpurchase = async (data) => {
+
+  try {
+
+    const token = await AsyncStorage.getItem("businessToken");
+
+    const response = await apiClient.post('/slotPurchases', data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response data" };
+    }
+
+  } catch (error) {
+    if (error.response) {
+
+      return { success: false, message: error.response.data?.message || "Server Error" };
+    } else if (error.request) {
+
+      return { success: false, message: "No response from server" };
+    } else {
+
+      return { success: false, message: error.message };
+    }
   }
 }
 

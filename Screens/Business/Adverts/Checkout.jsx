@@ -1,16 +1,19 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import RazorpayCheckout from "react-native-razorpay";
-import { createOrder, verifyPayment } from "../../../services/apiClient";
+import { assignSlot, assignSlotpurchase, createOrder, verifyPayment } from "../../../services/apiClient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Checkout = () => {
     const route = useRoute();
-    const { plan } = route.params; // ✅ Selected plan data
+    const { plan } = route.params;
 
-    // GST 18% calculation
+    const navigation = useNavigation();
+
     const gst = (plan.price * 0.18).toFixed(2);
     const total = (plan.price + parseFloat(gst)).toFixed(2);
+
 
     const handlePayNow = async () => {
         try {
@@ -47,12 +50,26 @@ const Checkout = () => {
             RazorpayCheckout.open(options)
                 .then(async (response) => {
 
+
+                    const businessDetails = await AsyncStorage.getItem("businessData")
+                    const businessData = JSON.parse(businessDetails);
+                    console.log(businessData, "Bisiness Detailsss");
+
                     const data = {
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,
                         planId: plan._id,
                         amount: total,
+                        // baseAmount,
+                        // cgstAmount,
+                        // sgstAmount,
+                        currency: response.currency,
+                        businessId: businessData?.id,
+                        businessName: businessData?.name,
+                        type: "slotPurchase",
+                        itemId: plan._id,
+                        itemName: plan.name,
                     }
 
                     const verifyResponse = await verifyPayment(data)
@@ -60,7 +77,23 @@ const Checkout = () => {
                     console.log(verifyResponse, "Verify response");
 
                     if (verifyResponse.success) {
-                        Alert.alert("Success", "Payment Verified & Slot Purchased 🎉");
+                        const slotDetails = {
+                            businessId: businessData?.id,
+                            slotId: plan._id,
+                        }
+
+                        await assignSlot(slotDetails);
+
+                        await assignSlotpurchase(slotDetails);
+
+                        Alert.alert("Success", "Payment Verified & Slot Purchased",
+                            [
+                                {
+                                    text: 'OK',
+                                    onPress: () => navigation.pop(2),
+                                },
+                            ]
+                        );
                     } else {
                         Alert.alert("Failed", "Payment verification failed");
                     }

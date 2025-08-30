@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     Text,
     View,
@@ -12,7 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchadverts } from "../../../services/apiClient";
 import { Zap, Award, Clock } from "react-native-feather";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get('window');
 
@@ -24,28 +24,35 @@ const Addon = () => {
     const navigation = useNavigation();
 
     useEffect(() => {
-        const init = async () => {
-            try {
-                const stored = await AsyncStorage.getItem("businessData");
-                if (stored) {
-                    setBusiness(JSON.parse(stored));
-                }
-
-                const res = await fetchadverts();
-                setAdverts(res);
-            } catch (error) {
-                console.error(error);
-            }
-        };
         init();
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            init();
+        }, [])
+    );
+
+    const init = async () => {
+        try {
+            const stored = await AsyncStorage.getItem("businessData");
+            if (stored) {
+                setBusiness(JSON.parse(stored));
+            }
+
+            const res = await fetchadverts();
+            setAdverts(res);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleButton = (item) => {
         setSelectedPlan(item);
     };
 
     const renderCard = (item, index) => {
-        const isPurchased = item.allowedBusinesses.includes(business?._id);
+        const isPurchased = item.allowedBusinesses.includes(business?.id);
         const isFull = item.allowedBusinesses.length >= item.maxAds;
 
         let buttonText = "Buy Slot";
