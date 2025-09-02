@@ -125,12 +125,18 @@ const Profile = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView className={`flex-1 relative ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-      {/* Profile Section */}
-      {profileOpen && (
-        <View className="items-center justify-between h-screen w-full py-6 absolute z-10 bg-black/95">
-          <StatusBar backgroundColor={"black"} />
+    <SafeAreaView className={`flex-1 pt-5 relative ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+      
+      <StatusBar
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor={isDarkMode ? "#0f172a" : "#f8fafc"}
+        translucent={false}
+      />
 
+      {profileOpen && (
+        <View className="items-center justify-between h-screen w-full pt-10 py-6 absolute z-10 bg-black/95">
+
+          <StatusBar backgroundColor={"black"} />
           <FloatingBall delay={0} top={100} left={20} size={80} />
           <FloatingBall delay={800} top={250} left={width - 120} size={60} />
           <FloatingBall delay={1600} top={400} left={width - 140} size={300} />
@@ -194,13 +200,14 @@ const Profile = ({ navigation }) => {
       </View>
 
       {/* Tab Content */}
-      <View className="flex-1 px-4 py-2 ">
+      <View className="flex-1 py-2 ">
         {activeTab === "favourites" ? (
           <FlatList
             data={favourites}
             keyExtractor={(item) => item.id}
             renderItem={renderFavouriteCard}
             showsVerticalScrollIndicator={false}
+            className='px-4'
           />
         ) : (
           <CivicCrud />
@@ -217,6 +224,7 @@ const Profile = ({ navigation }) => {
           <Text className="text-white font-semibold text-lg ml-2">My Profile</Text>
         </TouchableOpacity>
       </View>
+
     </SafeAreaView>
   );
 };

@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { civicFeedUpdate, civicFeedUser, civicPost } from "../../../services/apiClient";
+import { civicFeedUpdate, civicFeedUser, civicPost, civicPostDelete } from "../../../services/apiClient";
 import { PlusCircle } from "react-native-feather";
 
 export default function CivicCrud() {
@@ -152,8 +152,9 @@ export default function CivicCrud() {
         try {
             // Assuming you have a civicPostDelete function in apiClient
             // import { civicPostDelete } from "../../services/apiClient";
-            // await civicPostDelete(confirmDelete);
+            await civicPostDelete(confirmDelete);
             Alert.alert("Deleted", "Post removed successfully");
+            fetchPosts();
             setPosts((prev) => prev.filter((p) => p._id !== confirmDelete));
             setConfirmDelete(null);
         } catch (error) {

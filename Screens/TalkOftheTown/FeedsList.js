@@ -28,7 +28,7 @@ const FeedsList = ({
 
   return (
     <ScrollView 
-      className="flex-1"
+      className="flex-1 pt-10"
       refreshControl={
         <RefreshControl
           refreshing={loading}

@@ -238,7 +238,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                 }
                 
                 Alert.alert(
-                    "Success! 🎉",
+                    "Success!",
                     "Business details updated successfully!",
                     [{ text: "OK", onPress: onClose }]
                 );

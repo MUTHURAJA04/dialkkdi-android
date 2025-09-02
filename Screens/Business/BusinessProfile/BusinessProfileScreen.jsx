@@ -118,7 +118,7 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                 console.log('✅ [BusinessProfileScreen] Business timings updated successfully');
                 setBusinessTimings(newTimings);
                 setTimingEditVisible(false);
-                Alert.alert("Success! 🎉", "Business timings updated successfully!");
+                Alert.alert("Success!", "Business timings updated successfully!");
                 await handleBusinessUpdated();
             } else {
                 console.error('❌ [BusinessProfileScreen] Timings update failed:', response.error);
