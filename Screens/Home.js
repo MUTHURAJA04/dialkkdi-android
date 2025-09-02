@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, Text, Button, ScrollView, BackHandler, Alert } from 'react-native';
 import HeroSlide from './Home/HeroSlide';
 import Banner from './Home/Banner';
 import Products from './Home/Products';
@@ -28,7 +28,24 @@ const Home = ({ navigation }) => {
       }
     }
     getAdverts();
+    const backAction = () => {
+      Alert.alert("Exit App", "Do you want to exit?", [
+        {
+          text: "Cancel",
+          onPress: () => null,
+          style: "cancel"
+        },
+        { text: "YES", onPress: () => BackHandler.exitApp() }
+      ]);
+      return true; // prevent default back action
+    };
 
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
   }, [])
 
   return (

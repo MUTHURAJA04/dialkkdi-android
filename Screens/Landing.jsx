@@ -37,7 +37,8 @@ const Landing = ({ navigation }) => {
 
   // 3D CTA animations
   const tilt = React.useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const press = React.useRef(new Animated.Value(0)).current;
+  const userPress = React.useRef(new Animated.Value(0)).current;
+  const businessPress = React.useRef(new Animated.Value(0)).current;
   const shimmer = React.useRef(new Animated.Value(0)).current;
 
   const panResponder = React.useRef(
@@ -251,8 +252,8 @@ const Landing = ({ navigation }) => {
                     inputRange: [-40, 40],
                     outputRange: ['-6deg', '6deg'],
                   });
-                  const scale = press.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] });
-                  const translateY = press.interpolate({ inputRange: [0, 1], outputRange: [0, 4] });
+                  const scale = userPress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] });
+                  const translateY = userPress.interpolate({ inputRange: [0, 1], outputRange: [0, 4] });
                   const shimmerTranslate = shimmer.interpolate({ inputRange: [0, 1], outputRange: [-width, width] });
 
                   return (
@@ -270,10 +271,10 @@ const Landing = ({ navigation }) => {
                         ],
                       }}
                       onTouchStart={() =>
-                        Animated.spring(press, { toValue: 1, useNativeDriver: true, friction: 6, tension: 120 }).start()
+                        Animated.spring(userPress, { toValue: 1, useNativeDriver: true, friction: 6, tension: 120 }).start()
                       }
                       onTouchEnd={() =>
-                        Animated.spring(press, { toValue: 0, useNativeDriver: true, friction: 6, tension: 120 }).start()
+                        Animated.spring(userPress, { toValue: 0, useNativeDriver: true, friction: 6, tension: 120 }).start()
                       }
                     >
                       {/* Moving shimmer strip */}
@@ -349,8 +350,8 @@ const Landing = ({ navigation }) => {
                     inputRange: [-40, 40],
                     outputRange: ['-6deg', '6deg'],
                   });
-                  const scale = press.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] });
-                  const translateY = press.interpolate({ inputRange: [0, 1], outputRange: [0, 4] });
+                  const scale = businessPress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] });
+                  const translateY = businessPress.interpolate({ inputRange: [0, 1], outputRange: [0, 4] });
                   const shimmerTranslate = shimmer.interpolate({ inputRange: [0, 1], outputRange: [-width, width] });
 
                   return (
@@ -368,10 +369,10 @@ const Landing = ({ navigation }) => {
                         ],
                       }}
                       onTouchStart={() =>
-                        Animated.spring(press, { toValue: 1, useNativeDriver: true, friction: 6, tension: 120 }).start()
+                        Animated.spring(businessPress, { toValue: 1, useNativeDriver: true, friction: 6, tension: 120 }).start()
                       }
                       onTouchEnd={() =>
-                        Animated.spring(press, { toValue: 0, useNativeDriver: true, friction: 6, tension: 120 }).start()
+                        Animated.spring(businessPress, { toValue: 0, useNativeDriver: true, friction: 6, tension: 120 }).start()
                       }
                     >
                       {/* Moving shimmer strip */}
