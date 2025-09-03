@@ -9,12 +9,14 @@ import {
   Platform,
   SafeAreaView,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { X } from 'react-native-feather';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import Input from '../components/CustomInput';
 import { googleSSOLogin, loginWithEmail } from '../services/apiClient'; // ✅ Added login API
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({ route }) => {
 
@@ -94,6 +96,25 @@ const Login = ({ route }) => {
       Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
     }
   };
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkAuth = async () => {
+        try {
+          const userData = await AsyncStorage.getItem('userData');
+          const businessData = await AsyncStorage.getItem('businessData');
+
+          if (userData || businessData) {
+            BackHandler.exitApp();
+          }
+        } catch (e) {
+          // ignore
+        }
+      };
+      checkAuth();
+    }, [navigation])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white">

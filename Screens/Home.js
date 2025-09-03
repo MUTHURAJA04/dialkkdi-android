@@ -28,24 +28,25 @@ const Home = ({ navigation }) => {
       }
     }
     getAdverts();
-    const backAction = () => {
-      Alert.alert("Exit App", "Do you want to exit?", [
-        {
-          text: "Cancel",
-          onPress: () => null,
-          style: "cancel"
-        },
-        { text: "YES", onPress: () => BackHandler.exitApp() }
-      ]);
-      return true; // prevent default back action
-    };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
+    // const backAction = () => {
+    //   Alert.alert("Exit App", "Do you want to exit?", [
+    //     {
+    //       text: "Cancel",
+    //       onPress: () => null,
+    //       style: "cancel"
+    //     },
+    //     { text: "YES", onPress: () => BackHandler.exitApp() }
+    //   ]);
+    //   return true; // prevent default back action
+    // };
 
-    return () => backHandler.remove();
+    // const backHandler = BackHandler.addEventListener(
+    //   "hardwareBackPress",
+    //   backAction
+    // );
+
+    // return () => backHandler.remove();
   }, [])
 
   return (

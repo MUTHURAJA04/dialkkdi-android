@@ -5,6 +5,8 @@ import {
   Dimensions,
   FlatList,
   SafeAreaView,
+  BackHandler,
+  Alert,
 } from "react-native";
 
 // ✅ Local images
@@ -34,6 +36,25 @@ export default function HeroSlide() {
       const scaledHeight = (height / width) * screenWidth;
       setImageHeights((prev) => ({ ...prev, [img]: scaledHeight }));
     });
+
+    // const backAction = () => {
+    //   Alert.alert("Exit App", "Do you want to exit?", [
+    //     {
+    //       text: "Cancel",
+    //       onPress: () => null,
+    //       style: "cancel"
+    //     },
+    //     { text: "YES", onPress: () => BackHandler.exitApp() }
+    //   ]);
+    //   return true; // prevent default back action
+    // };
+
+    // const backHandler = BackHandler.addEventListener(
+    //   "hardwareBackPress",
+    //   backAction
+    // );
+
+    // return () => backHandler.remove();
   }, []);
 
   const scrollTo = (index) => {
