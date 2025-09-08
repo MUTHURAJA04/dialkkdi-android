@@ -57,10 +57,6 @@ const withAuthGuard = (Component) => (props) => {
             }
           }
 
-          // if (userData || businessData) {
-          //   navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
-          // }
-
         } catch (err) {
           console.error(err);
           if (!cancelled) {
