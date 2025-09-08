@@ -71,7 +71,22 @@ const Login = ({ route }) => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
+
     }
+
+    const emailRegex = /^(?!\.)(?!.*\.\.)(?!.*\.\@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.com$/;
+
+
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('Validation Error', 'Enter a valid email address');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Validation Error', 'Password must be 8-20 characters');
+      return;
+    }
+
 
     try {
       console.log(' Calling login API with:', { email, password });

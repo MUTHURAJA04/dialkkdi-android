@@ -33,7 +33,7 @@ const Recognized = () => {
         </View>
 
         {/* DPIT */}
-        <View style={{ width: isLargeScreen ? 250 : 50, height: 100 }}>
+        <View style={{ width: isLargeScreen ? 250 : 70, height: 100 }}>
           <Image
             source={{
               uri: "https://livecdn.dialkaraikudi.com/default/default_images/dpit.png",

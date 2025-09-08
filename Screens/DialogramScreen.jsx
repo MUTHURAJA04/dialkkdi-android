@@ -373,7 +373,7 @@ const DialogramScreen = () => {
           contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }}
         />
       </SafeAreaView>
-      
+
     </View>
 
   );

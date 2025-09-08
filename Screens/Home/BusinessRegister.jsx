@@ -82,7 +82,7 @@ const BusinessRegister = () => {
       /> */}
 
       <Input
-        placeholder="Enter email"
+        placeholder="Enter email Address"
         keyboardType="email-address"
         placeholderTextColor="#aaa"
       />

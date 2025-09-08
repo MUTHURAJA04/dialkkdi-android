@@ -280,6 +280,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     const opacityAnimation = Animated.timing(heartOpacityAnim, {
       toValue: 0,
       duration: 800,
+      delay: 300,
       useNativeDriver: true,
     });
 
@@ -500,8 +501,8 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
         className="relative flex justify-center items-center overflow-hidden"
       >
         {/* Blurred background image */}
-        <Image 
-          source={{ uri: `${CDN_PREFIX}${imageUrl}` }} 
+        <Image
+          source={{ uri: `${CDN_PREFIX}${imageUrl}` }}
           style={{
             position: 'absolute',
             width: '100%',
@@ -511,7 +512,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           blurRadius={20}
           resizeMode="cover"
         />
-        
+
         {/* Main image */}
         <Image
           source={{ uri: `${CDN_PREFIX}${imageUrl}` }}

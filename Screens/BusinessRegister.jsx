@@ -32,10 +32,10 @@ const BusinessRegister = () => {
 
   // Regex rules
   const regex = {
-    businessName: /^[a-zA-Z0-9&\-. ]{2,50}$/,
-    ownerName: /^[a-zA-Z ]{2,50}$/,
-    phone: /^[6-9]\d{9}$/,
-    email: /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/,
+    businessName: /^(?! )[a-zA-Z0-9&\-. ]{2,50}$/, // disallow starting with space
+    ownerName: /^(?! )[a-zA-Z ]{2,50}$/,          // disallow starting with space
+    phone: /^[6-9]\d{9}$/,                        // same
+    email: /^(?!\.)(?!.*\.\.)(?!.*\.\@)(?!.*\.$)[A-Za-z0-9._-]+@[A-Za-z0-9-]+(\.[A-Za-z]{2,})+$/
   };
 
   const toggleSubcategory = (categoryId, segmentId) => {
@@ -172,14 +172,14 @@ const BusinessRegister = () => {
         placeholder="Enter business name"
         placeholderTextColor="#aaa"
         value={businessName}
-        onChangeText={setBusinessName}
+        onChangeText={(text) => setBusinessName(text.replace(/^\s+/, ''))}
       />
       <Input
         placeholder="Enter owner name"
         placeholderTextColor="#aaa"
         value={ownerName}
         onChangeText={(text) => {
-          const onlyLetters = text.replace(/[^A-Za-z\s]/g, '');
+          const onlyLetters = text.replace(/[^A-Za-z\s]/g, '').replace(/^\s+/, '');
           setOwnerName(onlyLetters);
         }}
       />
@@ -188,14 +188,15 @@ const BusinessRegister = () => {
         keyboardType="phone-pad"
         placeholderTextColor="#aaa"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(text) => setPhone(text.replace(/^\s+/, ''))}
       />
+
       <Input
-        placeholder="Enter email"
+        placeholder="Enter email Address"
         keyboardType="email-address"
         placeholderTextColor="#aaa"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text.replace(/^\s+/, ''))}
       />
 
       {/* Category Selector */}
@@ -254,14 +255,14 @@ const BusinessRegister = () => {
                 <TouchableOpacity
                   onPress={() => toggleSegment(group._id)}
                   className={`flex-row items-center justify-between p-3 my-1 rounded-lg ${activeSegmentId && group._id !== activeSegmentId
-                      ? 'bg-gray-300'
-                      : 'bg-gray-100'
+                    ? 'bg-gray-300'
+                    : 'bg-gray-100'
                     }`}
                   disabled={activeSegmentId && group._id !== activeSegmentId}
                 >
                   <Text className={`font-bold text-gray-800 ${activeSegmentId && group._id !== activeSegmentId
-                      ? 'text-gray-500'
-                      : ''
+                    ? 'text-gray-500'
+                    : ''
                     }`}>{group.name}</Text>
                   {openSegments[group._id] ? <ChevronUp color="gray" /> : <ChevronDown color="gray" />}
                 </TouchableOpacity>
@@ -273,10 +274,10 @@ const BusinessRegister = () => {
                         <TouchableOpacity
                           key={sub._id}
                           className={`border rounded-full px-4 py-2 m-1 ${selected.includes(sub._id)
-                              ? 'bg-orange-100 border-orange-400'
-                              : isDisabled
-                                ? 'bg-gray-200 border-gray-300'
-                                : 'border-gray-300'
+                            ? 'bg-orange-100 border-orange-400'
+                            : isDisabled
+                              ? 'bg-gray-200 border-gray-300'
+                              : 'border-gray-300'
                             }`}
                           onPress={() => toggleSubcategory(sub._id, group._id)}
                           disabled={isDisabled}

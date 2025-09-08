@@ -60,6 +60,16 @@ const BusinessStep2 = () => {
       return;
     }
 
+    const trimmedAddress = address.trim();
+
+    if (!/^(?!\.)(?!\d+$)[A-Za-z0-9\s,#-]+$/.test(trimmedAddress) || trimmedAddress.length < 5) {
+      Alert.alert(
+        'Validation Error',
+        'Enter a valid Mail address'
+      );
+      return;
+    }
+
     if (!cityId) {
       Alert.alert('Validation Error', 'Please select a city');
       return;
@@ -79,6 +89,8 @@ const BusinessStep2 = () => {
       Alert.alert('Validation Error', 'Enter a valid 6-digit pincode');
       return;
     }
+
+
 
     const mergedFormData = {
       ...formData,
@@ -107,13 +119,18 @@ const BusinessStep2 = () => {
           placeholder="Address"
           placeholderTextColor="#aaa"
           value={address}
-          onChangeText={setAddress}
+          onChangeText={(text) => {
+            let formatted = text.replace(/^\s+/g, '');
+            formatted = formatted.replace(/\s{2,}/g, ' ');
+            setAddress(formatted);
+          }}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
         />
 
-        <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-50">
+
+        <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-200">
           <Picker
             selectedValue={cityId}
             onValueChange={(itemValue) => {
@@ -122,7 +139,8 @@ const BusinessStep2 = () => {
             }}
             style={{
               color: '#000', // Ensure text is visible
-              height: Platform.OS === 'ios' ? 200 : 50, // Better height for Android
+              // height: Platform.OS === 'ios' ? 200 : 50, // Better height for Android
+              // padding: ''
             }}
             dropdownIconColor="#000" // For Android dropdown icon
           >
@@ -132,20 +150,20 @@ const BusinessStep2 = () => {
                 key={city._id}
                 label={city.name}
                 value={city._id}
-                color="#fff" // Ensure item text is visible
+                color="#000" // Ensure item text is visible
               />
             ))}
           </Picker>
         </View>
 
-        <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-50">
+        <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-200">
           <Picker
             selectedValue={areaId}
             onValueChange={(itemValue) => setAreaId(itemValue)}
             enabled={!!cityId} // Disable if no city selected
             style={{
               color: '#000',
-              height: Platform.OS === 'ios' ? 200 : 50,
+              // height: Platform.OS === 'ios' ? 200 : 50,
             }}
             dropdownIconColor="#000"
           >
@@ -155,7 +173,7 @@ const BusinessStep2 = () => {
                 key={area._id}
                 label={area.name}
                 value={area._id}
-                color="#fff"
+                color="#000"
               />
             ))}
           </Picker>

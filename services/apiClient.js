@@ -688,10 +688,21 @@ export const civicFeedUser = async () => {
 
   console.log(businessId, userId);
 
+  const usertoken = await AsyncStorage.getItem("userToken");
+  const businesstoken = await AsyncStorage.getItem("businessToken");
+
+  const token = businesstoken ? businesstoken : usertoken
 
   try {
     if (userId) {
-      const response = await apiClient.get(`/civicfeeds/poster/${userId}?type=User`)
+      const response = await apiClient.get(`/civicfeeds/poster/${userId}?type=User`,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
       return response.data;
     } else {
       const response = await apiClient.get(`/civicfeeds/poster/${businessId}?type=Business`)
@@ -752,6 +763,11 @@ export const civicPost = async (postData) => {
   let loginId = businessData?.id || userData?.id;
   let userType = businessData ? "Business" : "User";
 
+  const usertoken = await AsyncStorage.getItem("userToken");
+  const businesstoken = await AsyncStorage.getItem("businessToken");
+
+  const token = businesstoken ? businesstoken : usertoken
+
   const dataToSend = new FormData();
 
   dataToSend.append("title", postData.title);
@@ -770,10 +786,11 @@ export const civicPost = async (postData) => {
   dataToSend.append("isAdmin", false);
 
   try {
-    console.log("👉 Sending Form Data:", dataToSend);
+    console.log("👉 Sending Form Data:", dataToSend, token);
     const response = await apiClient.post(`/civicfeeds`, dataToSend, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;

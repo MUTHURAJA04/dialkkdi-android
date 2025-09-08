@@ -15,6 +15,7 @@ import { launchImageLibrary } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { civicFeedUpdate, civicFeedUser, civicPost, civicPostDelete } from "../../../services/apiClient";
 import { PlusCircle } from "react-native-feather";
+import { isDisabled } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
 
 export default function CivicCrud() {
     const [form, setForm] = useState({ title: "", description: "", imageUrl: null });
@@ -24,6 +25,7 @@ export default function CivicCrud() {
     const [userType, setUserType] = useState("guest");
     const [openForm, setOpenForm] = useState(false);
     const [loadingPosts, setLoadingPosts] = useState(true); // New loading state for posts
+    const [isDisabled, setIsDisabled] = useState(false);
 
     const Img_Url = "https://livecdn.dialkaraikudi.com";
 
@@ -54,6 +56,7 @@ export default function CivicCrud() {
         try {
             const fetchCivicPosts = await civicFeedUser();
             setPosts(fetchCivicPosts);
+            console.log(fetchCivicPosts, "12344");
         } catch (error) {
             console.log(error);
             Alert.alert("Error", "Failed to load civic posts.");
@@ -126,7 +129,7 @@ export default function CivicCrud() {
                 Alert.alert("Success", "Post created successfully");
             }
 
-            // After successful creation/update, refetch posts and reset form
+
             fetchPosts();
             setForm({ title: "", description: "", imageUrl: null });
             setEditingId(null);
@@ -176,10 +179,13 @@ export default function CivicCrud() {
                 <View className="flex-row justify-end p-4">
                     <TouchableOpacity
                         onPress={() => {
+                            setIsDisabled(true); // disable
                             setOpenForm(true);
-                            setForm({ title: "", description: "", imageUrl: null }); // Clear form on opening for new post
-                            setEditingId(null); // Clear editing state
+                            setForm({ title: "", description: "", imageUrl: null });
+                            setEditingId(null);
+                            setTimeout(() => setIsDisabled(false), 4000);
                         }}
+                        disabled={isDisabled}
                         className="flex-row items-center bg-blue-600 px-4 py-2 rounded-full shadow-md"
                     >
                         <PlusCircle color="white" width={20} height={20} />

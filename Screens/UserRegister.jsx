@@ -25,10 +25,10 @@ const UserRegister = ({ navigation }) => {
 
   const type = 'user'
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const phoneRegex = /^[6-9]\d{9}$/;
-  const passwordRegex = /^(?!.*[ .])[A-Za-z0-9!@#$%^&*()_+\-={}[\]|:;"'<>,?/]{8,20}$/;
-  const nameRegex = /^[A-Za-z\s]+$/;
+  const emailRegex = /^(?! )[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const phoneRegex = /^(?! )[6-9]\d{9}$/;
+  const passwordRegex = /^(?! )[A-Za-z0-9!@#$%^&*()_+\-={}[\]|:;"'<>,?/]{8,20}$/;
+  const nameRegex = /^(?! )[A-Za-z\s]+$/;
 
 
   /** ✅ Handle Register */
@@ -75,12 +75,12 @@ const UserRegister = ({ navigation }) => {
       return;
     }
     if (!passwordRegex.test(password)) {
-      Alert.alert('Error', 'Please enter a valid Password');
+      Alert.alert('Error', 'Password must be at least 8 characters');
       return;
     }
 
     if (name.length < 3) {
-      Alert.alert('Error', 'Nmae must be at least 3 characters long');
+      Alert.alert('Error', 'Name must be at least 3 characters long');
       return;
     }
 
@@ -145,10 +145,11 @@ const UserRegister = ({ navigation }) => {
       </Text>
 
       {/* Name Input */}
+      {/* Name Input */}
       <Input
         placeholder="Enter your full name"
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => setName(text.replace(/^\s+/, ''))}
         placeholderTextColor="#999"
         maxLength={30}
       />
@@ -158,7 +159,7 @@ const UserRegister = ({ navigation }) => {
         placeholder="Enter your Email Address"
         keyboardType="email-address"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text.replace(/^\s+/, ''))}
         placeholderTextColor="#aaa"
       />
 
@@ -167,7 +168,7 @@ const UserRegister = ({ navigation }) => {
         placeholder="Enter your phone number"
         keyboardType="phone-pad"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(text) => setPhone(text.replace(/^\s+/, ''))}
         placeholderTextColor="#999"
         maxLength={10}
       />
@@ -178,7 +179,7 @@ const UserRegister = ({ navigation }) => {
         secureTextEntry
         value={password}
         onChangeText={(text) => {
-          const cleanedText = text.replace(/[ .,]/g, '');
+          const cleanedText = text.replace(/[ .,]/g, '').replace(/^\s+/, '');
           setPassword(cleanedText);
         }}
         placeholderTextColor="#999"
@@ -194,12 +195,12 @@ const UserRegister = ({ navigation }) => {
         secureTextEntry
         value={confirmPassword}
         onChangeText={(text) => {
-          const cleanedText = text.replace(/[ .,]/g, '');
+          const cleanedText = text.replace(/[ .,]/g, '').replace(/^\s+/, '');
           setConfirmPassword(cleanedText);
         }}
         placeholderTextColor="#999"
-
       />
+
 
       {/* Agree to Terms */}
       <TouchableOpacity
