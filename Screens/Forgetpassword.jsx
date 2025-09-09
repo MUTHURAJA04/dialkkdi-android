@@ -36,12 +36,12 @@ const ForgotPassword = () => {
     try {
       if (type === 'business') {
         console.log('📡 Sending OTP to:', email);
-        const res = await apiClient.post('/business/forgotpassword', { email });
+        const res = await apiClient.post('/business/forgotpassword', { email, type });
         Alert.alert('Success', res.data.message || 'OTP sent successfully');
         setStep(2);
       } else {
         console.log('📡 Sending OTP to:', email);
-        const res = await apiClient.post('/user/forgotpassword', { email });
+        const res = await apiClient.post('/user/forgotpassword', { email, type });
         Alert.alert('Success', res.data.message || 'OTP sent successfully');
         setStep(2);
       }
@@ -99,7 +99,7 @@ const ForgotPassword = () => {
         });
         console.log('✅ Password reset successful:', res.data);
         Alert.alert('Success', res.data.message || 'Password has been reset', [
-          { text: 'OK', onPress: () => navigation.navigate('Login') },
+          { text: 'OK', onPress: () => navigation.navigate('Login', { type }) },
         ]);
       } else {
         console.log('📡 Resetting password...');
@@ -111,7 +111,7 @@ const ForgotPassword = () => {
         });
         console.log('✅ Password reset successful:', res.data);
         Alert.alert('Success', res.data.message || 'Password has been reset', [
-          { text: 'OK', onPress: () => navigation.navigate('Login') },
+          { text: 'OK', onPress: () => navigation.navigate('Login', { type }) },
         ]);
       }
 

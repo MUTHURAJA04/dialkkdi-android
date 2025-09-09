@@ -116,7 +116,7 @@ const UserRegister = ({ navigation }) => {
       if (result?.success || result?.message?.includes('OTP')) {
         Alert.alert('Success', 'OTP sent to your email');
         console.log('➡️ Navigating to VerifyOtp screen with email:', email);
-        navigation.navigate('VerifyOtp', { email });
+        navigation.navigate('VerifyOtp', { email, type });
       } else {
         Alert.alert('Signup Failed', result?.message || 'Unknown error');
       }

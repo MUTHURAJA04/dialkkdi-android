@@ -142,7 +142,7 @@ export const verifyOtpAndCreateAccount = async (email, otp, type) => {
   try {
     console.log(type);
 
-    if (type = 'business') {
+    if (type == 'business') {
       const response = await apiClient.post('/business/verifyOtpAndCreateBusiness', {
         email,
         otp,
@@ -844,6 +844,7 @@ export const civicLikeUnlike = async (postId) => {
 
     // Get user data from AsyncStorage
     const userDataString = await AsyncStorage.getItem("userData");
+    const businessDataString = await AsyncStorage.getItem("businessData");
     console.log('[civicLikeUnlike API] 📦 Raw user data from storage:', userDataString);
 
     if (!userDataString) {
@@ -852,11 +853,18 @@ export const civicLikeUnlike = async (postId) => {
     }
 
     const userData = JSON.parse(userDataString);
+    const businessData = JSON.parse(businessDataString);
+
     console.log('[civicLikeUnlike API] 👤 Parsed user data:', userData);
 
-    // Check for user ID - try different possible properties
-    const userId = userData._id || userData.id || userData.userId;
-    const userType = "User";
+    const usertoken = await AsyncStorage.getItem("userToken");
+    const businesstoken = await AsyncStorage.getItem("businessToken");
+
+    const token = businesstoken ? businesstoken : usertoken
+
+    const userId = businessData ? businessData._id || businessData.id : userData._id || userData.id || userData.userId;
+    const userType = businesstoken ? "Business" : "User";
+
 
     console.log('[civicLikeUnlike API] 🔍 Extracted user info:', { userId, userType });
 
@@ -872,7 +880,13 @@ export const civicLikeUnlike = async (postId) => {
 
     console.log('[civicLikeUnlike API] 📤 Sending payload:', payload);
 
-    const res = await apiClient.patch(`/civicfeeds/${postId}/like`, payload);
+    const res = await apiClient.patch(`/civicfeeds/${postId}/like`, payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     console.log(`[civicLikeUnlike API] ✅ Post ${postId} toggled like:`, res.data);
     return res.data;
   } catch (error) {

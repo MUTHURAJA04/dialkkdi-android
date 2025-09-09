@@ -21,9 +21,10 @@ const VerifyOtp = () => {
       console.log('📡 Sending OTP verification:', { email, otp, type });
       const response = await verifyOtpAndCreateAccount(email, otp, type);
       console.log('✅ OTP Verified:', response);
+      console.log(type, "Type verify OTP");
 
       Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Login');
+      navigation.navigate('Login', { type });
     } catch (error) {
       console.error('❌ OTP Verification Failed:', error.response?.data || error.message);
       Alert.alert('Verification Failed', error.response?.data?.message || 'Invalid OTP');
