@@ -126,7 +126,7 @@ const Profile = ({ navigation }) => {
 
   return (
     <SafeAreaView className={`flex-1 pt-5 relative ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-      
+
       <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={isDarkMode ? "#0f172a" : "#f8fafc"}
@@ -204,15 +204,20 @@ const Profile = ({ navigation }) => {
         {activeTab === "favourites" ? (
           <FlatList
             data={favourites}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={renderFavouriteCard}
             showsVerticalScrollIndicator={false}
-            className='px-4'
+            className="px-4"
+            ListEmptyComponent={
+              <View className="items-center justify-center py-10">
+                <Text className="text-gray-600 text-lg">No Favourites...</Text>
+              </View>
+            }
           />
         ) : (
           <CivicCrud />
         )}
-      </View>
+      </View> 
 
       {/* Logout Button */}
       <View className="px-6 pb-6">

@@ -21,9 +21,8 @@ const BusinessStep3 = () => {
 
   const route = useRoute();
   const { formData } = route.params;
-  console.log(formData, "2 nd businessssss");
 
-
+  const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [photos, setPhotos] = useState([]);
@@ -71,6 +70,8 @@ const BusinessStep3 = () => {
     }
 
     try {
+
+      setLoading(true)
       const form = new FormData();
 
       // Append all fields from formData
@@ -98,7 +99,6 @@ const BusinessStep3 = () => {
       const type = 'business'
       const email = formData.email
 
-      console.log('✅ Registration Response:', response, email);
 
       Alert.alert('Success', 'Registration complete!');
       navigation.navigate('VerifyOtp', { email, type });
@@ -109,6 +109,8 @@ const BusinessStep3 = () => {
         details: error.response?.data,
       });
       Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -394,7 +396,14 @@ const BusinessStep3 = () => {
             disabled={!password || !confirmPassword || !agreed}
             className={`px-6 py-3 rounded-lg ${!password || !confirmPassword || !agreed ? 'bg-orange-300' : 'bg-orange-500'}`}
           >
-            <Text className="text-white font-semibold">Register</Text>
+            {
+              loading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text className="text-white font-semibold">Register</Text>
+              )
+            }
+
           </TouchableOpacity>
         </View>
 

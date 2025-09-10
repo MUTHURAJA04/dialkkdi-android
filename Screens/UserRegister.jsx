@@ -8,6 +8,7 @@ import {
   Pressable,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Input from '../components/CustomInput';
 import { signupUser } from '../services/apiClient';
@@ -21,6 +22,7 @@ const UserRegister = ({ navigation }) => {
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
 
 
   const type = 'user'
@@ -33,7 +35,6 @@ const UserRegister = ({ navigation }) => {
 
   /** ✅ Handle Register */
   const handleRegister = async () => {
-    console.log('🔹 [START] handleRegister triggered');
 
 
     if (!name && !email && !phone && !password && !confirmPassword) {
@@ -102,20 +103,16 @@ const UserRegister = ({ navigation }) => {
     }
 
     try {
-      console.log('📡 [REQUEST] Sending signup payload:', {
-        name,
-        email,
-        phone,
-        password,
-      });
+   
+
+      setLoading(true);
 
       const result = await signupUser(name, email, phone, password);
 
-      console.log('✅ [RESPONSE] Signup:', result);
+   
 
       if (result?.success || result?.message?.includes('OTP')) {
         Alert.alert('Success', 'OTP sent to your email');
-        console.log('➡️ Navigating to VerifyOtp screen with email:', email);
         navigation.navigate('VerifyOtp', { email, type });
       } else {
         Alert.alert('Signup Failed', result?.message || 'Unknown error');
@@ -123,6 +120,8 @@ const UserRegister = ({ navigation }) => {
     } catch (error) {
       console.error('❌ [ERROR] Signup failed:', error.response?.data || error.message);
       Alert.alert('Signup Failed', error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -223,10 +222,15 @@ const UserRegister = ({ navigation }) => {
 
       {/* Register Button */}
       <TouchableOpacity
-        className="bg-orange-500 py-3 rounded-md mb-4 w-full"
+        className={` py-3 rounded-md mb-4 w-full ${loading ? "bg-orange-400" : "bg-orange-500"}`}
         onPress={handleRegister}
+        disabled={loading}
       >
-        <Text className="text-center text-white font-semibold">REGISTER</Text>
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          <Text className="text-center text-white font-semibold">REGISTER</Text>
+        )}
       </TouchableOpacity>
 
       {/* Login Link */}
@@ -309,7 +313,7 @@ const UserRegister = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </ScrollView >
 
 
   );

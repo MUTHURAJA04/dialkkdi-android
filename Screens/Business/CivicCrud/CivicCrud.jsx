@@ -47,7 +47,7 @@ export default function CivicCrud() {
                 setUserType("guest");
             }
         } catch (e) {
-            console.log("Error reading userType:", e);
+            console.error("Error reading userType:", e);
         }
     };
 
@@ -56,9 +56,7 @@ export default function CivicCrud() {
         try {
             const fetchCivicPosts = await civicFeedUser();
             setPosts(fetchCivicPosts);
-            console.log(fetchCivicPosts, "12344");
         } catch (error) {
-            console.log(error);
             Alert.alert("Error", "Failed to load civic posts.");
         } finally {
             setLoadingPosts(false); // Set loading to false after fetching (success or error)
@@ -174,6 +172,8 @@ export default function CivicCrud() {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-200">
+
+
             {/* Create Post Button (visible when form is closed) */}
             {!openForm && (
                 <View className="flex-row justify-end p-4">
@@ -272,73 +272,79 @@ export default function CivicCrud() {
             {loadingPosts ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color="#0000ff" />
-                    <Text className="mt-2 text-gray-600">Loading civic posts from Karaikudi...</Text>
+                    <Text className="mt-2 text-gray-600">Loading civic posts ...</Text>
                 </View>
             ) : (
-                <FlatList
-                    data={posts}
-                    keyExtractor={(item, index) =>
-                        item?._id?.toString() || item?.id?.toString() || index.toString()
-                    }
-                    contentContainerStyle={{ padding: 16 }}
-                    renderItem={({ item }) => (
-                        <View className="bg-white rounded mb-6 shadow-xl overflow-hidden">
-                            <View className="relative">
-                                {item?.imageUrl ? (
-                                    <Image
-                                        source={{ uri: getImageUrl(item?.imageUrl) }}
-                                        className="w-full h-56"
-                                        resizeMode="cover"
-                                    />
-                                ) : (
-                                    <View className="w-full h-56 bg-gray-100 items-center justify-center">
-                                        <Text className="text-gray-400 italic">No Image</Text>
+
+                (!posts || posts.length === 0) ? (
+                    <View>
+                        <Text className="mt-2 text-lg text-center text-gray-600">No civic posts..</Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={posts}
+                        keyExtractor={(item, index) =>
+                            item?._id?.toString() || item?.id?.toString() || index.toString()
+                        }
+                        contentContainerStyle={{ padding: 16 }}
+                        renderItem={({ item }) => (
+                            <View className="bg-white rounded mb-6 shadow-xl overflow-hidden">
+                                <View className="relative">
+                                    {item?.imageUrl ? (
+                                        <Image
+                                            source={{ uri: getImageUrl(item?.imageUrl) }}
+                                            className="w-full h-56"
+                                            resizeMode="cover"
+                                        />
+                                    ) : (
+                                        <View className="w-full h-56 bg-gray-100 items-center justify-center">
+                                            <Text className="text-gray-400 italic">No Image</Text>
+                                        </View>
+                                    )}
+
+                                    <View className="absolute top-3 right-3">
+                                        <Text
+                                            className={`px-3 py-1 rounded-full text-xs font-bold shadow-md ${item?.status === "approved"
+                                                ? "bg-green-500 text-white"
+                                                : item?.status === "rejected"
+                                                    ? "bg-red-500 text-white"
+                                                    : "bg-yellow-500 text-white"
+                                                }`}
+                                        >
+                                            {item?.status?.toUpperCase()}
+                                        </Text>
                                     </View>
-                                )}
+                                </View>
 
-                                <View className="absolute top-3 right-3">
-                                    <Text
-                                        className={`px-3 py-1 rounded-full text-xs font-bold shadow-md ${item?.status === "approved"
-                                            ? "bg-green-500 text-white"
-                                            : item?.status === "rejected"
-                                                ? "bg-red-500 text-white"
-                                                : "bg-yellow-500 text-white"
-                                            }`}
-                                    >
-                                        {item?.status?.toUpperCase()}
+                                <View className="p-5">
+                                    <Text className="text-xl font-bold text-gray-800 mb-2">
+                                        {item?.title}
                                     </Text>
+
+                                    <Text className="text-gray-600 text-sm leading-relaxed mb-4">
+                                        {item?.description}
+                                    </Text>
+
+                                    <View className="flex-row justify-between">
+                                        <TouchableOpacity
+                                            className="flex-row items-center bg-gray-100 px-4 py-2 rounded"
+                                            onPress={() => handleEdit(item)}
+                                        >
+                                            <Text className="text-gray-700 font-semibold"> Edit</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            className="flex-row items-center bg-red-500 px-4 py-2 rounded"
+                                            onPress={() => setConfirmDelete(item._id)}
+                                        >
+                                            <Text className="text-white font-semibold"> Delete</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-
-                            <View className="p-5">
-                                <Text className="text-xl font-bold text-gray-800 mb-2">
-                                    {item?.title}
-                                </Text>
-
-                                <Text className="text-gray-600 text-sm leading-relaxed mb-4">
-                                    {item?.description}
-                                </Text>
-
-                                <View className="flex-row justify-between">
-                                    <TouchableOpacity
-                                        className="flex-row items-center bg-gray-100 px-4 py-2 rounded"
-                                        onPress={() => handleEdit(item)}
-                                    >
-                                        <Text className="text-gray-700 font-semibold"> Edit</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        className="flex-row items-center bg-red-500 px-4 py-2 rounded"
-                                        onPress={() => setConfirmDelete(item._id)}
-                                    >
-                                        <Text className="text-white font-semibold"> Delete</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-                    )}
-                />
-
+                        )}
+                    />
+                )
             )}
 
 

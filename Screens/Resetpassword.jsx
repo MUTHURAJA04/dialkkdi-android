@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StatusBar, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { resetPassword } from '../../api/authService';
+import { ActivityIndicator } from 'react-native/types_generated/index';
 
 const ResetPassword = ({ route }) => {
   const { email, otp } = route.params || {}; // ✅ Email & OTP passed from VerifyOtp (Forgot)
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false)
   const navigation = useNavigation();
 
   const handleResetPassword = async () => {
@@ -20,15 +22,16 @@ const ResetPassword = ({ route }) => {
     }
 
     try {
-      console.log('📡 Sending reset password request:', { email, newPassword, confirmPassword, otp });
+      setLoading(true)
       const response = await resetPassword(email, newPassword, confirmPassword, otp);
-      console.log('✅ Password Reset Success:', response.data);
 
       Alert.alert('Success', 'Password has been reset successfully!');
       navigation.navigate('Login');
     } catch (error) {
       console.error('❌ Password Reset Failed:', error.response?.data || error.message);
       Alert.alert('Reset Failed', error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -62,13 +65,21 @@ const ResetPassword = ({ route }) => {
 
           <TouchableOpacity
             onPress={handleResetPassword}
-            className="bg-orange-600 p-4 rounded-lg"
+            className={` p-4 rounded-lg ${loading ? "bg-orange-400" : "bg-orange-500"}`}
+            disabled={loading}
           >
-            <Text className="text-white text-center font-semibold">Reset Password</Text>
+            {
+              loading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text className="text-white text-center font-semibold">Reset Password</Text>
+              )
+            }
+
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 

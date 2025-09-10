@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StatusBar, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StatusBar, SafeAreaView, ActivityIndicatorBase, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { resendRegisterOtp, verifyOtpAndCreateAccount } from '../services/apiClient';
 
@@ -8,6 +8,7 @@ const VerifyOtp = () => {
   const route = useRoute();
   const { email, type } = route.params;
   const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false)
   const navigation = useNavigation();
 
   /** ✅ Handle OTP Verification */
@@ -18,30 +19,31 @@ const VerifyOtp = () => {
     }
 
     try {
-      console.log('📡 Sending OTP verification:', { email, otp, type });
+      setLoading(true)
       const response = await verifyOtpAndCreateAccount(email, otp, type);
-      console.log('✅ OTP Verified:', response);
-      console.log(type, "Type verify OTP");
 
       Alert.alert('Success', 'Account created successfully!');
       navigation.navigate('Login', { type });
     } catch (error) {
       console.error('❌ OTP Verification Failed:', error.response?.data || error.message);
       Alert.alert('Verification Failed', error.response?.data?.message || 'Invalid OTP');
+    } finally {
+      setLoading(false)
     }
   };
 
   /** ✅ Handle Resend OTP */
   const handleResendOtp = async () => {
     try {
-      console.log('📡 Resending OTP to:', email);
+      setLoading(true)
       const response = await resendRegisterOtp(email, type);
-      console.log('✅ OTP Resent:', response);
 
       Alert.alert('Success', 'A new OTP has been sent to your email.');
     } catch (error) {
       console.error('❌ Resend OTP Failed:', error.response?.data || error.message);
       Alert.alert('Failed', error.response?.data?.message || 'Unable to resend OTP');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -63,6 +65,7 @@ const VerifyOtp = () => {
       {/* ✅ Verify OTP Button */}
       <TouchableOpacity
         onPress={handleVerifyOtp}
+        disabled={loading}
         className="bg-orange-600 p-4 rounded-lg w-full mb-3"
       >
         <Text className="text-white text-center font-semibold">Verify</Text>
@@ -71,9 +74,17 @@ const VerifyOtp = () => {
       {/* ✅ Resend OTP Button */}
       <TouchableOpacity
         onPress={handleResendOtp}
+        disabled={loading}
         className="bg-gray-300 p-4 rounded-lg w-full"
       >
-        <Text className="text-black text-center font-semibold">Resend OTP</Text>
+        {
+          loading ? (
+            <ActivityIndicator />
+          ) : (
+            <Text className="text-black text-center font-semibold">Resend OTP</Text>
+          )
+        }
+
       </TouchableOpacity>
     </SafeAreaView>
   );

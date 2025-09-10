@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Alert,
   BackHandler,
+  ActivityIndicator,
 } from 'react-native';
 import { X } from 'react-native-feather';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -24,26 +25,23 @@ const Login = ({ route }) => {
   const { type } = route.params;
   const title = type === 'business' ? 'Business Login' : 'User Login';
 
-  console.log(type);
-
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [googleloading, setGoogleloading] = useState(false)
 
   /** ✅ Handle Google Login */
   const handleGoogleLogin = async () => {
     try {
-      console.log('🟢 Starting Google login process...');
+      setGoogleloading(true)
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      console.log('✅ Google user info:', userInfo);
 
       const idToken = userInfo.data.idToken;
       const result = await googleSSOLogin(idToken);
 
       if (result?.token) {
-        console.log('🎉 Google login success:', result);
         Alert.alert('Welcome!', `Logged in as ${result.user.name}`);
         navigation.navigate('Home');
       } else {
@@ -62,6 +60,8 @@ const Login = ({ route }) => {
       } else {
         Alert.alert('Something went wrong', error.message || 'Unknown error');
       }
+    } finally {
+      setGoogleloading(false)
     }
   };
 
@@ -71,7 +71,6 @@ const Login = ({ route }) => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
-
     }
 
     const emailRegex = /^(?!\.)(?!.*\.\.)(?!.*\.\@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.com$/;
@@ -89,16 +88,15 @@ const Login = ({ route }) => {
 
 
     try {
-      console.log(' Calling login API with:', { email, password });
+      setLoading(true);
+
       const result = await loginWithEmail(email, password, type);
 
       if (result?.token) {
         if (type == 'user') {
-          console.log(' Email login success:', result);
           Alert.alert('Welcome!', `Logged in as ${result.name} `);
           navigation.navigate('Home');
         } else {
-          console.log(' Email login success:', result);
           Alert.alert('Welcome!', `Logged in as ${result?.business?.name} `);
           navigation.navigate('BusinessLanding');
         }
@@ -106,9 +104,12 @@ const Login = ({ route }) => {
         console.warn(' Login failed:', result?.message);
         Alert.alert('Login Failed', result?.message || 'Invalid credentials');
       }
+
     } catch (error) {
       console.error(' Email Login Error:', error);
       Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -165,10 +166,15 @@ const Login = ({ route }) => {
 
             {/* ✅ Email Login Button */}
             <TouchableOpacity
-              className="bg-orange-500 px-6 py-3 rounded-lg w-full mb-4"
+              className={`px-6 py-3 rounded-lg w-full mb-4 ${loading ? "bg-orange-400" : "bg-orange-500"}`}
               onPress={handleEmailLogin}
+              disabled={loading}
             >
-              <Text className="text-white text-center text-base font-semibold">Login</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white text-center text-base font-semibold">Login</Text>
+              )}
             </TouchableOpacity>
 
             {/* Conditional Google SSO for User Login */}
@@ -182,11 +188,19 @@ const Login = ({ route }) => {
 
                 <TouchableOpacity
                   onPress={handleGoogleLogin}
+                  disabled={googleloading}
                   className="flex-row items-center justify-center border border-gray-300 px-6 py-3 rounded-lg w-full bg-white"
                 >
-                  <Text className="text-center text-base font-semibold text-gray-700">
-                    Continue with Google
-                  </Text>
+                  {
+                    googleloading ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text className="text-center text-base font-semibold text-gray-700">
+                        Continue with Google
+                      </Text>
+                    )
+                  }
+
                 </TouchableOpacity>
               </View>
             )}

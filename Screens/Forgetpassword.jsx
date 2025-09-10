@@ -10,6 +10,7 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import apiClient from '../services/apiClient';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -26,6 +27,7 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false)
 
   /** ✅ Send OTP */
   const handleSendOTP = async () => {
@@ -34,13 +36,12 @@ const ForgotPassword = () => {
       return;
     }
     try {
+      setLoading(true)
       if (type === 'business') {
-        console.log('📡 Sending OTP to:', email);
         const res = await apiClient.post('/business/forgotpassword', { email, type });
         Alert.alert('Success', res.data.message || 'OTP sent successfully');
         setStep(2);
       } else {
-        console.log('📡 Sending OTP to:', email);
         const res = await apiClient.post('/user/forgotpassword', { email, type });
         Alert.alert('Success', res.data.message || 'OTP sent successfully');
         setStep(2);
@@ -48,6 +49,8 @@ const ForgotPassword = () => {
     } catch (err) {
       console.error('❌ Send OTP Error:', err.response?.data);
       Alert.alert('Error', err.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -58,16 +61,13 @@ const ForgotPassword = () => {
       return;
     }
     try {
+      setLoading(true)
       if (type === 'business') {
-        console.log('📡 Verifying OTP:', otp);
         const res = await apiClient.post('/business/verifyotp', { email, otp });
-        console.log('✅ OTP verified successfully:', res.data);
         Alert.alert('Success', res.data.message || 'OTP verified');
         setStep(3);
       } else {
-        console.log('📡 Verifying OTP:', otp);
         const res = await apiClient.post('/user/verifyotp', { email, otp });
-        console.log('✅ OTP verified successfully:', res.data);
         Alert.alert('Success', res.data.message || 'OTP verified');
         setStep(3);
       }
@@ -75,6 +75,8 @@ const ForgotPassword = () => {
     } catch (err) {
       console.error('❌ Verify OTP Error:', err.response?.data);
       Alert.alert('Error', err.response?.data?.message || 'OTP verification failed');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -89,27 +91,24 @@ const ForgotPassword = () => {
       return;
     }
     try {
+      setLoading(true)
       if (type === 'business') {
-        console.log('📡 Resetting password...');
         const res = await apiClient.post('/business/resetpassword', {
           email,
           newPassword,
           confirmPassword,
           otp,
         });
-        console.log('✅ Password reset successful:', res.data);
         Alert.alert('Success', res.data.message || 'Password has been reset', [
           { text: 'OK', onPress: () => navigation.navigate('Login', { type }) },
         ]);
       } else {
-        console.log('📡 Resetting password...');
         const res = await apiClient.post('/user/resetpassword', {
           email,
           newPassword,
           confirmPassword,
           otp,
         });
-        console.log('✅ Password reset successful:', res.data);
         Alert.alert('Success', res.data.message || 'Password has been reset', [
           { text: 'OK', onPress: () => navigation.navigate('Login', { type }) },
         ]);
@@ -118,6 +117,8 @@ const ForgotPassword = () => {
     } catch (err) {
       console.error('❌ Reset Password Error:', err.response?.data);
       Alert.alert('Error', err.response?.data?.message || 'Failed to reset password');
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -241,9 +242,17 @@ const ForgotPassword = () => {
                 />
                 <TouchableOpacity
                   onPress={handleSendOTP}
+                  disabled={loading}
                   className="bg-orange-600 p-4 rounded-lg w-full"
                 >
-                  <Text className="text-white text-center font-semibold">Send OTP</Text>
+                  {
+                    loading ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text className="text-white text-center font-semibold">Send OTP</Text>
+                    )
+                  }
+
                 </TouchableOpacity>
               </>
             )}
@@ -262,9 +271,17 @@ const ForgotPassword = () => {
                 />
                 <TouchableOpacity
                   onPress={handleVerifyOTP}
+                  disabled={loading}
                   className="bg-orange-600 p-4 rounded-lg w-full"
                 >
-                  <Text className="text-white text-center font-semibold">Verify OTP</Text>
+                  {
+                    loading ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text className="text-white text-center font-semibold">Verify OTP</Text>
+                    )
+                  }
+
                 </TouchableOpacity>
               </>
             )}
@@ -303,9 +320,16 @@ const ForgotPassword = () => {
                 />
                 <TouchableOpacity
                   onPress={handleResetPassword}
+                  disabled={loading}
                   className="bg-orange-600 p-4 rounded-lg w-full"
                 >
-                  <Text className="text-white text-center font-semibold">Reset Password</Text>
+                  {
+                    loading ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text className="text-white text-center font-semibold">Reset Password</Text>
+                    )
+                  }
                 </TouchableOpacity>
               </>
             )}
