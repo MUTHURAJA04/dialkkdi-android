@@ -29,15 +29,12 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
     // Initialize form when modal opens or business changes
     useEffect(() => {
-        console.log('🔄 [BusinessEditModal] useEffect triggered:', { visible, hasBusiness: !!business });
-        
+
         if (visible && business) {
-            console.log('📥 [BusinessEditModal] Business data received:', business);
-            console.log('📥 [BusinessEditModal] Contact details:', business.contactDetails);
-            console.log('📥 [BusinessEditModal] Address details:', business.address);
-            
+
+
             setOriginalBusiness(business);
-            
+
             const newForm = {
                 businessName: business.businessName || "",
                 description: business.description || "",
@@ -50,8 +47,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                 area: business.address?.area?._id || "",
                 pincode: business.address?.pincode || "",
             };
-            
-            console.log('📝 [BusinessEditModal] Form initialized with:', newForm);
+
             setForm(newForm);
         }
     }, [visible, business]);
@@ -63,14 +59,11 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
     // Load areas when city changes
     useEffect(() => {
-        console.log('🏙️ [BusinessEditModal] City changed:', form.city);
         // Reset area selection on city change
         setForm(prev => ({ ...prev, area: "" }));
         if (form.city) {
-            console.log('📩 [BusinessEditModal] Loading areas for city:', form.city);
             loadAreas(form.city);
         } else {
-            console.log('🧹 [BusinessEditModal] City cleared, resetting areas');
             setAreas([]);
         }
     }, [form.city]);
@@ -86,11 +79,8 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
 
     const loadAreas = async (cityId) => {
         try {
-            console.log('📡 [BusinessEditModal] getArea request cityId:', cityId);
             const areaData = await getArea(cityId);
-            console.log('📥 [BusinessEditModal] getArea response:', areaData);
             const parsed = Array.isArray(areaData?.data) ? areaData.data : (Array.isArray(areaData) ? areaData : []);
-            console.log('🧮 [BusinessEditModal] Areas parsed length:', parsed.length);
             setAreas(parsed);
         } catch (error) {
             console.error("Failed to load areas:", error);
@@ -101,18 +91,13 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
     useEffect(() => {
         if (form.city && areas.length > 0 && !form.area) {
             const first = `${areas[0]._id || areas[0].id}`;
-            console.log('✅ [BusinessEditModal] Defaulting area to first item:', first);
             setForm(prev => ({ ...prev, area: first }));
         }
     }, [areas, form.city]);
 
-    // Log area changes
-    useEffect(() => {
-        console.log('📌 [BusinessEditModal] form.area changed to:', form.area);
-    }, [form.area]);
+
 
     const handleChange = (field, value) => {
-        console.log(`🔄 [BusinessEditModal] handleChange: ${field} = "${value}"`);
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
@@ -130,7 +115,6 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                 area: originalBusiness.address?.area?._id || "",
                 pincode: originalBusiness.address?.pincode || "",
             };
-            console.log('🔄 [BusinessEditModal] Resetting form to:', resetForm);
             setForm(resetForm);
         }
         onClose();
@@ -226,17 +210,15 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                 },
             };
 
-            console.log('📤 [BusinessEditModal] Submitting payload:', payload);
             const response = await editBusiness(payload);
-            
+
             if (response.success) {
-                console.log('✅ [BusinessEditModal] Business updated successfully');
-                
+
                 // Call the callback to refresh parent component
                 if (onBusinessUpdated) {
                     await onBusinessUpdated();
                 }
-                
+
                 Alert.alert(
                     "Success!",
                     "Business details updated successfully!",
@@ -252,10 +234,6 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
             setIsSubmitting(false);
         }
     };
-
-    // Debug: Log current form state
-    console.log('🔍 [BusinessEditModal] Current form state:', form);
-    console.log('🔍 [BusinessEditModal] Business prop:', business);
 
     if (!visible) return null;
 
@@ -279,7 +257,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                 Edit Business Details
                             </Text>
                         </View>
-                       
+
                     </View>
 
                     {/* Form Content */}
@@ -434,13 +412,15 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                 <View className="border border-gray-300 rounded-xl bg-gray-50 overflow-hidden">
                                     <Picker
                                         selectedValue={form.city || ""}
-                                        onValueChange={(value, index) => { console.log('🛎️ [BusinessEditModal] City Picker changed:', value, 'at index', index); handleChange("city", value); }}
+                                        onValueChange={(value, index) => {
+                                            handleChange("city", value);
+                                        }}
                                         style={{
                                             color: "#374151",
                                             fontSize: 16,
                                             height: Platform.OS === "ios" ? 200 : 50,
                                         }}
-                
+
                                     >
                                         <Picker.Item label="Select a city" value="" enabled={false} />
                                         {cities.map((city) => (
@@ -466,14 +446,17 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                     <Picker
                                         key={form.city || 'no-city'}
                                         selectedValue={`${form.area || ""}`}
-                                        onValueChange={(value, index) => { const v = `${value}`; console.log('🛎️ [BusinessEditModal] Area Picker changed:', v, 'at index', index); handleChange("area", v); }}
+                                        onValueChange={(value, index) => {
+                                            const v = `${value}`;
+                                            handleChange("area", v);
+                                        }}
                                         enabled={!!form.city}
                                         style={{
                                             color: "#374151",
                                             fontSize: 16,
                                             height: Platform.OS === "ios" ? 200 : 50,
                                         }}
-                                       
+
                                     >
                                         <Picker.Item
                                             label={form.city ? "Select an area" : "Select a city first"}
@@ -527,7 +510,7 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                                         Cancel
                                     </Text>
                                 </TouchableOpacity>
-                                
+
                                 <TouchableOpacity
                                     onPress={handleSubmit}
                                     className="flex-1 bg-blue-500 rounded-xl py-4 items-center"

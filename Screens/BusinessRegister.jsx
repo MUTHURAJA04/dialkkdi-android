@@ -101,7 +101,6 @@ const BusinessRegister = () => {
       categories: selected,
     };
 
-    console.log('Form Data:', formData);
     navigation.navigate('BusinessStep2', { formData });
   };
 
@@ -111,7 +110,6 @@ const BusinessRegister = () => {
     const fetchCategories = async () => {
       try {
         const response = await getCategories();
-        console.log('Full API response:', response);
         setCategories(response || []);
       } catch (error) {
         console.error('Error fetching categories:', error);

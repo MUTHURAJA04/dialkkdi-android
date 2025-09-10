@@ -27,7 +27,6 @@ const BusinessDetailScreen = () => {
   const route = useRoute();
   const { business } = route.params;
 
-  console.log(business, "get business");
 
   const [businessData, setBusinessData] = useState(business);
   const [loading, setLoading] = useState(true);
@@ -73,7 +72,6 @@ const BusinessDetailScreen = () => {
       try {
         const status = await checkFavoriteStatus(businessData._id);
         setIsFavourite(status.favourited);
-        console.log(status, "14254125");
 
       } catch (error) {
         console.error("❌ Failed to check favorite status:", error);
@@ -183,9 +181,7 @@ const BusinessDetailScreen = () => {
 
   const handleReviewSubmit = async (newReview) => {
     try {
-      console.log("first dataaaaaaa", newReview);
 
-      // 🔁 Send review to API
       const response = await review(businessData._id, {
         rating: newReview.rating,
         comment: newReview.comment,
@@ -193,9 +189,7 @@ const BusinessDetailScreen = () => {
         reviewId: newReview.reviewId
       });
 
-      console.log('✅ Review submitted to server:', response);
 
-      // ✅ Fetch updated business details after review
       const updated = await getBusinessById(businessData._id);
       if (updated.success) {
         setBusinessData({

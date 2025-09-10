@@ -28,7 +28,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
   // Defensive check - if item is undefined, don't render
   if (!item || !item._id) {
-    console.log('[PostItem] ⚠️ Item is undefined or missing _id, skipping render');
     return null;
   }
 
@@ -153,7 +152,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       const storedState = parsedStates[postId];
 
       if (storedState) {
-        console.log(`[PostItem] 📖 Using stored like state for post ${postId}:`, storedState);
         return {
           isLiked: storedState.isLiked,
           likesCount: storedState.likesCount
@@ -161,7 +159,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       }
 
       // Fallback to API data
-      console.log(`[PostItem] ℹ️ No stored state, using API data for post ${postId}`);
       return {
         isLiked: isLikedByCurrentUser(),
         likesCount: item.likesCount || (item.likes && Array.isArray(item.likes) ? item.likes.length : 0) || 0
@@ -186,7 +183,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     const updateFinalLikeState = async () => {
       const state = await getFinalLikeState();
       setFinalLikeState(state);
-      console.log(`[PostItem] 🔄 Updated final like state for post ${postId}:`, state);
     };
 
     updateFinalLikeState();
@@ -200,7 +196,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     const loadUserAndCheckLikes = async () => {
       const userId = await getCurrentUserId();
       if (userId) {
-        console.log(`[PostItem] 👤 Current user loaded: ${userId}`);
 
         // Check for stored like state for this post
         try {
@@ -209,31 +204,18 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           const storedState = parsedStates[postId];
 
           if (storedState) {
-            console.log(`[PostItem] 📖 Found stored like state for post ${postId}:`, storedState);
             // Force re-render with stored state
-            console.log(`[PostItem] 🔄 Stored state indicates user ${storedState.isLiked ? 'liked' : 'did not like'} this post`);
           }
         } catch (error) {
           console.error(`[PostItem] ❌ Error checking stored like state:`, error);
         }
 
         // Force re-evaluation of like state after user ID is loaded
-        console.log(`[PostItem] 🔄 Re-evaluating like state for user: ${userId}`);
       }
     };
     loadUserAndCheckLikes();
   }, [getCurrentUserId, postId]);
 
-  console.log(`[PostItem] 📊 Post ${postId} final state:`, {
-    isLiked,
-    likesCount,
-    currentUserId,
-    likesArray: item.likes,
-    originalIsLiked: item.isLiked,
-    originalLikesCount: item.likesCount,
-    heartWillFill: isLiked ? 'YES (current user liked)' : 'NO (current user did not like)',
-    persistenceCheck: `User ID: ${currentUserId}, Likes Array: ${item.likes?.length || 0} items, IsLiked Property: ${item.isLiked}`
-  });
 
   // Check if user is authenticated
   const checkAuthentication = useCallback(async () => {
@@ -242,7 +224,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       const userToken = await AsyncStorage.getItem('userToken');
 
       if (!userData || !userToken) {
-        console.log('[PostItem] ⚠️ User not authenticated');
         return false;
       }
 
@@ -250,11 +231,9 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       const userId = parsedUserData._id || parsedUserData.id || parsedUserData.userId;
 
       if (!userId) {
-        console.log('[PostItem] ⚠️ No user ID found in user data');
         return false;
       }
 
-      console.log('[PostItem] ✅ User authenticated:', userId);
       return true;
     } catch (error) {
       console.error('[PostItem] ❌ Error checking authentication:', error);
@@ -294,7 +273,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     const DOUBLE_PRESS_DELAY = 300;
 
     if (lastTapRef.current && (now - lastTapRef.current) < DOUBLE_PRESS_DELAY) {
-      console.log(`[PostItem] ❤️ Double tapped post: ${postId}, current like state:`, isLiked);
 
       // Always show heart animation on double-tap
       triggerHeartAnimation();
@@ -309,29 +287,18 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       // Double-tap only likes, never unlikes
       if (!isLiked) {
         try {
-          console.log(`[PostItem] 📡 Calling DialogramLike API for post: ${postId}`);
           const response = await DialogramLike(postId);
-          console.log(`[PostItem] ✅ Double-tap like API response:`, response);
 
           // Update the like state based on API response message
           let newLikesCount;
 
           if (response.message === 'Liked') {
             newLikesCount = likesCount + 1;
-            console.log(`[PostItem] 🔄 Double-tap post was liked:`, { newLikesCount });
           } else {
             // Fallback: increment like count
             newLikesCount = likesCount + 1;
-            console.log(`[PostItem] 🔄 Double-tap using fallback:`, { newLikesCount });
           }
 
-          console.log(`[PostItem] 🔄 Double-tap liking post:`, {
-            oldState: isLiked,
-            newState: true,
-            oldCount: likesCount,
-            newCount: newLikesCount,
-            apiResponse: response
-          });
 
           onUpdateLike(postId, true, newLikesCount);
 
@@ -344,7 +311,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           }
         }
       } else {
-        console.log(`[PostItem] ℹ️ Post ${postId} is already liked by current user, showing animation only`);
       }
     } else {
       lastTapRef.current = now;
@@ -353,7 +319,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
   // Handle manual like/unlike via heart button
   const handleHeartPress = useCallback(async () => {
-    console.log(`[PostItem] 💖 Heart button pressed for post: ${postId}, current like state:`, isLiked);
 
     // Check authentication first
     const isAuthenticated = await checkAuthentication();
@@ -363,9 +328,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     }
 
     try {
-      console.log(`[PostItem] 📡 Calling DialogramLike API for post: ${postId}`);
       const response = await DialogramLike(postId);
-      console.log(`[PostItem] ✅ Heart button like API response:`, response);
 
       // Determine new like state based on API response message
       let newLikeState;
@@ -374,26 +337,16 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       if (response.message === 'Liked') {
         newLikeState = true;
         newLikesCount = likesCount + 1;
-        console.log(`[PostItem] 🔄 Post was liked:`, { newLikeState, newLikesCount });
       } else if (response.message === 'Unliked') {
         newLikeState = false;
         newLikesCount = Math.max(0, likesCount - 1);
-        console.log(`[PostItem] 🔄 Post was unliked:`, { newLikeState, newLikesCount });
       } else {
         // Fallback: toggle current state
         newLikeState = !isLiked;
         newLikesCount = newLikeState ? likesCount + 1 : Math.max(0, likesCount - 1);
-        console.log(`[PostItem] 🔄 Using fallback toggle:`, { oldState: isLiked, newState: newLikeState, newLikesCount });
       }
 
-      console.log(`[PostItem] 🔄 Heart button updating like state:`, {
-        oldState: isLiked,
-        newState: newLikeState,
-        oldCount: likesCount,
-        newCount: newLikesCount,
-        apiResponse: response,
-        willPersist: newLikeState ? 'YES - Heart will stay filled' : 'NO - Heart will be transparent'
-      });
+
 
       onUpdateLike(postId, newLikeState, newLikesCount);
 
@@ -411,7 +364,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
             if (likeInfoResponse.ok) {
               const likeInfo = await likeInfoResponse.json();
-              console.log(`[PostItem] 🔄 Fresh like info for post ${postId}:`, likeInfo);
               // Update the post with fresh like information
               onUpdateLike(postId, likeInfo.isLiked, likeInfo.likesCount);
             }
@@ -432,12 +384,10 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   }, [postId, isLiked, likesCount, onUpdateLike, checkAuthentication]);
 
   const handleImageLoad = useCallback(() => {
-    console.log(`[PostItem] 🖼️ Image loaded for post: ${postId}`);
     setImageLoading(false);
   }, [postId]);
 
   const handleImageLoadStart = useCallback(() => {
-    console.log(`[PostItem] 🔄 Image loading started for post: ${postId}`);
     setImageLoading(true);
   }, [postId]);
 
@@ -465,9 +415,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       };
       const result = await Share.share(content);
       if (result.action === Share.sharedAction) {
-        console.log(`[PostItem] ✅ Shared post ${postId}`, result.activityType);
       } else if (result.action === Share.dismissedAction) {
-        console.log(`[PostItem] ❎ Share dismissed for post ${postId}`);
       }
     } catch (error) {
       console.error(`[PostItem] ❌ Share failed for post ${postId}:`, error);

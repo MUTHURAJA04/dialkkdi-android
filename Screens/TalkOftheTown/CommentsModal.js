@@ -53,11 +53,8 @@ const CommentsModal = React.memo(({
     try {
       // Import the deleteComment function dynamically
       const { deleteComment: deleteCommentAPI } = await import('../../services/apiClient');
-      
-      console.log('🗑️ Deleting comment:', commentId);
-      
+            
       const response = await deleteCommentAPI(commentId);
-      console.log('✅ Comment deleted successfully:', response);
       
       // Call the callback to refresh comments in parent component
       if (onCommentDeleted) {

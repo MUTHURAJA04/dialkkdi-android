@@ -77,7 +77,6 @@ const Bottom = () => {
   ];
 
   const handlePress = (item) => {
-    console.log(`✅ ${item.screen} clicked`);
     if (item.screen) {
       navigation.navigate(item.screen);
     }

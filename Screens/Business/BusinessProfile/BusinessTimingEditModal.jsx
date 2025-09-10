@@ -29,10 +29,7 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
 
     useEffect(() => {
         if (visible) {
-            console.log('⏰ [BusinessTimingEditModal] Modal opened with timings:', {
-                count: Object.keys(timings).length,
-                openDays: Object.values(timings).filter(t => t.isOpen).length
-            });
+        
             
             // Initialize with default timings if none exist
             const defaultTimings = {};
@@ -48,7 +45,6 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
     }, [visible, timings]);
 
     const handleTimingChange = (day, field, value) => {
-        console.log('🔄 [BusinessTimingEditModal] Timing change:', { day, field, value });
         setLocalTimings(prev => ({
             ...prev,
             [day]: {
@@ -59,16 +55,11 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
     };
 
     const handleSave = async () => {
-        console.log('💾 [BusinessTimingEditModal] Saving timing changes:', {
-            currentCount: Object.keys(timings).length,
-            newCount: Object.keys(localTimings).length,
-            openDays: Object.values(localTimings).filter(t => t.isOpen).length
-        });
+      
 
         setIsSubmitting(true);
         try {
             await onUpdate(localTimings);
-            console.log('✅ [BusinessTimingEditModal] Timings saved successfully');
         } catch (error) {
             console.error('❌ [BusinessTimingEditModal] Failed to save timings:', error);
         } finally {
@@ -77,19 +68,10 @@ const BusinessTimingEditModal = ({ visible, onClose, timings, onUpdate }) => {
     };
 
     const handleClose = () => {
-        console.log('🚪 [BusinessTimingEditModal] Modal closing');
         onClose();
     };
 
     if (!visible) return null;
-
-    console.log('🔍 [BusinessTimingEditModal] Rendering modal with:', {
-        visible,
-        localTimingsCount: Object.keys(localTimings).length,
-        isSubmitting,
-        timingsProp: timings,
-        timingsKeys: Object.keys(timings || {})
-    });
 
     return (
         <Modal

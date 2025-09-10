@@ -37,10 +37,8 @@ const TalkofTown = () => {
   const fetchFeeds = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching feeds from civicFeeds API...');
       
       const response = await civicFeeds();
-      console.log('📡 Raw API response:', response);
       
       // Handle both direct array and nested data responses
       let feedsData = null;
@@ -51,17 +49,11 @@ const TalkofTown = () => {
       }
       
       if (feedsData) {
-        console.log('✅ Feeds fetched successfully:', feedsData);
         
         // Debug: Check comment fields in first post
         if (feedsData.length > 0) {
           const firstPost = feedsData[0];
-          console.log('🔍 Comment fields in first post:', {
-            commentCount: firstPost.commentCount,
-            commentsCount: firstPost.commentsCount,
-            comments: firstPost.comments,
-            commentsLength: firstPost.comments ? firstPost.comments.length : 'no comments array'
-          });
+          
         }
         
         // Map API data to our component format
@@ -79,9 +71,7 @@ const TalkofTown = () => {
         }));
         
         setPosts(mappedPosts);
-        console.log('✅ Posts mapped and set:', mappedPosts);
       } else {
-        console.log('⚠️ No valid data received from API');
         setPosts([]);
       }
     } catch (error) {
@@ -94,7 +84,6 @@ const TalkofTown = () => {
 
   // Handle pull-to-refresh
   const handleRefresh = async () => {
-    console.log('🔄 Pull to refresh triggered');
     await fetchFeeds();
   };
 
@@ -127,20 +116,15 @@ const TalkofTown = () => {
   const fetchComments = async (postId) => {
     try {
       setLoadingComments(true);
-      console.log('🔄 Fetching comments for post:', postId);
       
       const response = await GetComments(postId);
-      console.log('📡 Comments API response:', response);
       
       if (response && Array.isArray(response)) {
         setComments(response);
-        console.log('✅ Comments fetched successfully:', response);
       } else if (response && response.data && Array.isArray(response.data)) {
         setComments(response.data);
-        console.log('✅ Comments fetched successfully (nested):', response.data);
       } else {
         setComments([]);
-        console.log('⚠️ No comments found for post:', postId);
       }
     } catch (error) {
       console.error('❌ Error fetching comments:', error);
@@ -156,11 +140,9 @@ const TalkofTown = () => {
     
     try {
       setSubmittingComment(true);
-      console.log('📝 Submitting comment via civicComments API...');
       
       // Call civicComments API to add the comment
       const response = await civicComments(selectedPost._id, commentText.trim());
-      console.log('✅ Comment submitted successfully:', response);
       
       // Clear the input
       setCommentText('');

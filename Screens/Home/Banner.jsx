@@ -11,7 +11,6 @@ import { getCategories } from '../../services/apiClient';
 const CDN_PREFIX = 'https://livecdn.dialkaraikudi.com';
 
 const Banner = () => {
-  console.log('Banner component rendering');
   const navigation = useNavigation();
 
   const [products, setProducts] = useState([]);
@@ -22,21 +21,15 @@ const Banner = () => {
   const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
-    console.log('useEffect triggered for fetching categories');
     const fetchCategories = async () => {
       try {
-        console.log('Starting to fetch categories...');
         const response = await getCategories();
-        console.log('Raw API response:', response);
 
         const data = Array.isArray(response) ? response : [];
-        console.log('Processed categories data:', data);
 
         const productCategories = data.filter(cat => cat.categoryType === 'product');
         const serviceCategories = data.filter(cat => cat.categoryType === 'service');
 
-        console.log('Product categories:', productCategories);
-        console.log('Service categories:', serviceCategories);
 
         setProducts(productCategories);
         setServices(serviceCategories);
@@ -49,21 +42,18 @@ const Banner = () => {
   }, []);
 
   const handleSeeAll = (items, title) => {
-    console.log(`See all clicked for ${title}`, items);
     setModalContent(items);
     setModalTitle(title);
     setModalVisible(true);
   };
 
   const handleItemPress = (item) => {
-    console.log('Category item pressed:', item);
     setModalVisible(false);
     navigation.navigate('BusinessListScreen', { categoryId: item._id });
   };
 
   const getImageUrl = (url) => {
     if (!url) {
-      console.log('No image URL provided, using placeholder');
       return 'https://via.placeholder.com/100';
     }
     const finalUrl = url.startsWith('http') ? url : `${CDN_PREFIX}/${url}`;
@@ -72,7 +62,6 @@ const Banner = () => {
   };
 
   const renderGridItem = ({ item }) => {
-    console.log('Rendering grid item:', item.displayName);
     return (
       <TouchableOpacity
         className="w-[30%] mb-6 items-center"
@@ -97,7 +86,6 @@ const Banner = () => {
   };
 
   const renderListItem = ({ item }) => {
-    console.log('Rendering list item:', item.displayName);
     return (
       <TouchableOpacity
         className="flex-row items-center py-3 px-4 bg-white mb-2 rounded-lg shadow-sm shadow-gray-200"
@@ -117,14 +105,6 @@ const Banner = () => {
     );
   };
 
-  console.log('Current component state:', {
-    products,
-    services,
-    modalVisible,
-    modalContent,
-    modalTitle,
-    viewMode
-  });
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -136,7 +116,6 @@ const Banner = () => {
             <TouchableOpacity
               className={`p-2 rounded-l-lg ${viewMode === 'grid' ? 'bg-blue-100' : 'bg-gray-100'}`}
               onPress={() => {
-                console.log('Grid view selected');
                 setViewMode('grid');
               }}
             >
@@ -145,7 +124,6 @@ const Banner = () => {
             <TouchableOpacity
               className={`p-2 rounded-r-lg ${viewMode === 'list' ? 'bg-blue-100' : 'bg-gray-100'}`}
               onPress={() => {
-                console.log('List view selected');
                 setViewMode('list');
               }}
             >
@@ -229,7 +207,6 @@ const Banner = () => {
         transparent={false}
         visible={modalVisible}
         onRequestClose={() => {
-          console.log('Modal close requested');
           setModalVisible(false);
         }}
       >

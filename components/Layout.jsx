@@ -4,7 +4,7 @@ import Header from './Header';
 import Bottom from './Bottom';
 
 const Layout = ({ children, showHeader = true, showBottom = true }) => {
-  console.log('Layout rendered');
+
   return (
     <View style={{ flex: 1 }}>
       {showHeader && <Header />}

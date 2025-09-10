@@ -16,7 +16,6 @@ const Categories = () => {
     const fetchCategories = async () => {
       try {
         const response = await getCategories();
-        console.log(response, "successfully ads Categories");
 
         const products = response.filter(
           (product) => product.categoryType === "product"
@@ -28,7 +27,6 @@ const Categories = () => {
         // Pick first 6
         setCat(shuffled.slice(0, 6));
 
-        console.log(shuffled.slice(0, 6), "random 6 Products.......");
       } catch (error) {
         console.error("Error loading user data:", error);
       }

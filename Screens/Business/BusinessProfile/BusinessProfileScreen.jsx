@@ -22,29 +22,21 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     const [showmore, setShowmore] = useState(false);
     const [editVisible, setEditVisible] = useState(false);
     const [currentBusiness, setCurrentBusiness] = useState(businessPanel?.business);
-    
+
     // Images edit state
     const [imagesEditVisible, setImagesEditVisible] = useState(false);
     const [images, setImages] = useState([]);
-    
+
     // Business timing edit state
     const [timingEditVisible, setTimingEditVisible] = useState(false);
     const [businessTimings, setBusinessTimings] = useState({});
 
     // Initialize business data when component mounts or businessPanel changes
     useEffect(() => {
-        console.log('🔄 [BusinessProfileScreen] useEffect triggered:', { 
-            hasBusinessPanel: !!businessPanel, 
-            hasBusiness: !!businessPanel?.business 
-        });
-        
+
+
         if (businessPanel?.business) {
-            console.log('📥 [BusinessProfileScreen] Setting initial business data:', {
-                businessName: businessPanel.business.businessName,
-                photosCount: businessPanel.business.photos?.length || 0,
-                timingsCount: Object.keys(businessPanel.business.businessTimings || {}).length
-            });
-            
+
             setCurrentBusiness(businessPanel.business);
             setImages(businessPanel.business.photos || []);
             setBusinessTimings(businessPanel.business.businessTimings || {});
@@ -54,17 +46,9 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     // Refresh business data after successful edit
     const handleBusinessUpdated = async () => {
         try {
-            console.log('🔄 [BusinessProfileScreen] Refreshing business data...');
             const response = await getbusinessDetails();
-            
+
             if (response.business) {
-                console.log('✅ [BusinessProfileScreen] Business data refreshed successfully:', {
-                    businessName: response.business.businessName,
-                    photosCount: response.business.photos?.length || 0,
-                    timingsCount: Object.keys(response.business.businessTimings || {}).length,
-                    hasWhatsApp: !!response.business.contactDetails?.whatsapp
-                });
-                
                 setCurrentBusiness(response.business);
                 setImages(response.business.photos || []);
                 setBusinessTimings(response.business.businessTimings || {});
@@ -83,15 +67,13 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     // Handle images update
     const handleImagesUpdate = async (formData) => {
         try {
-            console.log('📤 [BusinessProfileScreen] Received update from ImagesEditModal');
-            
+
             // ImagesEditModal now handles the API call directly
             // This function is kept for backward compatibility but simplified
-            console.log('✅ [BusinessProfileScreen] Images update completed by ImagesEditModal');
-            
+
             // Refresh business data to get updated images
             await handleBusinessUpdated();
-            
+
         } catch (error) {
             console.error('❌ [BusinessProfileScreen] Images update error:', {
                 message: error.message,
@@ -105,17 +87,12 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     // Handle business timing update
     const handleTimingUpdate = async (newTimings) => {
         try {
-            console.log('📤 [BusinessProfileScreen] Updating business timings:', {
-                currentCount: Object.keys(businessTimings).length,
-                newCount: Object.keys(newTimings).length,
-                openDays: Object.values(newTimings).filter(t => t.isOpen).length
-            });
-            
+
+
             const payload = { businessTimings: newTimings };
             const response = await editBusiness(payload);
-            
+
             if (response.success) {
-                console.log('✅ [BusinessProfileScreen] Business timings updated successfully');
                 setBusinessTimings(newTimings);
                 setTimingEditVisible(false);
                 Alert.alert("Success!", "Business timings updated successfully!");
@@ -136,7 +113,6 @@ const BusinessProfileScreen = ({ businessPanel }) => {
 
     // Loading state
     if (!businessPanel || !currentBusiness) {
-        console.log('⏳ [BusinessProfileScreen] Loading state - waiting for business data');
         return (
             <View className="flex-1 items-center justify-center bg-gray-50">
                 <ActivityIndicator size="large" color="#3B82F6" />
@@ -157,13 +133,7 @@ const BusinessProfileScreen = ({ businessPanel }) => {
         sortOrder === "highest" ? b.rating - a.rating : a.rating - b.rating
     );
 
-    console.log('🔍 [BusinessProfileScreen] Rendering with data:', {
-        businessName: currentBusiness.businessName,
-        imagesCount: images.length,
-        timingsCount: days.length,
-        reviewsCount: sortedReviews.length,
-        sortOrder
-    });
+
 
     return (
         <ScrollView className="flex-1 bg-gray-50">
@@ -184,13 +154,9 @@ const BusinessProfileScreen = ({ businessPanel }) => {
             <View className="mt-5 px-4">
                 <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-xl font-semibold text-gray-800">Images</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => {
-                            console.log('🖼️ [BusinessProfileScreen] Opening images edit modal with:', {
-                                imagesCount: images.length,
-                                images: images,
-                                imagesEditVisible: imagesEditVisible
-                            });
+
                             setImagesEditVisible(true);
                         }}
                         className="px-3 py-1 bg-blue-100 rounded-lg"
@@ -201,12 +167,12 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
                     {images.length > 0 ? (
                         images.map((src, i) => (
-                        <Image
-                            key={i}
+                            <Image
+                                key={i}
                                 source={{ uri: `${IMG_URL}/${src}` }}
-                            resizeMode="cover"
-                            className="w-40 h-28 mr-3 rounded-xl bg-gray-200"
-                        />
+                                resizeMode="cover"
+                                className="w-40 h-28 mr-3 rounded-xl bg-gray-200"
+                            />
                         ))
                     ) : (
                         <View className="w-40 h-28 mr-3 rounded-xl bg-gray-200 items-center justify-center">
@@ -220,9 +186,9 @@ const BusinessProfileScreen = ({ businessPanel }) => {
             <View className="mt-6 px-4">
                 <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-xl font-semibold text-gray-800">Business Details</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => {
-                            console.log('✏️ [BusinessProfileScreen] Opening business edit modal');
+
                             setEditVisible(true);
                         }}
                         className="px-3 py-1 bg-blue-100 rounded-lg"
@@ -257,13 +223,9 @@ const BusinessProfileScreen = ({ businessPanel }) => {
             <View className="mt-6 px-4">
                 <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-xl font-semibold text-gray-800">Business Timing</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => {
-                            console.log('⏰ [BusinessProfileScreen] Opening timing edit modal with:', {
-                                timingsCount: Object.keys(businessTimings).length,
-                                businessTimings: businessTimings,
-                                timingEditVisible: timingEditVisible
-                            });
+                        
                             setTimingEditVisible(true);
                         }}
                         className="px-3 py-1 bg-blue-100 rounded-lg"
@@ -274,18 +236,18 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                 <View className="bg-white rounded-2xl shadow-md divide-y divide-gray-200">
                     {days.length > 0 ? (
                         days.map(([day, { isOpen, openTime, closeTime }], index) => (
-                        <View key={index} className="flex-row justify-between items-center px-4 py-3">
-                            <Text className="text-base font-semibold text-gray-700 capitalize">
-                                {day.charAt(0).toUpperCase() + day.slice(1)}
-                            </Text>
-                            {isOpen ? (
-                                <Text className="text-base text-green-600 font-medium">
-                                    {openTime} - {closeTime}
+                            <View key={index} className="flex-row justify-between items-center px-4 py-3">
+                                <Text className="text-base font-semibold text-gray-700 capitalize">
+                                    {day.charAt(0).toUpperCase() + day.slice(1)}
                                 </Text>
-                            ) : (
-                                <Text className="text-base text-red-500 font-medium">Closed</Text>
-                            )}
-                        </View>
+                                {isOpen ? (
+                                    <Text className="text-base text-green-600 font-medium">
+                                        {openTime} - {closeTime}
+                                    </Text>
+                                ) : (
+                                    <Text className="text-base text-red-500 font-medium">Closed</Text>
+                                )}
+                            </View>
                         ))
                     ) : (
                         <View className="px-4 py-8 items-center">
@@ -302,7 +264,6 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                     <View className="flex-row space-x-2 gap-2">
                         <TouchableOpacity
                             onPress={() => {
-                                console.log('🔍 [BusinessProfileScreen] Changing sort order to highest');
                                 setSortOrder("highest");
                             }}
                             className={`px-3 py-1 rounded-full ${sortOrder === 'highest' ? 'bg-blue-500' : 'bg-gray-200'}`}
@@ -313,7 +274,6 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
-                                console.log('🔍 [BusinessProfileScreen] Changing sort order to lowest');
                                 setSortOrder("lowest");
                             }}
                             className={`px-3 py-1 rounded-full ${sortOrder === 'lowest' ? 'bg-blue-500' : 'bg-gray-200'}`}
@@ -327,36 +287,35 @@ const BusinessProfileScreen = ({ businessPanel }) => {
 
                 {sortedReviews.length > 0 ? (
                     <>
-                <FlatList
-                    data={showmore ? sortedReviews : sortedReviews.slice(0, 3)}
-                    keyExtractor={(item) => item._id}
-                    renderItem={({ item }) => (
-                        <View className="bg-white rounded-xl shadow p-4 mb-3">
-                            <Text className="text-lg font-semibold text-gray-800">
-                                {item.user?.name || "Anonymous"}
-                            </Text>
-                            <Text className="text-gray-500 text-sm mb-1">
-                                {item.user?.email || "No email"}
-                            </Text>
-                            <Text className="text-yellow-500 font-bold mb-1">
-                                ⭐ {item.rating}/5
-                            </Text>
-                            <Text className="text-gray-700">{item.comment}</Text>
-                        </View>
-                    )}
+                        <FlatList
+                            data={showmore ? sortedReviews : sortedReviews.slice(0, 3)}
+                            keyExtractor={(item) => item._id}
+                            renderItem={({ item }) => (
+                                <View className="bg-white rounded-xl shadow p-4 mb-3">
+                                    <Text className="text-lg font-semibold text-gray-800">
+                                        {item.user?.name || "Anonymous"}
+                                    </Text>
+                                    <Text className="text-gray-500 text-sm mb-1">
+                                        {item.user?.email || "No email"}
+                                    </Text>
+                                    <Text className="text-yellow-500 font-bold mb-1">
+                                        ⭐ {item.rating}/5
+                                    </Text>
+                                    <Text className="text-gray-700">{item.comment}</Text>
+                                </View>
+                            )}
                             scrollEnabled={false}
-                />
-                    <TouchableOpacity
+                        />
+                        <TouchableOpacity
                             onPress={() => {
-                                console.log('📖 [BusinessProfileScreen] Toggling show more reviews:', !showmore);
                                 setShowmore(!showmore);
                             }}
                             className="bg-gray-200 rounded-lg py-3 items-center mt-2"
                         >
                             <Text className="text-gray-700 font-medium">
                                 {showmore ? "Show Less" : `Show More (${sortedReviews.length - 3} more)`}
-                        </Text>
-                    </TouchableOpacity>
+                            </Text>
+                        </TouchableOpacity>
                     </>
                 ) : (
                     <View className="bg-white rounded-xl shadow p-8 items-center">
@@ -364,7 +323,7 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                         <Text className="text-gray-400 text-sm mt-1">Be the first to review!</Text>
                     </View>
                 )}
-                </View>
+            </View>
 
             {/* Modals */}
             <BusinessEditModal

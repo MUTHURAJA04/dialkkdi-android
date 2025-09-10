@@ -23,10 +23,9 @@ const BusinessLanding = () => {
         const getDashBoard = async () => {
             try {
                 const response = await getbusinessDashboard();
-                console.log(response, "sucessfully get Data");
                 setDashboard(response)
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         };
         getDashBoard();
@@ -36,10 +35,9 @@ const BusinessLanding = () => {
         const getBusinessDetails = async () => {
             try {
                 const response = await getbusinessDetails();
-                console.log(response, "sucessfully business Data");
                 setBusinessPanel(response)
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         };
         getBusinessDetails();

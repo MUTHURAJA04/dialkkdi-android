@@ -59,7 +59,6 @@ export const ReviewsSection = ({ reviews = [], overallRating = 0, onReviewSubmit
         String(r.user?.id) === String(currentUserId)
     );
 
-    console.log(existingReview, "existingReview");
 
 
     await onReviewSubmit({

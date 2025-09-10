@@ -39,7 +39,6 @@ const DialogramScreen = () => {
         timestamp: Date.now()
       };
       await AsyncStorage.setItem('userLikeStates', JSON.stringify(parsedStates));
-      console.log(`[DialogramScreen] 💾 Stored like state for post ${postId}:`, { isLiked, likesCount });
     } catch (error) {
       console.error('[DialogramScreen] ❌ Error storing like state:', error);
     }
@@ -52,7 +51,6 @@ const DialogramScreen = () => {
       const parsedStates = likeStates ? JSON.parse(likeStates) : {};
       const storedState = parsedStates[postId];
       if (storedState) {
-        console.log(`[DialogramScreen] 📖 Retrieved stored like state for post ${postId}:`, storedState);
         return storedState;
       }
       return null;
@@ -63,51 +61,23 @@ const DialogramScreen = () => {
   }, []);
 
   const fetchFeed = useCallback(async (isRefresh = false) => {
-    console.log('[DialogramScreen] 🔄 Fetching feed...', { isRefresh });
     try {
       if (!isRefresh) {
         setLoading(true);
       }
 
       const data = await Dialogram();
-      console.log('[DialogramScreen] ✅ Feed fetched successfully:', data);
 
       // Ensure data is an array and filter out invalid items
       const validData = Array.isArray(data)
         ? data.filter(item => item && item._id)
         : [];
 
-      console.log('[DialogramScreen] 📊 Valid posts:', validData.length);
 
       // Check if current user has liked any of these posts
       const processedData = await processFeedWithUserLikes(validData);
 
-      console.log('[DialogramScreen] 📊 Raw API response analysis:');
-      validData.forEach((post, index) => {
-        console.log(`[DialogramScreen] 📋 Post ${index + 1}:`, {
-          id: post._id,
-          businessName: post.business?.businessName,
-          likes: post.likes,
-          likesCount: post.likesCount,
-          isLiked: post.isLiked,
-          hasLikesArray: Array.isArray(post.likes),
-          likesArrayLength: Array.isArray(post.likes) ? post.likes.length : 'not array',
-          allProperties: Object.keys(post),
-          // Check for alternative like property names
-          likeCount: post.likeCount,
-          likeCountAlt: post.like_count,
-          likedBy: post.likedBy,
-          liked_by: post.liked_by,
-          userLikes: post.userLikes,
-          user_likes: post.user_likes,
-          // Check if there are any properties that might contain like info
-          possibleLikeProps: Object.keys(post).filter(key =>
-            key.toLowerCase().includes('like') ||
-            key.toLowerCase().includes('count') ||
-            key.toLowerCase().includes('user')
-          )
-        });
-      });
+
       setFeed(processedData);
     } catch (error) {
       console.error('[DialogramScreen] ❌ Error fetching feed:', error);
@@ -123,12 +93,10 @@ const DialogramScreen = () => {
   }, []);
 
   useEffect(() => {
-    console.log('[DialogramScreen] 🚀 Component mounted, fetching initial feed');
     fetchFeed();
   }, [fetchFeed]);
 
   const onRefresh = useCallback(() => {
-    console.log('[DialogramScreen] 🔄 Pull-to-refresh triggered');
     setRefreshing(true);
     fetchFeed(true);
   }, [fetchFeed]);
@@ -138,7 +106,6 @@ const DialogramScreen = () => {
     try {
       const userData = await AsyncStorage.getItem('userData');
       if (!userData) {
-        console.log('[DialogramScreen] ⚠️ No user data found, skipping like state processing');
         return feedData;
       }
 
@@ -146,11 +113,9 @@ const DialogramScreen = () => {
       const currentUserId = parsedUserData._id || parsedUserData.id || parsedUserData.userId;
 
       if (!currentUserId) {
-        console.log('[DialogramScreen] ⚠️ No user ID found, skipping like state processing');
         return feedData;
       }
 
-      console.log('[DialogramScreen] 👤 Processing feed with user ID:', currentUserId);
 
       // Since the feed API doesn't return like information, we need to check each post
       // For now, we'll use the optimistic updates from the state
@@ -167,23 +132,12 @@ const DialogramScreen = () => {
         const finalIsLiked = storedState ? storedState.isLiked : userLiked;
         const finalLikesCount = storedState ? storedState.likesCount : (post.likesCount || 0);
 
-        console.log(`[DialogramScreen] 🔍 Post ${post._id}:`, {
-          likesArray: post.likes,
-          userLiked,
-          likesCount: post.likesCount,
-          currentUserId: currentUserIdStr,
-          storedState,
-          finalIsLiked,
-          finalLikesCount,
-          comparison: post.likes ? post.likes.map(id => `${String(id)} === ${currentUserIdStr} = ${String(id) === currentUserIdStr}`) : 'no likes array'
-        });
         return {
           ...post,
           isLiked: finalIsLiked, // Mark if current user has liked this post
           likesCount: finalLikesCount,
         };
       }));
-      console.log('[DialogramScreen] ✅ Feed processed with user like states');
       return processedFeed;
     } catch (error) {
       console.error('[DialogramScreen] ❌ Error processing feed with user likes:', error);
@@ -196,7 +150,6 @@ const DialogramScreen = () => {
     try {
       const userToken = await AsyncStorage.getItem('userToken');
       if (!userToken) {
-        console.log('[DialogramScreen] ⚠️ No user token found for like info request');
         return null;
       }
 
@@ -206,7 +159,6 @@ const DialogramScreen = () => {
           Authorization: `Bearer ${userToken}`,
         },
       });
-      console.log(`[DialogramScreen] ✅ Like info for post ${postId}:`, response.data);
       return response.data;
     } catch (error) {
       console.error(`[DialogramScreen] ❌ Error getting like info for post ${postId}:`, error);
@@ -216,7 +168,6 @@ const DialogramScreen = () => {
 
   // Update likes in state when a post is liked/unliked
   const handleUpdateLike = useCallback(async (postId, isLiked, likesCount) => {
-    console.log('[DialogramScreen] 💖 Updating like state:', { postId, isLiked, likesCount });
 
     // Store the like state locally for persistence
     await storeLikeState(postId, isLiked, likesCount);
@@ -235,7 +186,6 @@ const DialogramScreen = () => {
     setFeed((prev) =>
       prev.map((post) => {
         if (post && post._id === postId) {
-          console.log('[DialogramScreen] 🔄 Updating post:', post._id, 'isLiked:', isLiked, 'likesCount:', likesCount);
           // Update likes array based on current user's action
           let updatedLikes = post.likes || [];
           if (currentUserId) {
@@ -264,7 +214,6 @@ const DialogramScreen = () => {
 
   // Function to update a specific post's like information
   const updatePostLikeInfo = useCallback((postId, likeInfo) => {
-    console.log('[DialogramScreen] 🔄 Updating post like info:', { postId, likeInfo });
     setFeed((prev) =>
       prev.map((post) => {
         if (post && post._id === postId) {
@@ -283,7 +232,6 @@ const DialogramScreen = () => {
   const renderPost = useCallback(({ item }) => {
     // Additional safety check for renderPost
     if (!item || !item._id) {
-      console.log('[DialogramScreen] ⚠️ Invalid item in renderPost:', item);
       return null;
     }
     return (

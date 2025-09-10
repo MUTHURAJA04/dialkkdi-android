@@ -100,7 +100,6 @@ const BusinessStep2 = () => {
       pincode,
     };
 
-    console.log('✅ Full Form Data after Step 2:', mergedFormData);
 
     navigation.navigate('BusinessStep3', {
       formData: mergedFormData,

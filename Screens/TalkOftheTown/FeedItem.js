@@ -41,7 +41,6 @@ const FeedItem = ({
           
           // Check if current user has liked this post
           if (userId && post.likes && Array.isArray(post.likes)) {
-            console.log(`🔍 Checking likes for post ${post._id}:`, post.likes);
             const userLiked = post.likes.some(like => {
               // Handle both like objects and direct user IDs
               if (typeof like === 'object' && like.user) {
@@ -50,9 +49,7 @@ const FeedItem = ({
               return like === userId;
             });
             setIsLiked(userLiked);
-            console.log(`✅ User ${userId} ${userLiked ? 'has liked' : 'has not liked'} post ${post._id}`);
           } else {
-            console.log(`⚠️ No likes array or user ID for post ${post._id}:`, { likes: post.likes, userId });
           }
         }
       } catch (error) {
@@ -102,11 +99,9 @@ const FeedItem = ({
       }
 
       setIsLiking(true);
-      console.log('❤️ Like button pressed for post:', post._id, 'Current state:', isLiked);
 
       // Call the API to toggle like
       const response = await civicLikeUnlike(post._id);
-      console.log('✅ Like API response:', response);
 
       if (response) {
         // Update local state based on current state (toggle)
@@ -116,7 +111,6 @@ const FeedItem = ({
         setIsLiked(newIsLiked);
         setLikeCount(newLikeCount);
         
-        console.log(`✅ Post ${post._id} ${newIsLiked ? 'liked' : 'unliked'}, new count: ${newLikeCount}`);
         
         // Also update the post.likes array to keep it in sync
         if (newIsLiked) {
@@ -171,9 +165,7 @@ const FeedItem = ({
       // Double-tap only likes, never unlikes
       if (!isLiked && !isLiking) {
         handleLikePress();
-      } else if (isLiked) {
-        console.log(`ℹ️ Post ${post._id} is already liked, showing animation only`);
-      }
+      } 
     } else {
       lastTapRef.current = now;
     }

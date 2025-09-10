@@ -22,7 +22,6 @@ const Home = ({ navigation }) => {
     const getAdverts = async () => {
       try {
         const response = await getads();
-        console.log(response, "successfully ads get");
       } catch (error) {
         console.error('Error loading user data:', error);
       }

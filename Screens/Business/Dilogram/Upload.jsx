@@ -33,7 +33,7 @@ const ImageUpload = () => {
                 const response = await getBusinessFeed();
                 setPosts(response)
             } catch (error) {
-                console.log(error, "Dont gett Postss");
+                console.error(error, "Dont gett Postss");
             }
         }
         getFeed();
@@ -54,7 +54,7 @@ const ImageUpload = () => {
                         setPosts((prevPosts) => prevPosts.filter((post) => post._id !== id));
                         Alert.alert("Success", "Successfully Deleted");
                     } catch (error) {
-                        console.log(error);
+                        console.error(error);
                     }
                 },
             },
@@ -68,14 +68,12 @@ const ImageUpload = () => {
             { mediaType: "photo", quality: 1 },
             (response) => {
                 if (response.didCancel) {
-                    console.log("User cancelled image picker");
+                    console.error("User cancelled image picker");
                 } else if (response.errorCode) {
-                    console.log("Image Picker Error:", response.errorMessage);
                     Alert.alert("Error", response.errorMessage || "Picker error");
                 } else if (response.assets && response.assets.length > 0) {
                     const picked = response.assets[0]; // ✅ get first asset
                     setImage(picked);
-                    console.log("Picked image:", picked);
                 }
             }
         );
@@ -119,7 +117,6 @@ const ImageUpload = () => {
 
                 const response = await updatefeed(editPost._id, formData);
                 Alert.alert("Success", "Post updated successfully!");
-                console.log("✅ successfully updated", response);
 
             } else {
                 formData.append("post", {
@@ -131,7 +128,6 @@ const ImageUpload = () => {
 
                 const res = await postFeed(formData);
                 if (res.success) {
-                    console.log("✅ Feed posted:", res.data);
                 } else {
                     Alert.alert("Error", res.error?.message || res.error);
                 }

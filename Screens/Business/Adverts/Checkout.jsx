@@ -19,9 +19,6 @@ const Checkout = () => {
         try {
             // Step 1: Create order on backend
             const orderResponse = await createOrder({ amount: total })
-            console.log(orderResponse);
-
-
 
             if (!orderResponse.id) {
                 Alert.alert("Error", "Order creation failed");
@@ -45,7 +42,6 @@ const Checkout = () => {
                 theme: { color: "#2b6cb0" },
             };
 
-            console.log(options);
 
             RazorpayCheckout.open(options)
                 .then(async (response) => {
@@ -53,7 +49,6 @@ const Checkout = () => {
 
                     const businessDetails = await AsyncStorage.getItem("businessData")
                     const businessData = JSON.parse(businessDetails);
-                    console.log(businessData, "Bisiness Detailsss");
 
                     const data = {
                         razorpay_order_id: response.razorpay_order_id,
@@ -74,7 +69,6 @@ const Checkout = () => {
 
                     const verifyResponse = await verifyPayment(data)
 
-                    console.log(verifyResponse, "Verify response");
 
                     if (verifyResponse.success) {
                         const slotDetails = {

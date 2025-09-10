@@ -40,7 +40,6 @@ const BusinessListScreen = () => {
 
         setBusinesses(list);
         setFilteredBusinesses(list);
-        console.log("✅ Fetched businesses:", list);
       } catch (error) {
         console.error('❌ Error fetching businesses:', error.message);
       } finally {
@@ -80,8 +79,6 @@ const BusinessListScreen = () => {
 
 
   const handleNavigate = (item) => {
-    console.log("item", item)
-    console.log("item_id", item._id)
     navigation.navigate('BusinessDetailScreen', { business: item });
   };
 
@@ -94,8 +91,6 @@ const BusinessListScreen = () => {
       ? `${CDN_PREFIX}${rawImagePath}`
       : 'https://via.placeholder.com/400x200.png?text=Business';
 
-    console.log('📸 Raw image path from API:', rawImagePath);
-    console.log('🖼️ Final image URL:', imageUrl);
 
     return (
       <TouchableOpacity
