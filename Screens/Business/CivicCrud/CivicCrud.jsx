@@ -15,7 +15,6 @@ import { launchImageLibrary } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { civicFeedUpdate, civicFeedUser, civicPost, civicPostDelete } from "../../../services/apiClient";
 import { PlusCircle } from "react-native-feather";
-import { isDisabled } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
 
 export default function CivicCrud() {
     const [form, setForm] = useState({ title: "", description: "", imageUrl: null });
@@ -95,12 +94,9 @@ export default function CivicCrud() {
         if (!validateForm()) return;
 
         try {
-            // Note: The civicPost and civicFeedUpdate functions should handle FormData creation internally
-            // as discussed in previous interactions. Pass the form state directly.
-
+            setIsDisabled(true);
             const formData = new FormData();
 
-            // ✅ Use form values directly
             formData.append("title", form.title);
             formData.append("description", form.description);
 
@@ -127,7 +123,6 @@ export default function CivicCrud() {
                 Alert.alert("Success", "Post created successfully");
             }
 
-
             fetchPosts();
             setForm({ title: "", description: "", imageUrl: null });
             setEditingId(null);
@@ -135,6 +130,8 @@ export default function CivicCrud() {
         } catch (err) {
             console.error("❌ Submit Error:", err);
             Alert.alert("Error", "Something went wrong while saving: " + (err.response?.data?.message || err.message));
+        } finally {
+            setIsDisabled(false)
         }
     };
 
@@ -179,13 +176,13 @@ export default function CivicCrud() {
                 <View className="flex-row justify-end p-4">
                     <TouchableOpacity
                         onPress={() => {
-                            setIsDisabled(true); // disable
+                            // setIsDisabled(true); // disable
                             setOpenForm(true);
                             setForm({ title: "", description: "", imageUrl: null });
                             setEditingId(null);
                             setTimeout(() => setIsDisabled(false), 4000);
                         }}
-                        disabled={isDisabled}
+
                         className="flex-row items-center bg-blue-600 px-4 py-2 rounded-full shadow-md"
                     >
                         <PlusCircle color="white" width={20} height={20} />
@@ -256,10 +253,18 @@ export default function CivicCrud() {
                         <TouchableOpacity
                             className="bg-blue-600 px-4 py-2 rounded-lg"
                             onPress={handleSubmit}
+                            disabled={isDisabled}
                         >
-                            <Text className="text-white font-semibold">
-                                {editingId ? "Update" : "Create"}
-                            </Text>
+                            {
+                                isDisabled ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text className="text-white font-semibold">
+                                        {editingId ? "Update" : "Create"}
+                                    </Text>
+                                )
+                            }
+
                         </TouchableOpacity>
                     </View>
                 </View>

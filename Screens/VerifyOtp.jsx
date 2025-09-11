@@ -9,6 +9,7 @@ const VerifyOtp = () => {
   const { email, type } = route.params;
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false)
+  const [resendLoading, setresendLoading] = useState(false)
   const navigation = useNavigation();
 
   /** ✅ Handle OTP Verification */
@@ -35,7 +36,7 @@ const VerifyOtp = () => {
   /** ✅ Handle Resend OTP */
   const handleResendOtp = async () => {
     try {
-      setLoading(true)
+      setresendLoading(true)
       const response = await resendRegisterOtp(email, type);
 
       Alert.alert('Success', 'A new OTP has been sent to your email.');
@@ -43,7 +44,7 @@ const VerifyOtp = () => {
       console.error('❌ Resend OTP Failed:', error.response?.data || error.message);
       Alert.alert('Failed', error.response?.data?.message || 'Unable to resend OTP');
     } finally {
-      setLoading(false)
+      setresendLoading(false)
     }
   };
 
@@ -57,8 +58,9 @@ const VerifyOtp = () => {
         placeholder="Enter OTP"
         placeholderTextColor="#888"
         value={otp}
-        onChangeText={setOtp}
+        onChangeText={(text) => setOtp(text.replace(/[^0-9]/g, ""))} // ✅ only numbers
         keyboardType="number-pad"
+        maxLength={4} // optional: limit OTP length
         className="border border-gray-300 rounded-lg p-3 w-full mb-4"
       />
 
@@ -68,7 +70,13 @@ const VerifyOtp = () => {
         disabled={loading}
         className="bg-orange-600 p-4 rounded-lg w-full mb-3"
       >
-        <Text className="text-white text-center font-semibold">Verify</Text>
+        {
+          loading ? (
+            <ActivityIndicator />
+          ) : (
+            <Text className="text-white text-center font-semibold">Verify</Text>
+          )
+        }
       </TouchableOpacity>
 
       {/* ✅ Resend OTP Button */}
@@ -78,7 +86,7 @@ const VerifyOtp = () => {
         className="bg-gray-300 p-4 rounded-lg w-full"
       >
         {
-          loading ? (
+          resendLoading ? (
             <ActivityIndicator />
           ) : (
             <Text className="text-black text-center font-semibold">Resend OTP</Text>

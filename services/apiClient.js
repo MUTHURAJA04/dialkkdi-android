@@ -165,7 +165,7 @@ export const verifyOtpAndCreateAccount = async (email, otp, type) => {
 /** ✅ Resend OTP (Signup) */
 export const resendRegisterOtp = async (email, type) => {
   try {
-    if (type = 'business') {
+    if (type == 'business') {
       const response = await apiClient.post('/business/resendBusinessOtp', {
         email,
       });
@@ -728,6 +728,11 @@ export const civicFeedUpdate = async ({ posterId, formData }) => {
     const userData = userDataString ? JSON.parse(userDataString) : null;
     const userId = userData?.id;
 
+    const usertoken = await AsyncStorage.getItem("userToken");
+    const businesstoken = await AsyncStorage.getItem("businessToken");
+
+    const token = businesstoken ? businesstoken : usertoken
+
     let LoginId = businessId ? businessId : userId;
     let isAdmin = businessId ? true : false;
 
@@ -738,6 +743,7 @@ export const civicFeedUpdate = async ({ posterId, formData }) => {
     const response = await apiClient.put(`/civicfeeds/${posterId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
       },
     });
 
