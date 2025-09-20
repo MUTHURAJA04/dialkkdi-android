@@ -84,7 +84,7 @@ const Checkout = () => {
                             [
                                 {
                                     text: 'OK',
-                                    onPress: () => navigation.pop(2),
+                                    onPress: () => navigation.pop(1),
                                 },
                             ]
                         );

@@ -10,6 +10,7 @@ import {
   Modal,
   Pressable,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
