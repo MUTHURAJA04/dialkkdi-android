@@ -1,42 +1,22 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Image,
-  Dimensions,
-  FlatList,
-  SafeAreaView,
-  BackHandler,
-  Alert,
-} from "react-native";
-
-// ✅ Local images
-import Banner1 from "../../assets/Banners/Banner1.jpg";
-import Banner2 from "../../assets/Banners/Banner2.jpg";
-import Banner3 from "../../assets/Banners/Banner3.jpg";
-import Banner4 from "../../assets/Banners/Banner4.jpg";
-import Banner5 from "../../assets/Banners/Banner5.jpg";
+import { View, Image, Dimensions, FlatList, SafeAreaView, TouchableOpacity } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// ✅ Image list
-const images = [Banner1, Banner2, Banner3, Banner4, Banner5];
+export default function HeroSlide({ images }) {
+  const navigation = useNavigation();
 
-// ✅ Extended list for infinite loop
-const extendedImages = [images[images.length - 1], ...images, images[0]];
+  if (!images || images.length === 0) return null;
 
-export default function HeroSlide() {
+  const extendedImages = [
+    images[images.length - 1],
+    ...images,
+    images[0],
+  ];
+
   const flatListRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [imageHeights, setImageHeights] = useState({});
-
-  // ✅ Pre-calc local image sizes
-  useEffect(() => {
-    images.forEach((img) => {
-      const { width, height } = Image.resolveAssetSource(img);
-      const scaledHeight = (height / width) * screenWidth;
-      setImageHeights((prev) => ({ ...prev, [img]: scaledHeight }));
-    });
-  }, []);
 
   const scrollTo = (index) => {
     flatListRef.current?.scrollToIndex({ index: index + 1, animated: true });
@@ -47,10 +27,7 @@ export default function HeroSlide() {
       const currentIndex = viewableItems[0].index;
       if (currentIndex === 0) {
         setTimeout(() => {
-          flatListRef.current?.scrollToIndex({
-            index: images.length,
-            animated: false,
-          });
+          flatListRef.current?.scrollToIndex({ index: images.length, animated: false });
           setActiveIndex(images.length - 1);
         }, 50);
       } else if (currentIndex === extendedImages.length - 1) {
@@ -64,7 +41,6 @@ export default function HeroSlide() {
     }
   }).current;
 
-  // ✅ Auto-scroll every 3s
   useEffect(() => {
     const interval = setInterval(() => {
       scrollTo(activeIndex === images.length - 1 ? 0 : activeIndex + 1);
@@ -72,12 +48,16 @@ export default function HeroSlide() {
     return () => clearInterval(interval);
   }, [activeIndex]);
 
-  // ✅ Initial scroll to 1st real item
   useEffect(() => {
     setTimeout(() => {
       flatListRef.current?.scrollToIndex({ index: 1, animated: false });
     }, 100);
   }, []);
+
+  const handleNavigate = (item) => {
+    if (!item.businessId) return; // fallback images don't navigate
+    navigation.navigate("BusinessDetailScreen", { business: item.businessId });
+  };
 
   return (
     <SafeAreaView style={{ backgroundColor: "white", zIndex: 0 }}>
@@ -86,21 +66,20 @@ export default function HeroSlide() {
           ref={flatListRef}
           data={extendedImages}
           renderItem={({ item }) => (
-            <Image
-              source={item} // ✅ Local images use direct source
-              style={{
-                width: screenWidth,
-                height: imageHeights[item] || 200, // fallback 200 until resolved
-              }}
-              resizeMode="cover"
-            />
+            <TouchableOpacity onPress={() => handleNavigate(item)}>
+              <Image
+                source={typeof item.url === "string" ? { uri: item.url } : item.url}
+                style={{ width: screenWidth, height: 200 }}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
           )}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-          keyExtractor={(item, index) => `slide-${index}`}
+          keyExtractor={(_, index) => `slide-${index}`}
           getItemLayout={(_, index) => ({
             length: screenWidth,
             offset: screenWidth * index,
