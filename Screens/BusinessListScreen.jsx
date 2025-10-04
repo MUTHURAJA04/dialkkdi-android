@@ -11,6 +11,7 @@ import {
 import { Star, ChevronDown, MapPin } from 'react-native-feather';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { businessList } from '../services/apiClient';
+import ListScreenBanner from "../Screens/ListScreenBanner"
 
 const sortOptions = ['Rating High-Low', 'Rating Low-High', 'Name A-Z', 'Name Z-A'];
 
@@ -138,6 +139,9 @@ const BusinessListScreen = () => {
 
   return (
     <View className="flex-1 bg-gray-100 px-4 pt-4">
+
+      <ListScreenBanner />
+
       {/* Sort Button */}
       <View className="flex-row justify-end mb-3">
         <TouchableOpacity
