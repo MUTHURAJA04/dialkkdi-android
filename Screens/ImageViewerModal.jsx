@@ -1,52 +1,72 @@
-import React, { useEffect, useRef } from 'react';
-import { Modal, View, Animated, TouchableOpacity, Dimensions } from 'react-native';
-import { X } from 'react-native-feather';
+import React, { useEffect, useRef } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Animated,
+    StyleSheet,
+} from "react-native";
 
-const { width } = Dimensions.get('window');
-
-const ImageViewerModal = ({ visible, onClose }) => { // remove imageUrl if not needed
-    const scale = useRef(new Animated.Value(0.5)).current;
-    const opacity = useRef(new Animated.Value(0)).current;
+const ImageViewerModal = ({ visible, onClose, item }) => {
+    const slideAnim = useRef(new Animated.Value(300)).current;
 
     useEffect(() => {
         if (visible) {
-            Animated.parallel([
-                Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-                Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-            ]).start();
-
-            const timer = setTimeout(onClose, 5000); // auto close after 5 sec
-            return () => clearTimeout(timer);
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: 300,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
         }
     }, [visible]);
 
     if (!visible) return null;
 
     return (
-        <Modal transparent visible={visible} animationType="none">
-            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.overlay}>
+            {/* Background clickable to close */}
+            <TouchableOpacity style={styles.flexFill} onPress={onClose} activeOpacity={1} />
 
-                {/* Red placeholder instead of image */}
-                <Animated.View
-                    style={{
-                        width: width * 0.9,
-                        height: width * 0.9,
-                        borderRadius: 20,
-                        backgroundColor: 'red',
-                        transform: [{ scale }],
-                        opacity,
-                    }}
-                />
-
-                <TouchableOpacity
-                    onPress={onClose}
-                    style={{ position: 'absolute', top: 50, right: 20, padding: 10 }}
-                >
-                    <X color="#fff" width={30} height={30} />
+            {/* Popup */}
+            <Animated.View style={[styles.popup, { transform: [{ translateY: slideAnim }] }]}>
+                <Text style={styles.title}>{item?.businessName || item?.type || "Details"}</Text>
+                <Text>{JSON.stringify(item, null, 2)}</Text>
+                <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+                    <Text style={styles.closeText}>Close</Text>
                 </TouchableOpacity>
-            </View>
-        </Modal>
+            </Animated.View>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        justifyContent: "flex-end",
+    },
+    flexFill: { flex: 1 },
+    popup: {
+        backgroundColor: "white",
+        padding: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        maxHeight: "70%",
+    },
+    title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+    closeBtn: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: "#3b82f6",
+        borderRadius: 10,
+    },
+    closeText: { color: "#fff", textAlign: "center" },
+});
 
 export default ImageViewerModal;
