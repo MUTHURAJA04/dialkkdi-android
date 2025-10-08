@@ -27,6 +27,7 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false)
 
   /** ✅ Send OTP */
@@ -123,96 +124,6 @@ const ForgotPassword = () => {
   };
 
   return (
-
-
-    //     <SafeAreaView className="flex-1 bg-white">
-    //   <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
-    //   <KeyboardAvoidingView
-    //     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    //     className="flex-1"
-    //   >
-    //     <ScrollView
-    //       contentContainerStyle={{ flexGrow: 1 }}
-    //       keyboardShouldPersistTaps="handled"
-    //     >
-    //       <View className="flex-1 justify-center items-center px-6">
-    //         <Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
-    //           Forgot Password
-    //         </Text>
-
-    //         {/* STEP 1: Send OTP */}
-    //         {step === 1 && (
-    //           <>
-    //             <TextInput
-    //               placeholder="Enter your email"
-    //               placeholderTextColor="#888"
-    //               value={email}
-    //               onChangeText={setEmail}
-    //               className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
-    //             />
-    //             <TouchableOpacity
-    //               onPress={handleSendOTP}
-    //               className="bg-orange-600 p-4 rounded-lg w-full"
-    //             >
-    //               <Text className="text-white text-center font-semibold">Send OTP</Text>
-    //             </TouchableOpacity>
-    //           </>
-    //         )}
-
-    //         {/* STEP 2: Verify OTP */}
-    //         {step === 2 && (
-    //           <>
-    //             <TextInput
-    //               placeholder="Enter OTP"
-    //               placeholderTextColor="#888"
-    //               value={otp}
-    //               onChangeText={setOtp}
-    //               className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
-    //             />
-    //             <TouchableOpacity
-    //               onPress={handleVerifyOTP}
-    //               className="bg-orange-600 p-4 rounded-lg w-full"
-    //             >
-    //               <Text className="text-white text-center font-semibold">Verify OTP</Text>
-    //             </TouchableOpacity>
-    //           </>
-    //         )}
-
-    //         {/* STEP 3: Reset Password */}
-    //         {step === 3 && (
-    //           <>
-    //             <TextInput
-    //               placeholder="New Password"
-    //               placeholderTextColor="#888"
-    //               secureTextEntry
-    //               value={newPassword}
-    //               onChangeText={setNewPassword}
-    //               className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
-    //             />
-    //             <TextInput
-    //               placeholder="Confirm Password"
-    //               placeholderTextColor="#888"
-    //               secureTextEntry
-    //               value={confirmPassword}
-    //               onChangeText={setConfirmPassword}
-    //               className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
-    //             />
-    //             <TouchableOpacity
-    //               onPress={handleResetPassword}
-    //               className="bg-orange-600 p-4 rounded-lg w-full"
-    //             >
-    //               <Text className="text-white text-center font-semibold">Reset Password</Text>
-    //             </TouchableOpacity>
-    //           </>
-    //         )}
-    //       </View>
-    //     </ScrollView>
-    //   </KeyboardAvoidingView>
-    // </SafeAreaView>
-
-
-
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
@@ -315,8 +226,8 @@ const ForgotPassword = () => {
                     setConfirmPassword(cleanedText);
                   }}
                   // className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
-                  showPassword={showPassword}
-                  togglePasswordVisibility={() => setShowPassword((prev) => !prev)}
+                  showPassword={showConfirmPassword}
+                  togglePasswordVisibility={() => setShowConfirmPassword((prev) => !prev)}
                 />
                 <TouchableOpacity
                   onPress={handleResetPassword}

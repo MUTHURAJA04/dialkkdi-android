@@ -22,6 +22,7 @@ const UserRegister = ({ navigation }) => {
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false)
 
 
@@ -175,7 +176,6 @@ const UserRegister = ({ navigation }) => {
       {/* Password Input */}
       <Input
         placeholder="Enter password"
-        secureTextEntry
         value={password}
         onChangeText={(text) => {
           const cleanedText = text.replace(/[ .,]/g, '').replace(/^\s+/, '');
@@ -191,13 +191,15 @@ const UserRegister = ({ navigation }) => {
       {/* Confirm Password Input */}
       <Input
         placeholder="Re-enter password"
-        secureTextEntry
         value={confirmPassword}
         onChangeText={(text) => {
           const cleanedText = text.replace(/[ .,]/g, '').replace(/^\s+/, '');
           setConfirmPassword(cleanedText);
         }}
         placeholderTextColor="#999"
+        showPassword={showConfirmPassword}
+        togglePasswordVisibility={() => setShowConfirmPassword((prev) => !prev)}
+        isPassword
       />
 
 

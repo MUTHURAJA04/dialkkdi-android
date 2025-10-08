@@ -62,14 +62,17 @@ const BusinessStep2 = () => {
 
     const trimmedAddress = address.trim();
 
-    if (!/^(?!\.)(?!\d+$)[A-Za-z0-9\s,#-]+$/.test(trimmedAddress) || trimmedAddress.length < 5) {
+    if (
+      !/^(?!\.)(?!\d+$)[A-Za-z0-9\s,#.\-/'()]+$/.test(trimmedAddress) ||
+      trimmedAddress.length < 5
+    ) {
       Alert.alert(
         'Validation Error',
-        'Enter a valid Mail address'
+        'Please enter a valid physical address'
       );
       return;
     }
-
+    
     if (!cityId) {
       Alert.alert('Validation Error', 'Please select a city');
       return;

@@ -94,7 +94,9 @@ const Login = ({ route }) => {
 
       if (result?.token) {
         if (type == 'user') {
-          Alert.alert('Welcome!', `Logged in as ${result.name} `);
+          console.log('result', result);
+          console.log('result.name', result.user.name);
+          Alert.alert('Welcome!', `Logged in as ${result.user.name} `);
           navigation.navigate('Home');
         } else {
           Alert.alert('Welcome!', `Logged in as ${result?.business?.name} `);

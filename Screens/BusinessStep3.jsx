@@ -30,6 +30,7 @@ const BusinessStep3 = () => {
   const [agreed, setAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleAddPhoto = () => {
     if (photos.length >= 6) return;
@@ -77,9 +78,19 @@ const BusinessStep3 = () => {
 
       // Append all fields from formData
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          form.append(key, value);
+        if (value === null || value === undefined) return;
+
+        // Ensure categories are sent as an array entries in multipart form
+        if (key === 'categories' && Array.isArray(value)) {
+          value.forEach((categoryId) => {
+            if (categoryId !== null && categoryId !== undefined) {
+              form.append('categories[]', String(categoryId));
+            }
+          });
+          return;
         }
+
+        form.append(key, value);
       });
 
       // Append password
@@ -130,10 +141,12 @@ const BusinessStep3 = () => {
 
         <Input
           placeholder="Password"
-          secureTextEntry
           placeholderTextColor="#999"
+          isPassword
           value={password}
           onChangeText={setPassword}
+          showPassword={showPassword}
+          togglePasswordVisibility={() => setShowPassword(prev => !prev)}
         />
 
         <Input
@@ -142,8 +155,8 @@ const BusinessStep3 = () => {
           onChangeText={setConfirmPassword}
           placeholderTextColor="#aaa"
           isPassword
-          showPassword={showPassword}
-          togglePasswordVisibility={() => setShowPassword(prev => !prev)}
+          showPassword={showConfirmPassword}
+          togglePasswordVisibility={() => setShowConfirmPassword((prev) => !prev)}
         />
 
         <Text className="text-gray-700 font-medium mb-2">

@@ -202,18 +202,21 @@ const Profile = ({ navigation }) => {
       {/* Tab Content */}
       <View className="flex-1 py-2 ">
         {activeTab === "favourites" ? (
-          <FlatList
-            data={favourites}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderFavouriteCard}
-            showsVerticalScrollIndicator={false}
-            className="px-4"
-            ListEmptyComponent={
-              <View className="items-center justify-center py-10">
-                <Text className="text-gray-600 text-lg">No Favourites...</Text>
-              </View>
-            }
-          />
+         <FlatList
+  data={favourites || []}
+  keyExtractor={(item, index) =>
+    item?.id ? item.id.toString() : index.toString()
+  }
+  renderItem={renderFavouriteCard}
+  showsVerticalScrollIndicator={false}
+  className="px-4"
+  ListEmptyComponent={
+    <View className="items-center justify-center py-10">
+      <Text className="text-gray-600 text-lg">No Favourites...</Text>
+    </View>
+  }
+/>
+
         ) : (
           <CivicCrud />
         )}

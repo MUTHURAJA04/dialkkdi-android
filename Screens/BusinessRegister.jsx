@@ -32,7 +32,7 @@ const BusinessRegister = () => {
 
   // Regex rules
   const regex = {
-    businessName: /^(?! )[a-zA-Z0-9&\-. ]{2,50}$/, // disallow starting with space
+    businessName: /^(?![.\s])[A-Za-z0-9&\-. ]{2,50}$/,
     ownerName: /^(?! )[a-zA-Z ]{2,50}$/,          // disallow starting with space
     phone: /^[6-9]\d{9}$/,                        // same
     email: /^(?!\.)(?!.*\.\.)(?!.*\.\@)(?!.*\.$)[A-Za-z0-9._-]+@[A-Za-z0-9-]+(\.[A-Za-z]{2,})+$/
@@ -62,7 +62,7 @@ const BusinessRegister = () => {
       }
 
       // Otherwise, prevent the selection
-      Alert.alert('Selection Restricted', 'You can only select categories from the same segment.');
+      Alert.alert('Selection Restricted', ' Only 4 categories allowed');
       return prev;
     });
   };
@@ -119,17 +119,70 @@ const BusinessRegister = () => {
     fetchCategories();
   }, []);
 
-  const filteredGroupedCategories = useMemo(() => {
-    const filtered = categories.filter((category) => {
-      const categoryName = category.displayName || category.categoryName;
-      const segmentName = category.businessSegment?.name;
-      const searchTerm = search.toLowerCase();
-
-      return (
-        categoryName?.toLowerCase().includes(searchTerm) ||
-        segmentName?.toLowerCase().includes(searchTerm)
-      );
+  // When user types in search, auto-open segments that have matching subcategories
+  useEffect(() => {
+    if (!search) {
+      // Restore initial state: collapse all segments when query is cleared
+      setOpenSegments({});
+      return;
+    }
+    const opened = {};
+    filteredGroupedCategories.forEach((group) => {
+      if (group.subcategories && group.subcategories.length > 0) {
+        opened[group._id] = true;
+      }
     });
+    setOpenSegments(opened);
+  }, [search, filteredGroupedCategories]);
+
+  const filteredGroupedCategories = useMemo(() => {
+    // Normalize strings: case-insensitive, diacritics-insensitive, trimmed, single-spaced
+    const normalize = (value) => {
+      if (!value) return '';
+      try {
+        return String(value)
+          .normalize('NFKD')
+          .replace(/\p{Diacritic}+/gu, '')
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim();
+      } catch {
+        // Fallback if environment lacks Intl regex features
+        return String(value)
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+    };
+
+    const normQuery = normalize(search);
+
+    const matchesQuery = (category) => {
+      if (!normQuery) return true; // Empty query matches all
+
+      const fieldsToSearch = [
+        category.displayName,
+        category.categoryName,
+        category.name,
+        category.businessSegment?.name,
+      ];
+
+      // Include potential arrays like aliases/keywords if present
+      if (Array.isArray(category.aliases)) {
+        fieldsToSearch.push(...category.aliases);
+      }
+      if (Array.isArray(category.keywords)) {
+        fieldsToSearch.push(...category.keywords);
+      }
+      if (Array.isArray(category.searchTerms)) {
+        fieldsToSearch.push(...category.searchTerms);
+      }
+
+      // Any field containing the normalized query qualifies
+      return fieldsToSearch.some((field) => normalize(field).includes(normQuery));
+    };
+
+    const filtered = categories.filter(matchesQuery);
 
     const grouped = filtered.reduce((acc, current) => {
       const segmentId = current.businessSegment?._id || 'others';
@@ -261,7 +314,7 @@ const BusinessRegister = () => {
                   <Text className={`font-bold text-gray-800 ${activeSegmentId && group._id !== activeSegmentId
                     ? 'text-gray-500'
                     : ''
-                    }`}>{group.name}</Text>
+                    }`}>{group.name} {group.subcategories?.length ? `(${group.subcategories.length})` : ''}</Text>
                   {openSegments[group._id] ? <ChevronUp color="gray" /> : <ChevronDown color="gray" />}
                 </TouchableOpacity>
                 {openSegments[group._id] && (
