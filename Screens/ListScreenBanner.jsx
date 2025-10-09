@@ -7,6 +7,7 @@ import {
     Pressable,
     Image,
 } from "react-native";
+// Animate container Views, keep Image plain to avoid CssInterop BaseImage issues
 import { getads } from "../services/apiClient";
 
 // ✅ Local fallback images
@@ -112,6 +113,12 @@ const ListScreenBanner = () => {
     const img2 = getImageSource(banners[1]);
     const img3 = getImageSource(banners[2]);
 
+    if (__DEV__) {
+        console.log("[ListScreenBanner] banners len:", banners?.length || 0, {
+            img1: !!img1, img2: !!img2, img3: !!img3
+        });
+    }
+
     return (
         <View className="w-full">
 
@@ -120,28 +127,19 @@ const ListScreenBanner = () => {
                 style={{ height: imgHeight }}
             >
                 {img1 && (
-                    <Animated.Image
-                        source={img1}
-                        className="absolute w-full h-full"
-                        style={{ opacity: opacityAnim1 }}
-                        resizeMode="cover"
-                    />
+                    <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim1 }]}>
+                        <Image source={img1} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                    </Animated.View>
                 )}
                 {img2 && (
-                    <Animated.Image
-                        source={img2}
-                        className="absolute w-full h-full"
-                        style={{ opacity: opacityAnim2 }}
-                        resizeMode="cover"
-                    />
+                    <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim2 }]}>
+                        <Image source={img2} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                    </Animated.View>
                 )}
                 {img3 && (
-                    <Animated.Image
-                        source={img3}
-                        className="absolute w-full h-full"
-                        style={{ opacity: opacityAnim3 }}
-                        resizeMode="cover"
-                    />
+                    <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim3 }]}>
+                        <Image source={img3} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                    </Animated.View>
                 )}
             </Pressable>
         </View>

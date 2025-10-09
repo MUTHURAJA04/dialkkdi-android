@@ -88,7 +88,8 @@ const Products = ({ navigation }) => {
                     <View className="border border-gray-200 py-3 bg-white rounded-md shadow-md flex flex-col justify-start ">
                       <Image
                         source={{ uri: item.image }}
-                        style={{ width: '100%', height: 130, resizeMode: 'contain' }}
+                        style={{ width: '100%', height: 130 }}
+                        resizeMode="contain"
                       />
                       <View className="w-full px-2 mt-2">
                         <Text className="font-semibold text-sm text-center number-of-lines-1">
@@ -101,7 +102,11 @@ const Products = ({ navigation }) => {
                     </View>
                   </View>
                 )}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => {
+                  const key = item?.id ?? String(index);
+                  if (__DEV__) console.log('[Products] keyExtractor', { key, id: item?.id, name: item?.name });
+                  return key;
+                }}
                 showPagination={false}
               />
             </View>

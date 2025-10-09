@@ -73,7 +73,7 @@ const Services = () => {
                     <View className="w-full aspect-[4/3] overflow-hidden rounded-t-md">
                       <Image
                         source={{ uri: item.image }}
-                        className="w-full h-full object-cover"
+                        style={{ width: '100%', height: '100%' }}
                         resizeMode="cover"
                       />
                     </View>
@@ -88,7 +88,11 @@ const Services = () => {
                   </View>
                 </Pressable>
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => {
+                const key = item?.id ?? String(index);
+                if (__DEV__) console.log('[Services] keyExtractor', { key, id: item?.id, name: item?.name });
+                return key;
+              }}
               showPagination={false}
               numColumns={1}
             />

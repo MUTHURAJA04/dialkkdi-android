@@ -60,8 +60,8 @@ const Categories = () => {
     >
       <Image
         alt={item.displayName}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         source={{ uri: `${imgUrl}${item.imageUrl}` }}
+        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}
         resizeMode="cover"
       />
       <View className="absolute top-0 w-full bg-white/40 px-3 py-2 text-white text-sm font-semibold z-10 text-center">
@@ -96,7 +96,11 @@ const Categories = () => {
         <FlatList
           data={cat}
           renderItem={renderCategoryItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => {
+            const key = item?._id || item?.id || String(index);
+            if (__DEV__) console.log('[Categories] keyExtractor', { key, index, _id: item?._id, id: item?.id, name: item?.displayName });
+            return key;
+          }}
           numColumns={numColumns}
           // The `columnWrapperStyle` and margins in `renderCategoryItem`
           // are used to simulate `gap-5 sm:gap-6 md:gap-8`

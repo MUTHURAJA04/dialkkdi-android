@@ -71,7 +71,7 @@ const Banner = () => {
         <View className="w-20 h-20 bg-white rounded-xl items-center justify-center shadow-sm shadow-gray-300">
           <Image
             source={{ uri: getImageUrl(item.iconUrl) }}
-            className="w-16 h-16 rounded-lg"
+            style={{ width: 64, height: 64, borderRadius: 12 }}
             resizeMode="contain"
           />
         </View>
@@ -95,7 +95,7 @@ const Banner = () => {
         <View className="w-12 h-12 bg-gray-50 rounded-lg items-center justify-center mr-3">
           <Image
             source={{ uri: getImageUrl(item.iconUrl) }}
-            className="w-10 h-10"
+            style={{ width: 40, height: 40 }}
             resizeMode="contain"
           />
         </View>

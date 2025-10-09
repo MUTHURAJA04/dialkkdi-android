@@ -53,6 +53,7 @@ const Home = () => {
         if (banners.length < 5)
           banners = [...banners, ...fallbackBanners.slice(0, 5 - banners.length)];
 
+        console.log("[Home] hero banners computed:", banners);
         setHomeBanners(banners);
 
         // 🟨 LIMITED OFFERS 1
@@ -66,7 +67,9 @@ const Home = () => {
           }))
           .filter((ad) => ad.url);
 
-        setLimitedOffers1(getTwoOffers(offers1, fallbackOffers));
+        const finalOffers1 = getTwoOffers(offers1, fallbackOffers);
+        console.log("[Home] limitedOffers1 computed:", finalOffers1);
+        setLimitedOffers1(finalOffers1);
 
         // 🟦 LIMITED OFFERS 2
         const offers2 = response
@@ -79,7 +82,9 @@ const Home = () => {
           }))
           .filter((ad) => ad.url);
 
-        setLimitedOffers2(getTwoOffers(offers2, fallbackOffers));
+        const finalOffers2 = getTwoOffers(offers2, fallbackOffers);
+        console.log("[Home] limitedOffers2 computed:", finalOffers2);
+        setLimitedOffers2(finalOffers2);
       } catch (error) {
         console.error("Error loading ads:", error);
         setHomeBanners(fallbackBanners);
@@ -100,7 +105,7 @@ const Home = () => {
 
   return (
     <ScrollView>
-      
+      {console.log("[Home] render with homeBanners length:", homeBanners?.length || 0)}
       <HeroSlide images={homeBanners} />
       <Banner />
       <ServicesOn />

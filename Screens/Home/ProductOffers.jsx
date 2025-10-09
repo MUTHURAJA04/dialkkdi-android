@@ -116,8 +116,8 @@ const ProductOffers = () => {
                 style={{ width: 160, height: 220 }}
               >
                 <Image
-                  style={{ width: '100%', height: 150, borderTopLeftRadius: 6, borderTopRightRadius: 6 }}
                   source={{ uri: getValidImage(item.image) }}
+                  style={{ width: '100%', height: 150, borderTopLeftRadius: 6, borderTopRightRadius: 6 }}
                   resizeMode="cover"
                 />
                 <Text className="font-semibold text-sm px-2 mt-1" numberOfLines={1}>
@@ -128,7 +128,11 @@ const ProductOffers = () => {
                 </Text>
               </Pressable>
             )}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => {
+              const key = item?.id ?? String(index);
+              if (__DEV__) console.log('[ProductOffers] product key', { key, id: item?.id, name: item?.name });
+              return key;
+            }}
             showPagination={false}
           />
         </View>
@@ -147,8 +151,8 @@ const ProductOffers = () => {
                 style={{ width: 160, height: 220 }}
               >
                 <Image
-                  style={{ width: '100%', height: 150, borderTopLeftRadius: 6, borderTopRightRadius: 6 }}
                   source={{ uri: getValidImage(item.image) }}
+                  style={{ width: '100%', height: 150, borderTopLeftRadius: 6, borderTopRightRadius: 6 }}
                   resizeMode="cover"
                 />
                 <Text className="font-semibold text-sm px-2 mt-1" numberOfLines={1}>
@@ -159,7 +163,11 @@ const ProductOffers = () => {
                 </Text>
               </Pressable>
             )}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => {
+              const key = item?.id ?? String(index);
+              if (__DEV__) console.log('[ProductOffers] service key', { key, id: item?.id, name: item?.name });
+              return key;
+            }}
             showPagination={false}
           />
         </View>

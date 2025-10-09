@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Pressable, Dimensions, Animated } from "react-native";
+import { View, Text, Pressable, Dimensions, Animated, Image } from "react-native";
+// Animate a wrapping View instead of Image to avoid CssInterop BaseImage issues
 
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -81,6 +82,11 @@ const LimitedOffers = ({ offers1 = [], offers2 = [] }) => {
     offers2[(currentImageIndex2 + 1) % offers2.length]
   );
 
+  if (__DEV__) {
+    console.log("[LimitedOffers] offers1 len:", offers1?.length || 0, "offers2 len:", offers2?.length || 0);
+    console.log("[LimitedOffers] current indices:", { i1: currentImageIndex1, i2: currentImageIndex2 });
+  }
+
   return (
     <View className="w-full">
       {/* Title */}
@@ -98,20 +104,14 @@ const LimitedOffers = ({ offers1 = [], offers2 = [] }) => {
           style={{ height: imgHeight }}
         >
           {img1a && (
-            <Animated.Image
-              source={img1a}
-              className="absolute w-full h-full"
-              style={{ opacity: opacityAnim1a }}
-              resizeMode="cover"
-            />
+            <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim1a }]}>
+              <Image source={img1a} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+            </Animated.View>
           )}
           {img1b && (
-            <Animated.Image
-              source={img1b}
-              className="absolute w-full h-full"
-              style={{ opacity: opacityAnim1b }}
-              resizeMode="cover"
-            />
+            <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim1b }]}>
+              <Image source={img1b} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+            </Animated.View>
           )}
         </Pressable>
 
@@ -121,20 +121,14 @@ const LimitedOffers = ({ offers1 = [], offers2 = [] }) => {
           style={{ height: imgHeight }}
         >
           {img2a && (
-            <Animated.Image
-              source={img2a}
-              className="absolute w-full h-full"
-              style={{ opacity: opacityAnim2a }}
-              resizeMode="contain"
-            />
+            <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim2a }]}>
+              <Image source={img2a} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+            </Animated.View>
           )}
           {img2b && (
-            <Animated.Image
-              source={img2b}
-              className="absolute w-full h-full"
-              style={{ opacity: opacityAnim2b }}
-              resizeMode="contain"
-            />
+            <Animated.View style={[{ position: "absolute", width: "100%", height: "100%" }, { opacity: opacityAnim2b }]}>
+              <Image source={img2b} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+            </Animated.View>
           )}
         </Pressable>
       </View>

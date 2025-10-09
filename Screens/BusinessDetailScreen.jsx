@@ -403,6 +403,7 @@ const BusinessDetailScreen = () => {
       >
         <StatusBar barStyle="dark-content" backgroundColor="#000" />
         <View className="bg-black/90 relative">
+          {__DEV__ && console.log('[BusinessDetail] open image modal, photos:', businessData.photos?.length)}
           <Animated.FlatList
             ref={galleryRef}
             data={businessData.photos.slice(1)}
@@ -412,6 +413,7 @@ const BusinessDetailScreen = () => {
             initialScrollIndex={selectedImageIndex}
             renderItem={({ item }) => (
               <View className="w-screen h-screen justify-center items-center bg-black">
+                {__DEV__ && console.log('[BusinessDetail] render modal image', getFullImageUrl(item))}
                 <Image
                   source={{ uri: getFullImageUrl(item) }}
                   style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
