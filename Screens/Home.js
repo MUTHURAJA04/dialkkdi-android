@@ -100,6 +100,7 @@ const Home = () => {
 
   return (
     <ScrollView>
+      
       <HeroSlide images={homeBanners} />
       <Banner />
       <ServicesOn />
