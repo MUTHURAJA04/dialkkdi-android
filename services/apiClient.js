@@ -325,7 +325,8 @@ export const getCities = async () => {
 };
 export const getads = async () => {
   try {
-    const response = await apiClient.get(`/advert-slot`);
+    const response = await apiClient.get(`/adverts`);
+    
     return response.data;
   } catch (error) {
     console.error('❌ Google SSO API call failed:', {
