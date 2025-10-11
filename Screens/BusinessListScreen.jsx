@@ -12,8 +12,8 @@ import { Star, ChevronDown, MapPin } from "react-native-feather";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { businessList, getads } from "../services/apiClient";
 import ListScreenBanner from "../Screens/ListScreenBanner";
-import banner1 from "../assets/Banners/Banner1.jpg";
-import banner2 from "../assets/Banners/Banner2.jpg";
+import banner1 from "../assets/Banners/sidebanar2.jpeg";
+import banner2 from "../assets/Banners/sidebanner1.jpeg";
 
 const sortOptions = ["Rating High-Low", "Rating Low-High", "Name A-Z", "Name Z-A"];
 
