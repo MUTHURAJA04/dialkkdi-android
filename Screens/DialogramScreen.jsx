@@ -288,20 +288,22 @@ const DialogramScreen = () => {
   return (
 
     <View className={`flex-1  ${colorScheme === 'dark' ? 'bg-neutral-900' : 'bg-gray-50'
-      }`}>
+      }`}
+      style={{
+  flex: 1,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+}} 
+      >
 
       <StatusBar
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={colorScheme === 'dark' ? '#000000' : '#ffffff'}
       />
 
-      <SafeAreaView className='pb-10' style={{
-  flex: 1,
-  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
-}} >
+      <SafeAreaView className='pb-10' >
         <Image
           source={require("../assets/DialogramLogo.png")}
-          className="w-full h-20 mt-2"
+          className="w-full h-20"
           resizeMode="contain"
         />
         <FlatList
