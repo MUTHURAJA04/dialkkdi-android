@@ -269,11 +269,11 @@ const BusinessRegister = () => {
       </TouchableOpacity>
 
       {/* Navigate to login */}
-      <Text className="text-orange-600 text-center mt-3">
+      <Text className="text-orange-600 text-center mt-3" onPress={() => navigation.navigate('Login', { type })}>
         Already have an account?{' '}
         <Text
           className="underline"
-          onPress={() => navigation.navigate('Login', { type })}
+          
         >
           Login
         </Text>

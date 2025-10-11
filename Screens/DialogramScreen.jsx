@@ -14,7 +14,7 @@ import {
 import { Dialogram } from '../services/apiClient';
 import PostItem from './PostItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 
 const DialogramScreen = () => {
   const colorScheme = useColorScheme();
@@ -295,10 +295,13 @@ const DialogramScreen = () => {
         backgroundColor={colorScheme === 'dark' ? '#000000' : '#ffffff'}
       />
 
-      <SafeAreaView className='pb-10' >
+      <SafeAreaView className='pb-10' style={{
+  flex: 1,
+  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+}} >
         <Image
           source={require("../assets/DialogramLogo.png")}
-          className="w-full h-20"
+          className="w-full h-20 mt-2"
           resizeMode="contain"
         />
         <FlatList

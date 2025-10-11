@@ -236,11 +236,11 @@ const UserRegister = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Login Link */}
-      <Text className="text-center text-gray-600">
+      <Text className="text-center text-gray-600"  onPress={() => navigation.navigate('Login', { type })}>
         Already have an account?{' '}
         <Text
           className="text-orange-600 underline"
-          onPress={() => navigation.navigate('Login', { type })}
+        
         >
           Login
         </Text>
