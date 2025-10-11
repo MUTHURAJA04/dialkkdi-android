@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import HeroSlide from "./Home/HeroSlide";
+import VideoSlide from "./Home/VideoSlide";
 import Banner from "./Home/Banner";
 import ServicesOn from "./Home/ServicesOn";
 import Categories from "./Home/Categories";
@@ -17,9 +18,11 @@ const Home = () => {
   const [homeBanners, setHomeBanners] = useState([]);
   const [limitedOffers1, setLimitedOffers1] = useState([]);
   const [limitedOffers2, setLimitedOffers2] = useState([]);
+  const [videoAds, setVideoAds] = useState([]);
 
   const imgUrl = "https://livecdn.dialkaraikudi.com/";
 
+  // 🩵 Fallback data
   const fallbackBanners = [
     { url: banner1, businessId: null },
     { url: banner2, businessId: null },
@@ -33,10 +36,19 @@ const Home = () => {
     { url: banner2, businessId: null },
   ];
 
+  // 🎞️ Default fallback video (W3Schools)
+  const fallbackVideo = [
+    {
+      url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      businessId: null,
+    },
+  ];
+
   useEffect(() => {
     const getAdverts = async () => {
       try {
         const response = await getads();
+        console.log(response, "Adsss");
 
         // 🟩 HERO BANNERS
         const homeAds = response.filter(
@@ -52,9 +64,8 @@ const Home = () => {
 
         if (banners.length < 5)
           banners = [...banners, ...fallbackBanners.slice(0, 5 - banners.length)];
-
-        console.log("[Home] hero banners computed:", banners);
         setHomeBanners(banners);
+        console.log("[Home] hero banners:", banners);
 
         // 🟨 LIMITED OFFERS 1
         const offers1 = response
@@ -68,7 +79,6 @@ const Home = () => {
           .filter((ad) => ad.url);
 
         const finalOffers1 = getTwoOffers(offers1, fallbackOffers);
-        console.log("[Home] limitedOffers1 computed:", finalOffers1);
         setLimitedOffers1(finalOffers1);
 
         // 🟦 LIMITED OFFERS 2
@@ -83,13 +93,32 @@ const Home = () => {
           .filter((ad) => ad.url);
 
         const finalOffers2 = getTwoOffers(offers2, fallbackOffers);
-        console.log("[Home] limitedOffers2 computed:", finalOffers2);
         setLimitedOffers2(finalOffers2);
+
+        // 🎬 VIDEO SLIDE (your new slot)
+        const videos = response
+          .filter(
+            (ad) => ad.slotId?._id === "682af722344e51b185a45062" && ad.isActive
+          )
+          .map((ad) => ({
+            url: ad.videoUrl
+              ? imgUrl + ad.videoUrl
+              : ad.contentUrl
+                ? imgUrl + ad.contentUrl
+                : null,
+            businessId: ad.businessId || null,
+          }))
+          .filter((ad) => ad.url);
+
+        const finalVideos = videos.length ? videos : fallbackVideo;
+        setVideoAds(finalVideos);
+        console.log("[Home] video ads:", finalVideos);
       } catch (error) {
         console.error("Error loading ads:", error);
         setHomeBanners(fallbackBanners);
         setLimitedOffers1(fallbackOffers);
         setLimitedOffers2(fallbackOffers);
+        setVideoAds(fallbackVideo);
       }
     };
 
@@ -109,6 +138,7 @@ const Home = () => {
       <HeroSlide images={homeBanners} />
       <Banner />
       <ServicesOn />
+      <VideoSlide videos={videoAds} />
       <Categories />
       <LimitedOffers offers1={limitedOffers1} offers2={limitedOffers2} />
       <Recognized />

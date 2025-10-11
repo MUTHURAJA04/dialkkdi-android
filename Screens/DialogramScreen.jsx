@@ -14,7 +14,7 @@ import {
 import { Dialogram } from '../services/apiClient';
 import PostItem from './PostItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 
 const DialogramScreen = () => {
   const colorScheme = useColorScheme();
