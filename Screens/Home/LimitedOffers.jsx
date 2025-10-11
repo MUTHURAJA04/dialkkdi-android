@@ -69,7 +69,7 @@ const LimitedOffers = ({ offers1 = [], offers2 = [] }) => {
       <View className="px-5 w-full flex flex-col lg:flex-row justify-center items-center gap-3 mt-2">
         {/* First Offer */}
         <Pressable
-          className="w-full lg:w-6/12 relative overflow-hidden rounded-lg"
+          className="w-full lg:w-6/12 relative overflow-hidden rounded-2xl"
           style={{ height: imgHeight }}
         >
           {currentImage1 && (
@@ -96,7 +96,7 @@ const LimitedOffers = ({ offers1 = [], offers2 = [] }) => {
 
         {/* Second Offer */}
         <Pressable
-          className="w-full lg:w-6/12 relative overflow-hidden rounded-lg"
+          className="w-full lg:w-6/12 relative overflow-hidden rounded-2xl"
           style={{ height: imgHeight }}
         >
           {currentImage2 && (
