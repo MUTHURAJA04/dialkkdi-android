@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(request => {
 
 apiClient.interceptors.response.use(
   response => {
-    // console.log('✅ Response:', response.data);
+    console.log('✅ Response:', response.data);
     return response;
   },
   error => {
@@ -678,7 +678,6 @@ export const civicFeeds = async () => {
 };
 
 export const civicFeedUser = async () => {
-
   const businessDataString = await AsyncStorage.getItem("businessData");
   const businessData = JSON.parse(businessDataString);
   const businessId = businessData?.id;
@@ -687,37 +686,33 @@ export const civicFeedUser = async () => {
   const userData = JSON.parse(userDataString);
   const userId = userData?._id || userData?.id;
 
-  console.log(businessId, userId);
-
   const usertoken = await AsyncStorage.getItem("userToken");
   const businesstoken = await AsyncStorage.getItem("businessToken");
 
-  const token = businesstoken ? businesstoken : usertoken
+  const token = businesstoken || usertoken;
+  console.log("🧩 Token:", token);
 
   try {
-    if (userId) {
-      const response = await apiClient.get(`/civicfeeds/poster/${userId}?type=User`,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      return response.data;
-    } else {
-      const response = await apiClient.get(`/civicfeeds/poster/${businessId}?type=Business`)
-      return response.data;
-    }
+    const id = userId || businessId;
+    const type = userId ? "User" : "Business";
+
+    const response = await apiClient.get(`/civicfeeds/poster/${id}?type=${type}`, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
 
   } catch (error) {
-    console.error(`Dont fetch Cicic Post ❌ `, {
+    console.error("❌ Don't fetch Civic Post", {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
     });
   }
-}
+};
 
 export const civicFeedUpdate = async ({ posterId, formData }) => {
   try {

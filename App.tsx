@@ -6,7 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
-  webClientId: '533114410878-g2i2uuqdrbsbf9phv8teepaf5smgc14p.apps.googleusercontent.com', // From Google Cloud Console
+  webClientId: '832286081721-6lpslcpq47q535evouh7dnb754ag090a.apps.googleusercontent.com', // From Google Cloud Console
   offlineAccess: true,
 });
 

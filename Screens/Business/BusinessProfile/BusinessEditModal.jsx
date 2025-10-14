@@ -88,12 +88,12 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
     };
 
     // Auto-select first area when areas list loads (per user request)
-    useEffect(() => {
-        if (form.city && areas.length > 0 && !form.area) {
-            const first = `${areas[0]._id || areas[0].id}`;
-            setForm(prev => ({ ...prev, area: first }));
-        }
-    }, [areas, form.city]);
+    // useEffect(() => {
+    //     if (form.city && areas.length > 0 && !form.area) {
+    //         const first = `${areas[0]._id || areas[0].id}`;
+    //         setForm(prev => ({ ...prev, area: first }));
+    //     }
+    // }, [areas, form.city]);
 
 
 
@@ -438,45 +438,42 @@ const BusinessEditModal = ({ visible, onClose, business, onBusinessUpdated }) =>
                             </View>
 
                             {/* Area */}
-                            <View className="mb-4">
-                                <Text className="text-sm font-semibold text-gray-700 mb-2">
-                                    Area *
-                                </Text>
-                                <View className="border border-gray-300 rounded-xl bg-gray-50 overflow-hidden">
-                                    <Picker
-                                        key={form.city || 'no-city'}
-                                        selectedValue={`${form.area || ""}`}
-                                        onValueChange={(value, index) => {
-                                            const v = `${value}`;
-                                            handleChange("area", v);
-                                        }}
-                                        enabled={!!form.city}
-                                        style={{
-                                            color: "#374151",
-                                            fontSize: 16,
-                                            height: Platform.OS === "ios" ? 200 : 50,
-                                        }}
-
-                                    >
-                                        <Picker.Item
-                                            label={form.city ? "Select an area" : "Select a city first"}
-                                            value=""
-                                            enabled={false}
-                                        />
-                                        {areas.map((area) => (
-                                            <Picker.Item
-                                                key={area._id || area.id}
-                                                label={area.name}
-                                                value={`${area._id || area.id}`}
-                                            />
-                                        ))}
-                                    </Picker>
-                                </View>
-                                <Text className="text-[11px] text-gray-400 mt-1">Areas loaded: {areas?.length || 0} | Selected: {form.area || 'none'}</Text>
-                                <Text className="text-xs text-gray-500 mt-1">
-                                    Current: {business?.address?.area?.name || "Not set"}
-                                </Text>
-                            </View>
+                        {/* Area */}
+<View className="mb-4">
+    <Text className="text-sm font-semibold text-gray-700 mb-2">
+        Area *
+    </Text>
+    <View className="border border-gray-300 rounded-xl bg-gray-50 overflow-hidden">
+        <Picker
+            key={form.city || 'no-city'}
+            selectedValue={form.area || ""}
+            onValueChange={(value) => {
+                handleChange("area", value);
+            }}
+            enabled={!!form.city}
+            style={{
+                color: "#374151",
+                fontSize: 16,
+                height: Platform.OS === "ios" ? 200 : 50,
+            }}
+        >
+            <Picker.Item 
+                label={form.city ? "Select an area" : "Select a city first"} 
+                value="" 
+            />
+            {areas.map((area) => (
+                <Picker.Item
+                    key={area._id || area.id}
+                    label={area.name}
+                    value={area._id || area.id}
+                />
+            ))}
+        </Picker>
+    </View>
+    <Text className="text-xs text-gray-500 mt-1">
+        Current: {business?.address?.area?.name || "Not set"}
+    </Text>
+</View>
 
                             {/* Pincode */}
                             <View className="mb-6">
