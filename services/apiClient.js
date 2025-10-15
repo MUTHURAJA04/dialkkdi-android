@@ -1311,4 +1311,70 @@ export const assignSlotpurchase = async (data) => {
   }
 }
 
+
+
+export const deleteAccount = async (reason) => {
+  try {
+    // 🧠 Fetch all stored data
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const businessData = JSON.parse(businessDataString);
+    const businessId = businessData?.id;
+
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userData = JSON.parse(userDataString);
+    const userId = userData?._id || userData?.id;
+
+    const userToken = await AsyncStorage.getItem("userToken");
+    const businessToken = await AsyncStorage.getItem("businessToken");
+
+    // 🔹 Determine which account type is logged in
+    const id = userId || businessId;
+    const type = userId ? "user" : "business";
+    const token = businessToken || userToken;
+
+    console.log("🧩 Account Type:", type);
+    console.log("🧩 Account ID:", id);
+    console.log("🧩 Token:", token);
+
+    if (!id || !token) {
+      return { success: false, message: "Missing account info or token." };
+    }
+
+    // 🔹 Set Authorization header dynamically
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    // 🔹 Construct endpoint
+    const endpoint = `/accountUtils/${type}/${id}`;
+
+    // 🔹 Make delete request
+    const response = await apiClient.delete(endpoint, {
+      headers,
+      data: { reason },
+    });
+
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return { success: false, message: "No response from server." };
+    }
+  } catch (error) {
+    console.error("❌ Account deletion error:", error);
+    if (error.response) {
+      return {
+        success: false,
+        message:
+          error.response.data?.message ||
+          `Failed to delete account.`,
+      };
+    } else if (error.request) {
+      return { success: false, message: "No response from server." };
+    } else {
+      return { success: false, message: error.message };
+    }
+  }
+};
+
+
 export default apiClient;

@@ -8,13 +8,18 @@ import {
     TouchableOpacity,
     FlatList,
     Alert,
+    Modal,
+    TextInput,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import BusinessEditModal from "./BusinessEditModal";
 import ImagesEditModal from "./ImagesEditModal";
 import BusinessTimingEditModal from "./BusinessTimingEditModal";
-import { getbusinessDetails, editBusiness } from "../../../services/apiClient";
+import { getbusinessDetails, editBusiness, deleteAccount } from "../../../services/apiClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import apiClient from "../../../services/apiClient";
+import { useNavigation } from "@react-navigation/native";
+import { Trash2 } from "react-native-feather";
 
 const BusinessProfileScreen = ({ businessPanel }) => {
     // State management
@@ -30,6 +35,24 @@ const BusinessProfileScreen = ({ businessPanel }) => {
     // Business timing edit state
     const [timingEditVisible, setTimingEditVisible] = useState(false);
     const [businessTimings, setBusinessTimings] = useState({});
+
+    // Account deletion state
+    const [deletingAccount, setDeletingAccount] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedReason, setSelectedReason] = useState(null);
+    const [customReason, setCustomReason] = useState("");
+
+    const navigation = useNavigation();
+    const deleteReasons = [
+        'I no longer need the service',
+        'I had a bad experience',
+        'Privacy or security concerns',
+        'I get too many emails/notifications',
+        'I found a better alternative',
+        'Just taking a break',
+        'Other',
+    ];
+
 
     // Initialize business data when component mounts or businessPanel changes
     useEffect(() => {
@@ -109,6 +132,47 @@ const BusinessProfileScreen = ({ businessPanel }) => {
             });
             Alert.alert("Error", "Failed to update business timings. Please try again.");
         }
+    };
+
+    // Handle account deletion
+    const handleDeleteAccount = async () => {
+        const finalReason = selectedReason === 'Other' ? customReason : selectedReason;
+        Alert.alert(
+            "Confirm Account Deletion",
+            "Are you sure you want to permanently delete your account? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        setDeletingAccount(true);
+                        try {
+                            const result = await deleteAccount(finalReason || "Business profile delete request");
+                            if (result?.businessdeleted) {
+                                Alert.alert("Account Deleted", "Your account has been deleted successfully.");
+                                await AsyncStorage.clear();
+                                setDeleteModalOpen(false);
+                                setSelectedReason(null);
+                                setCustomReason("");
+                                navigation.replace("Landing");
+                            } else {
+                                Alert.alert("Error", result?.message || "Failed to delete account.");
+                            }
+                        } catch (error) {
+                            console.error('❌ [BusinessProfileScreen] Account deletion error:', {
+                                message: error.message,
+                                response: error.response?.data,
+                                status: error.response?.status
+                            });
+                            Alert.alert("Error", error?.message || "Something went wrong.");
+                        } finally {
+                            setDeletingAccount(false);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     // Loading state
@@ -325,6 +389,166 @@ const BusinessProfileScreen = ({ businessPanel }) => {
                 )}
             </View>
 
+            {/* Danger Zone - Account Deletion */}
+            <View className="px-4 mb-16">
+                <View className="bg-white rounded-2xl p-5 shadow border border-red-200">
+                    <Text className="text-xl font-semibold text-red-700 mb-2">Danger Zone</Text>
+                    <Text className="text-gray-600 mb-4">
+                        Deleting your account will permanently remove your business profile, images, and associated data. This action cannot be undone.
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => setDeleteModalOpen(true)}
+                        disabled={deletingAccount}
+                        className={`flex-row items-center justify-center py-4 rounded-xl ${deletingAccount ? 'bg-red-600 opacity-70' : 'bg-red-600'}`}
+                    >
+                        {deletingAccount ? (
+                            <>
+                                <ActivityIndicator size="small" color="#ffffff" />
+                                <Text className="text-white font-semibold text-lg ml-2">Deleting…</Text>
+                            </>
+                        ) : (
+                            <>
+                                <Trash2 color="#ffffff" width={20} height={20} />
+                                <Text className="text-white font-semibold text-lg ml-2">Delete My Account</Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Delete Account Modal */}
+            <Modal
+                visible={deleteModalOpen}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => {
+                    if (deletingAccount) return;
+                    setDeleteModalOpen(false);
+                    setSelectedReason(null);
+                    setCustomReason("");
+                }}
+            >
+                <KeyboardAvoidingView
+                    className="flex-1 bg-black/60 justify-end"
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+                >
+                    <View className="bg-white rounded-t-3xl px-6 py-8 h-[90%]">
+                        {/* Header */}
+                        <View className="items-center mb-6">
+                            <View className="w-12 h-12 bg-red-100 rounded-full items-center justify-center mb-4">
+                                <Trash2 color="#ef4444" width={24} height={24} />
+                            </View>
+                            <Text className="text-2xl font-bold text-slate-900 mb-2">
+                                Delete Account
+                            </Text>
+                            <Text className="text-slate-600 text-center leading-5">
+                                We're sorry to see you go. Please tell us why you're deleting your account so we can improve our service.
+                            </Text>
+                        </View>
+
+                        {/* Reasons List */}
+                        <View className="mb-6 flex-1">
+                            <Text className="text-lg font-semibold text-slate-900 mb-4">
+                                Why are you leaving?
+                            </Text>
+                            <FlatList
+                                data={deleteReasons}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        className={`py-4 px-4 rounded-xl mb-3 border-2 ${
+                                            selectedReason === item
+                                                ? 'bg-red-50 border-red-500'
+                                                : 'bg-slate-50 border-slate-200'
+                                        }`}
+                                        onPress={() => !deletingAccount && setSelectedReason(item)}
+                                        disabled={deletingAccount}
+                                    >
+                                        <Text
+                                            className={`text-center ${
+                                                selectedReason === item
+                                                    ? 'text-red-700 font-semibold'
+                                                    : 'text-slate-700'
+                                            }`}
+                                        >
+                                            {item}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                showsVerticalScrollIndicator={false}
+                                className="flex-1"
+                            />
+                        </View>
+
+                        {/* Custom Input for "Other" */}
+                        {selectedReason === 'Other' && (
+                            <View className="mb-6">
+                                <Text className="text-lg font-semibold text-slate-900 mb-3">
+                                    Please tell us more
+                                </Text>
+                                <TextInput
+                                    className="bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 text-slate-900 text-base"
+                                    placeholder="Share your reason..."
+                                    placeholderTextColor="#64748b"
+                                    value={customReason}
+                                    onChangeText={text => !deletingAccount && setCustomReason(text)}
+                                    multiline
+                                    numberOfLines={4}
+                                    textAlignVertical="top"
+                                    style={{ minHeight: 100 }}
+                                    editable={!deletingAccount}
+                                />
+                            </View>
+                        )}
+
+                        {/* Action Buttons */}
+                        <View className="flex-row gap-4">
+                            <TouchableOpacity
+                                className="flex-1 py-4 rounded-xl bg-slate-200"
+                                onPress={() => {
+                                    if (deletingAccount) return;
+                                    setDeleteModalOpen(false);
+                                    setSelectedReason(null);
+                                    setCustomReason("");
+                                }}
+                                disabled={deletingAccount}
+                            >
+                                <Text className="text-center text-slate-700 font-semibold text-lg">
+                                    {deletingAccount ? 'Please wait…' : 'Cancel'}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                className={`flex-1 py-4 rounded-xl ${
+                                    selectedReason && (selectedReason !== 'Other' || customReason.trim())
+                                        ? (deletingAccount ? 'bg-red-600 opacity-70' : 'bg-red-600')
+                                        : 'bg-slate-400'
+                                }`}
+                                onPress={handleDeleteAccount}
+                                disabled={
+                                    deletingAccount ||
+                                    !selectedReason ||
+                                    (selectedReason === 'Other' && !customReason.trim())
+                                }
+                            >
+                                {deletingAccount ? (
+                                    <View className="flex-row items-center justify-center">
+                                        <ActivityIndicator size="small" color="#ffffff" />
+                                        <Text className="text-center text-white font-semibold text-lg ml-2">
+                                            Deleting…
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <Text className="text-center text-white font-semibold text-lg">
+                                        Delete Account
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
             {/* Modals */}
             <BusinessEditModal
                 visible={editVisible}

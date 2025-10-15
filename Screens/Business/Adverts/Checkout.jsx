@@ -92,9 +92,13 @@ const Checkout = () => {
                         Alert.alert("Failed", "Payment verification failed");
                     }
                 })
-                .catch((error) => {
-                    Alert.alert("Payment Cancelled", error.description);
-                });
+            .catch((error) => {
+  Alert.alert(
+    "Payment Cancelled",
+    "Your payment was not completed. Try again to confirm your order."
+  );
+});
+
         } catch (err) {
             console.error("Payment error:", err);
             Alert.alert("Error", "Something went wrong, try again");
