@@ -70,7 +70,7 @@ const Profile = ({ navigation }) => {
   }, []);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('userData');
+     await AsyncStorage.clear();
     navigation.navigate('Landing');
   };
 

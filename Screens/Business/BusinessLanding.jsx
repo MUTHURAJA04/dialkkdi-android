@@ -46,8 +46,9 @@ const BusinessLanding = () => {
 
 
     const handleLogout = async () => {
-        await AsyncStorage.removeItem('businessData');
+        await AsyncStorage.clear();
         navigation.replace('Landing');
+
     };
 
     const handleHome = () => {
