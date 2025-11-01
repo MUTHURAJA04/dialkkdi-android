@@ -25,6 +25,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   const lastTapRef = useRef(null);
   const heartScaleAnim = useRef(new Animated.Value(0)).current;
   const heartOpacityAnim = useRef(new Animated.Value(0)).current;
+  const isProcessingLike = useRef(false);
 
   // Defensive check - if item is undefined, don't render
   if (!item || !item._id) {
@@ -273,6 +274,11 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
     const DOUBLE_PRESS_DELAY = 300;
 
     if (lastTapRef.current && (now - lastTapRef.current) < DOUBLE_PRESS_DELAY) {
+      // Prevent rapid successive taps
+      if (isProcessingLike.current) {
+        console.log(`[PostItem] ⏳ Like action already in progress for post ${postId}, ignoring double tap`);
+        return;
+      }
 
       // Always show heart animation on double-tap
       triggerHeartAnimation();
@@ -286,6 +292,9 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
       // Double-tap only likes, never unlikes
       if (!isLiked) {
+        // Set processing flag to prevent multiple simultaneous requests
+        isProcessingLike.current = true;
+
         try {
           const response = await DialogramLike(postId);
 
@@ -299,7 +308,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
             newLikesCount = likesCount + 1;
           }
 
-
           onUpdateLike(postId, true, newLikesCount);
 
         } catch (error) {
@@ -309,8 +317,12 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
           } else {
             Alert.alert('Error', 'Failed to like post. Please try again.');
           }
+        } finally {
+          // Reset processing flag after a short delay to prevent rapid taps
+          setTimeout(() => {
+            isProcessingLike.current = false;
+          }, 500); // 500ms debounce
         }
-      } else {
       }
     } else {
       lastTapRef.current = now;
@@ -319,6 +331,11 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
 
   // Handle manual like/unlike via heart button
   const handleHeartPress = useCallback(async () => {
+    // Prevent rapid successive taps
+    if (isProcessingLike.current) {
+      console.log(`[PostItem] ⏳ Like action already in progress for post ${postId}, ignoring tap`);
+      return;
+    }
 
     // Check authentication first
     const isAuthenticated = await checkAuthentication();
@@ -326,6 +343,9 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       Alert.alert('Login Required', 'Please login to like posts.');
       return;
     }
+
+    // Set processing flag to prevent multiple simultaneous requests
+    isProcessingLike.current = true;
 
     try {
       const response = await DialogramLike(postId);
@@ -345,8 +365,6 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
         newLikeState = !isLiked;
         newLikesCount = newLikeState ? likesCount + 1 : Math.max(0, likesCount - 1);
       }
-
-
 
       onUpdateLike(postId, newLikeState, newLikesCount);
 
@@ -380,6 +398,11 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
       } else {
         Alert.alert('Error', 'Failed to update like. Please try again.');
       }
+    } finally {
+      // Reset processing flag after a short delay to prevent rapid taps
+      setTimeout(() => {
+        isProcessingLike.current = false;
+      }, 500); // 500ms debounce
     }
   }, [postId, isLiked, likesCount, onUpdateLike, checkAuthentication]);
 
