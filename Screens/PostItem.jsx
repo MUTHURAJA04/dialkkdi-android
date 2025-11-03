@@ -429,7 +429,7 @@ const PostItem = ({ item, colorScheme, onUpdateLike }) => {
   // Handle share action using native share menu
   const handleSharePress = useCallback(async () => {
     try {
-      const shareUrl = `https://dev.dialkaraikudi.com/feed/${postId}`;
+      const shareUrl = `https://www.dialkaraikudi.com/feed/${postId}`;
       const content = {
         title: `${businessName} on Dialogram`,
         message: `${description ? description + '\n' : ''}${shareUrl}`,

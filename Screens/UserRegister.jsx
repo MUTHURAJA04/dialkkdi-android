@@ -30,7 +30,7 @@ const UserRegister = ({ navigation }) => {
 
   const emailRegex = /^(?! )[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^(?! )[6-9]\d{9}$/;
-  const passwordRegex = /^(?! )[A-Za-z0-9!@#$%^&*()_+\-={}[\]|:;"'<>,?/]{8,20}$/;
+  const passwordRegex = /^(?! )[A-Za-z0-9!@#$%^&*()_+\-={}[\]|:;"'<>,?/]{6,20}$/;
   const nameRegex = /^(?! )[A-Za-z\s]+$/;
 
 
@@ -77,7 +77,7 @@ const UserRegister = ({ navigation }) => {
       return;
     }
     if (!passwordRegex.test(password)) {
-      Alert.alert('Error', 'Password must be at least 8 characters');
+      Alert.alert('Error', 'Password must be between 6-20 characters');
       return;
     }
 
@@ -86,8 +86,13 @@ const UserRegister = ({ navigation }) => {
       return;
     }
 
-    if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters long');
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+
+    if (password.length > 20) {
+      Alert.alert('Error', 'Password must not exceed 20 characters');
       return;
     }
 
@@ -182,7 +187,7 @@ const UserRegister = ({ navigation }) => {
           setPassword(cleanedText);
         }}
         placeholderTextColor="#999"
-        maxLength={15}
+        maxLength={20}
         showPassword={showPassword}
         togglePasswordVisibility={() => setShowPassword((prev) => !prev)}
         isPassword

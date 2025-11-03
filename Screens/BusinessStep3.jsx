@@ -58,6 +58,9 @@ const BusinessStep3 = () => {
     if (password.length < 6) {
       return Alert.alert('Error', 'Password must be at least 6 characters long.');
     }
+    if (password.length > 20) {
+      return Alert.alert('Error', 'Password must not exceed 20 characters.');
+    }
 
     if (password !== confirmPassword) {
       return Alert.alert('Error', 'Passwords do not match.');
@@ -147,6 +150,7 @@ const BusinessStep3 = () => {
           onChangeText={setPassword}
           showPassword={showPassword}
           togglePasswordVisibility={() => setShowPassword(prev => !prev)}
+          maxLength={20}
         />
 
         <Input
@@ -157,6 +161,7 @@ const BusinessStep3 = () => {
           isPassword
           showPassword={showConfirmPassword}
           togglePasswordVisibility={() => setShowConfirmPassword((prev) => !prev)}
+          maxLength={20}
         />
 
         <Text className="text-gray-700 font-medium mb-2">

@@ -81,8 +81,12 @@ const Login = ({ route }) => {
       return;
     }
 
-    if (password.length < 8) {
-      Alert.alert('Validation Error', 'Password must be 8-20 characters');
+    if (password.length < 6) {
+      Alert.alert('Validation Error', 'Password must be 6-20 characters');
+      return;
+    }
+    if (password.length > 20) {
+      Alert.alert('Validation Error', 'Password must be 6-20 characters');
       return;
     }
 

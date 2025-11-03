@@ -87,6 +87,14 @@ const ForgotPassword = () => {
       Alert.alert('Error', 'Please enter and confirm new password');
       return;
     }
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+    if (newPassword.length > 20) {
+      Alert.alert('Error', 'Password must not exceed 20 characters');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -212,6 +220,7 @@ const ForgotPassword = () => {
                   }}
                   showPassword={showPassword}
                   togglePasswordVisibility={() => setShowPassword((prev) => !prev)}
+                  maxLength={20}
                 // className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
                 />
 
@@ -228,6 +237,7 @@ const ForgotPassword = () => {
                   // className="border border-gray-300 rounded-lg p-3 mb-4 w-full"
                   showPassword={showConfirmPassword}
                   togglePasswordVisibility={() => setShowConfirmPassword((prev) => !prev)}
+                  maxLength={20}
                 />
                 <TouchableOpacity
                   onPress={handleResetPassword}

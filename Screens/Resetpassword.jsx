@@ -16,6 +16,14 @@ const ResetPassword = ({ route }) => {
       Alert.alert('Error', 'Please enter both password fields');
       return;
     }
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+    if (newPassword.length > 20) {
+      Alert.alert('Error', 'Password must not exceed 20 characters');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -52,6 +60,7 @@ const ResetPassword = ({ route }) => {
             value={newPassword}
             onChangeText={setNewPassword}
             className="border border-gray-300 rounded-lg p-3 mb-4"
+            maxLength={20}
           />
 
           <TextInput
@@ -61,6 +70,7 @@ const ResetPassword = ({ route }) => {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             className="border border-gray-300 rounded-lg p-3 mb-4"
+            maxLength={20}
           />
 
           <TouchableOpacity
