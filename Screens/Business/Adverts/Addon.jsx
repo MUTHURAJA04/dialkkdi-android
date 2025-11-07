@@ -432,7 +432,7 @@ const Addon = () => {
                                 "Advertisement content must comply with our advertising policies.",
                                 "Ad placement is subject to availability and display priority.",
                                 "Only one slot per type is allowed per business.",
-                                "Each slot type has limited positions (e.g., homepage banner max 10).",
+                                "Each slot type has limited positions .",
                                 "If slots are full, contact us to reserve your spot.",
                                 "Refunds are not available once an advertisement becomes active.",
                                 "For further queries, contact us at: +91 94423 38670",

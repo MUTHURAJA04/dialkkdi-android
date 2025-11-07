@@ -30,7 +30,7 @@ const Checkout = () => {
                 description: `Ad Slot Purchase: ${plan.name}`,
                 image: "https://yourcdn.com/logo.png",
                 currency: "INR",
-                key: "rzp_test_w7eHbASEFZ4b09",
+                key: "rzp_live_Ap0i4wR26uP4WR",
                 amount: orderResponse.amount,
                 order_id: orderResponse.id,
                 name: "Dial Karaikudi",
