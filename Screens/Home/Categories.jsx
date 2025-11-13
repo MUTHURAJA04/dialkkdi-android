@@ -98,7 +98,7 @@ const Categories = () => {
           renderItem={renderCategoryItem}
           keyExtractor={(item, index) => {
             const key = item?._id || item?.id || String(index);
-            if (__DEV__) console.log('[Categories] keyExtractor', { key, index, _id: item?._id, id: item?.id, name: item?.displayName });
+            if (__DEV__) 
             return key;
           }}
           numColumns={numColumns}

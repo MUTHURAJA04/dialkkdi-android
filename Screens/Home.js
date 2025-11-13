@@ -7,12 +7,13 @@ import ServicesOn from "./Home/ServicesOn";
 import Categories from "./Home/Categories";
 import LimitedOffers from "./Home/LimitedOffers";
 import Recognized from "./Home/Recognized";
-import { getads } from "../services/apiClient";
+import { getads, syncFcmToken  } from "../services/apiClient";
 import banner1 from "../assets/Banners/Banner1.jpg";
 import banner2 from "../assets/Banners/Banner2.jpg";
 import banner3 from "../assets/Banners/Banner3.jpg";
 import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
+
 
 const Home = () => {
   const [homeBanners, setHomeBanners] = useState([]);
@@ -45,6 +46,7 @@ const Home = () => {
   ];
 
   useEffect(() => {
+     syncFcmToken();
     const getAdverts = async () => {
       try {
         const response = await getads();
