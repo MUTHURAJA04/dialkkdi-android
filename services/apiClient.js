@@ -3,7 +3,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
+const API_BASE_URL = 'https://api.dialkaraikudi.com';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1423,7 +1423,7 @@ export const syncFcmToken = async () => {
       return;
     }
 
-    const DEV_API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
+    const DEV_API_BASE_URL = 'https://api.dialkaraikudi.com';
     const endpoint =
       type === "business"
         ? `${DEV_API_BASE_URL}/business/updatefcm/${id}`
@@ -1443,6 +1443,68 @@ export const syncFcmToken = async () => {
       console.error("Response data:", error.response.data);
       console.error("Response status:", error.response.status);
     }
+  }
+};
+
+export const editUser = async (payload) => {
+  try {
+    const userDataString = await AsyncStorage.getItem("userData");
+    const token = await AsyncStorage.getItem("userToken");
+
+    if (!userDataString || !token) {
+      throw new Error("User not authenticated. Please login again.");
+    }
+
+    const userData = JSON.parse(userDataString);
+    const userId = userData.id;
+
+    if (!userId) {
+      throw new Error("Invalid user data. Please login again.");
+    }
+
+    // Detect if payload is FormData
+    const isFormData =
+      payload &&
+      typeof payload === "object" &&
+      (typeof FormData !== "undefined" && payload instanceof FormData);
+
+    console.log(
+      "📤 [editUser] Payload type:",
+      isFormData ? "FormData" : "JSON"
+    );
+
+    const response = await apiClient.put(
+      `/user/${userId}`,
+      isFormData ? payload : JSON.stringify(payload),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(isFormData
+            ? { "Content-Type": "multipart/form-data" }
+            : { "Content-Type": "application/json" }),
+        },
+        transformRequest: (data) => data, // prevent axios from modifying FormData
+      }
+    );
+
+    console.log("✅ [editUser] Success:", response.data);
+
+    if (response?.data) {
+      return { success: true, data: response.data };
+    }
+
+    return { success: false, error: "Unknown server error" };
+  } catch (error) {
+    console.error("❌ [editUser] API Error:", {
+      message: error.message,
+      status: error.response?.status,
+      response: error.response?.data,
+    });
+
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
   }
 };
 

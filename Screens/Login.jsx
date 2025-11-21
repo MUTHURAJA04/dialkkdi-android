@@ -14,13 +14,16 @@ import {
 } from 'react-native';
 import { X } from 'react-native-feather';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import Input from '../components/CustomInput';
 import { googleSSOLogin, loginWithEmail } from '../services/apiClient'; // ✅ Added login API
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PhoneModal from '../components/PhoneModal';
 
 const Login = ({ route }) => {
-
   const navigation = useNavigation();
   const { type } = route.params;
   const title = type === 'business' ? 'Business Login' : 'User Login';
@@ -28,13 +31,13 @@ const Login = ({ route }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false)
-  const [googleloading, setGoogleloading] = useState(false)
-
+  const [loading, setLoading] = useState(false);
+  const [googleloading, setGoogleloading] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
   /** ✅ Handle Google Login */
   const handleGoogleLogin = async () => {
     try {
-      setGoogleloading(true)
+      setGoogleloading(true);
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
 
@@ -43,7 +46,8 @@ const Login = ({ route }) => {
 
       if (result?.token) {
         Alert.alert('Welcome!', `Logged in as ${result.user.name}`);
-        navigation.navigate('Home');
+        console.log('SSO CLICKED');
+        setShowPhoneModal(true);
       } else {
         console.warn('⚠️ Google login failed:', result?.message);
         Alert.alert('Login Failed', result?.message || 'Unknown error');
@@ -61,20 +65,19 @@ const Login = ({ route }) => {
         Alert.alert('Something went wrong', error.message || 'Unknown error');
       }
     } finally {
-      setGoogleloading(false)
+      setGoogleloading(false);
     }
   };
 
   /** ✅ Handle Email/Password Login */
   const handleEmailLogin = async () => {
-
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
-    const emailRegex = /^(?!\.)(?!.*\.\.)(?!.*\.\@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.com$/;
-
+    const emailRegex =
+      /^(?!\.)(?!.*\.\.)(?!.*\.\@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.com$/;
 
     if (!emailRegex.test(email.trim())) {
       Alert.alert('Validation Error', 'Enter a valid email address');
@@ -89,7 +92,6 @@ const Login = ({ route }) => {
       Alert.alert('Validation Error', 'Password must be 6-20 characters');
       return;
     }
-
 
     try {
       setLoading(true);
@@ -110,15 +112,16 @@ const Login = ({ route }) => {
         console.warn(' Login failed:', result?.message);
         Alert.alert('Login Failed', result?.message || 'Invalid credentials');
       }
-
     } catch (error) {
       console.error(' Email Login Error:', error);
-      Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
+      Alert.alert(
+        'Login Failed',
+        error.response?.data?.message || 'Something went wrong',
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
-
 
   useFocusEffect(
     React.useCallback(() => {
@@ -135,7 +138,7 @@ const Login = ({ route }) => {
         }
       };
       checkAuth();
-    }, [navigation])
+    }, [navigation]),
   );
 
   return (
@@ -146,10 +149,15 @@ const Login = ({ route }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="flex-1 justify-center items-center px-6">
             {/* Title */}
-            <Text className="text-2xl font-bold text-gray-800 mb-6">{title}</Text>
+            <Text className="text-2xl font-bold text-gray-800 mb-6">
+              {title}
+            </Text>
 
             {/* Email Input */}
             <Input
@@ -167,19 +175,21 @@ const Login = ({ route }) => {
               value={password}
               onChangeText={setPassword}
               showPassword={showPassword}
-              togglePasswordVisibility={() => setShowPassword((prev) => !prev)}
+              togglePasswordVisibility={() => setShowPassword(prev => !prev)}
             />
 
             {/* ✅ Email Login Button */}
             <TouchableOpacity
-              className={`px-6 py-3 rounded-lg w-full mb-4 ${loading ? "bg-orange-400" : "bg-orange-500"}`}
+              className={`px-6 py-3 rounded-lg w-full mb-4 ${loading ? 'bg-orange-400' : 'bg-orange-500'}`}
               onPress={handleEmailLogin}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text className="text-white text-center text-base font-semibold">Login</Text>
+                <Text className="text-white text-center text-base font-semibold">
+                  Login
+                </Text>
               )}
             </TouchableOpacity>
 
@@ -197,16 +207,13 @@ const Login = ({ route }) => {
                   disabled={googleloading}
                   className="flex-row items-center justify-center border border-gray-300 px-6 py-3 rounded-lg w-full bg-white"
                 >
-                  {
-                    googleloading ? (
-                      <ActivityIndicator />
-                    ) : (
-                      <Text className="text-center text-base font-semibold text-gray-700">
-                        Continue with Google
-                      </Text>
-                    )
-                  }
-
+                  {googleloading ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <Text className="text-center text-base font-semibold text-gray-700">
+                      Continue with Google
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
@@ -224,16 +231,19 @@ const Login = ({ route }) => {
               >
                 <Text className="text-sm text-gray-700">
                   Don't have an account yet?{' '}
-                  <Text className="text-orange-600 font-semibold underline">Register</Text>
+                  <Text className="text-orange-600 font-semibold underline">
+                    Register
+                  </Text>
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword', { type })}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword', { type })}
+              >
                 <Text className="text-sm text-orange-600 font-semibold underline">
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
-
             </View>
           </View>
 
@@ -246,6 +256,10 @@ const Login = ({ route }) => {
           </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
+      <PhoneModal
+        visible={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+      />
     </SafeAreaView>
   );
 };

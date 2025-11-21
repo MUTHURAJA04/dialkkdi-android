@@ -45,7 +45,7 @@ const DashboardCharts = ({ dashboard }) => {
         });
     };
 
-    const createdDate = dashboard.business.createdDate;
+    const createdDate = dashboard.business.createdAt;
     const dateObj = new Date(createdDate);
 
     const onlyDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1)

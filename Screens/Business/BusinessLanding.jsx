@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { Home, User, Instagram, MessageCircle, Play, LogOut } from 'react-native-feather';
-import { getbusinessDashboard, getbusinessDetails } from '../../services/apiClient';
+import { getbusinessDashboard, getbusinessDetails, syncFcmToken } from '../../services/apiClient';
 import DashboardCharts from './Dashboard';
 import BusinessProfileScreen from './BusinessProfile/BusinessProfileScreen';
 import ImageUpload from './Dilogram/Upload';
@@ -20,6 +20,8 @@ const BusinessLanding = () => {
     const [businessPanel, setBusinessPanel] = useState(null);
 
     useEffect(() => {
+         syncFcmToken();
+         console.log("syncFcmToken called in bussnies")
         const getDashBoard = async () => {
             try {
                 const response = await getbusinessDashboard();
