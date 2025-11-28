@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import Input from '../components/CustomInput';
 import { getCategories } from '../services/apiClient';
 import { ChevronUp, ChevronDown } from 'react-native-feather';
-
+ 
 const BusinessRegister = () => {
   const navigation = useNavigation();
 
