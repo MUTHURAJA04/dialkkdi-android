@@ -53,6 +53,7 @@ const BusinessStep3 = () => {
   };
 
   const handleSubmit = async () => {
+
     // Basic validations
     if (password.length < 6) {
       return Alert.alert('Error', 'Password must be at least 6 characters long.');
@@ -71,50 +72,77 @@ const BusinessStep3 = () => {
     }
 
     try {
+      setLoading(true);
 
-      setLoading(true)
       const form = new FormData();
 
-      // Append all fields from formData
+
+      console.log(form, formData, "123214214");
+
+
+      // ---------- 1) CITY & AREA ObjectId (same as website) ----------
+      form.append("city", formData.cityId);
+      form.append("area", formData.areaId);
+
+      // ---------- 2) Address Area ----------
+      form.append("addressArea", formData.address);
+
+      // ---------- 3) Append simple fields except photos + categories ----------
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          form.append(key, value);
-        }
+        if (key === "photos" || key === "categories") return;
+        form.append(key, value);
       });
 
-      // Append password
-      form.append('password', password);
+      // ---------- 4) Categories (Array) EXACT same as website ----------
+      formData.categories.forEach((catId) => {
+        form.append("categories", catId);
+      });
 
-      // Append each photo
+      // ---------- 5) Formatted Address ----------
+      // const cityName = cities.find((c) => c._id === formData.cityId)?.name || "";
+      // const areaName = areas.find((a) => a._id === formData.areaId)?.name || "";
+
+      form.append(
+        "formattedAddress",
+        `${formData.address}, ${formData?.areaName}, ${formData?.cityName}, ${formData?.pincode}, Tamil Nadu`
+      );
+
+      // ---------- 6) Photos Upload ----------
       photos.forEach((photo, index) => {
-        form.append('photos', {
+        form.append("photos", {
           uri: photo.uri,
           name: photo.fileName || `photo_${index + 1}.jpg`,
-          type: photo.type || 'image/jpeg',
+          type: photo.type || "image/jpeg",
         });
       });
 
-      // Send to API
+      // ---------- 7) Contact Phone ----------
+      form.append("contactPhone", formData.phone);
+
+      // ---------- 8) Password ----------
+      form.append("password", password);
+
+      console.log("🚀 FINAL FORM DATA:", form);
+
+      // ---------- 9) Submit to API ----------
       const response = await postBusiness(form);
 
-      const type = 'business'
-      const email = formData.email
+      const email = formData.email;
+      const type = "business";
 
-
-      Alert.alert('Success', 'Registration complete!');
-      navigation.navigate('VerifyOtp', { email, type });
+      Alert.alert("Success", "Registration complete!");
+      navigation.navigate("VerifyOtp", { email, type });
 
     } catch (error) {
-      console.error('❌ Registration Error:', {
+      console.error("❌ Registration Error:", {
         message: error.message,
         details: error.response?.data,
       });
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
-
 
 
   return (
