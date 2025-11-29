@@ -3,7 +3,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://api.dialkaraikudi.com';
+const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
 
 // Axios instance
 const apiClient = axios.create({

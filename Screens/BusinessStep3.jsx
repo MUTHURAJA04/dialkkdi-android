@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Input from '../components/CustomInput';
-import { postBusiness } from '../services/apiClient';
+import { postBusiness, getCities, getArea } from '../services/apiClient';
 
 const BusinessStep3 = () => {
   const navigation = useNavigation();
@@ -31,6 +31,37 @@ const BusinessStep3 = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [cities, setCities] = useState([]);
+  const [areas, setAreas] = useState([]);
+
+  // Fetch cities on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const cityData = await getCities();
+        setCities(cityData || []);
+      } catch (err) {
+        console.error('Error fetching cities:', err);
+      }
+    })();
+  }, []);
+
+  // Fetch areas when cityId is available
+  useEffect(() => {
+    if (!formData?.cityId) {
+      setAreas([]);
+      return;
+    }
+
+    (async () => {
+      try {
+        const areaData = await getArea(formData.cityId);
+        setAreas(areaData || []);
+      } catch (err) {
+        console.error('Error fetching areas:', err);
+      }
+    })();
+  }, [formData?.cityId]);
 
   const handleAddPhoto = () => {
     if (photos.length >= 6) return;
@@ -79,27 +110,36 @@ const BusinessStep3 = () => {
       setLoading(true)
       const form = new FormData();
 
-      // Append all fields from formData
+      // Get city and area names for formattedAddress
+      const cityName = cities.find((c) => c._id === formData.cityId)?.name || '';
+      const areaName = areas.find((a) => a._id === formData.areaId)?.name || '';
+
+      // Append address fields with correct field names (matching React web version)
+      form.append('city', formData.cityId); // Must be the ObjectId string from DB
+      form.append('area', formData.areaId); // Same
+      form.append('addressArea', formData.address);
+
+      // Append all other fields from formData (excluding photos and categories)
       Object.entries(formData).forEach(([key, value]) => {
-        if (value === null || value === undefined) return;
-
-        // Ensure categories are sent as an array entries in multipart form
-        if (key === 'categories' && Array.isArray(value)) {
-          value.forEach((categoryId) => {
-            if (categoryId !== null && categoryId !== undefined) {
-              form.append('categories[]', String(categoryId));
-            }
-          });
-          return;
-        }
-
+        if (key === 'photos' || key === 'categories') return;
         form.append(key, value);
       });
 
       // Append password
       form.append('password', password);
 
-      // Append each photo
+      // Append categories correctly
+      if (formData.categories && Array.isArray(formData.categories)) {
+        formData.categories.forEach((catId) => {
+          form.append('categories', catId);
+        });
+      }
+
+      // Append formattedAddress
+      const formattedAddress = `${formData.address}, ${areaName}, ${cityName}, ${formData.pincode}, Tamil Nadu`;
+      form.append('formattedAddress', formattedAddress);
+
+      // Append images
       photos.forEach((photo, index) => {
         form.append('photos', {
           uri: photo.uri,
@@ -108,6 +148,9 @@ const BusinessStep3 = () => {
         });
       });
 
+      // Append contactPhone at the end (matching React web version)
+      form.append('contactPhone', formData.phone);
+console.log("FORM >>>>>>>>>>>>>>>>>>>>>>>>", form)
       // Send to API
       const response = await postBusiness(form);
 
@@ -426,12 +469,10 @@ const BusinessStep3 = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate(('Login'), { type: 'business' })}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login', { type: 'business' })}>
           <Text className="text-sm text-orange-600 text-center">
-            Already have an account?
-            <Text className="underline"
-              onPress={() => navigation.navigate('Login', { type })}
-            >Login</Text>
+            Already have an account?{' '}
+            <Text className="underline">Login</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
