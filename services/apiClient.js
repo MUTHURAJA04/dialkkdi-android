@@ -1,8 +1,9 @@
 // services/apiClient.js
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://api.dialkaraikudi.com';
+const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
 
 // Axios instance
 const apiClient = axios.create({
@@ -325,8 +326,8 @@ export const getCities = async () => {
 };
 export const getads = async () => {
   try {
-    const response = await apiClient.get(`/adverts`);
-    
+    const response = await apiClient.get(`/adverts/publicAds`);
+
     return response.data;
   } catch (error) {
     console.error('❌ Google SSO API call failed:', {
@@ -1372,6 +1373,75 @@ export const deleteAccount = async (reason) => {
       return { success: false, message: "No response from server." };
     } else {
       return { success: false, message: error.message };
+    }
+  }
+};
+
+export const syncFcmToken = async () => {
+  try {
+    // Get FCM token saved in AsyncStorage
+    const fcmToken = await AsyncStorage.getItem('fcmToken');
+    if (!fcmToken) {
+      console.log('⚠️ No FCM token found in AsyncStorage');
+      return;
+    }
+
+    // Load user/business data & tokens
+    const businessDataString = await AsyncStorage.getItem("businessData");
+    const userDataString = await AsyncStorage.getItem("userData");
+    const userToken = await AsyncStorage.getItem("userToken");
+    const businessToken = await AsyncStorage.getItem("businessToken");
+
+    let businessData = null;
+    let userData = null;
+
+    if (businessDataString) {
+      try {
+        businessData = JSON.parse(businessDataString);
+      } catch (e) {
+        console.error('Error parsing businessData:', e);
+      }
+    }
+
+    if (userDataString) {
+      try {
+        userData = JSON.parse(userDataString);
+      } catch (e) {
+        console.error('Error parsing userData:', e);
+      }
+    }
+
+    const businessId = businessData?.id || businessData?._id;
+    const userId = userData?._id || userData?.id;
+
+    const id = userId || businessId;
+    const type = userId ? "user" : "business";
+    const token = userToken || businessToken;
+
+    if (!id || !token) {
+      console.log('⚠️ Missing account info or token. User may not be logged in.');
+      return;
+    }
+
+    const DEV_API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
+    const endpoint =
+      type === "business"
+        ? `${DEV_API_BASE_URL}/business/updatefcm/${id}`
+        : `${DEV_API_BASE_URL}/user/updatefcm/${id}`;
+
+    await axios.patch(endpoint, { fcmToken }, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log(`✅ ${type} FCM token updated successfully!`);
+  } catch (error) {
+    console.error("❌ FCM sync error:", error.message);
+    if (error.response) {
+      console.error("Response data:", error.response.data);
+      console.error("Response status:", error.response.status);
     }
   }
 };

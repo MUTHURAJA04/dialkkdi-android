@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
-  Platform,
   Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -22,8 +21,13 @@ const BusinessStep2 = () => {
   const [cityId, setCityId] = useState('');
   const [areaId, setAreaId] = useState('');
   const [pincode, setPincode] = useState('');
+
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
+
+  // NEW STATES FOR NAME
+  const [cityName, setCityName] = useState('');
+  const [areaName, setAreaName] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -62,14 +66,8 @@ const BusinessStep2 = () => {
 
     const trimmedAddress = address.trim();
 
-    if (
-      !/^(?!\.)(?!\d+$)[A-Za-z0-9\s,#.\-/'()]+$/.test(trimmedAddress) ||
-      trimmedAddress.length < 5
-    ) {
-      Alert.alert(
-        'Validation Error',
-        'Please enter a valid physical address'
-      );
+    if (!/^(?!\.)(?!\d+$)[A-Za-z0-9\s,#-]+$/.test(trimmedAddress) || trimmedAddress.length < 5) {
+      Alert.alert('Validation Error', 'Enter a valid Mail address');
       return;
     }
     
@@ -93,16 +91,16 @@ const BusinessStep2 = () => {
       return;
     }
 
-
-
+    // MERGED FORM DATA WITH NAME + ID
     const mergedFormData = {
       ...formData,
       address,
       cityId,
+      cityName, // ADDED
       areaId,
+      areaName, // ADDED
       pincode,
     };
-
 
     navigation.navigate('BusinessStep3', {
       formData: mergedFormData,
@@ -131,20 +129,19 @@ const BusinessStep2 = () => {
           textAlignVertical="top"
         />
 
-
+        {/* CITY PICKER */}
         <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-200">
           <Picker
             selectedValue={cityId}
             onValueChange={(itemValue) => {
               setCityId(itemValue);
               setAreaId('');
+
+              const selectedCity = cities.find((c) => c._id === itemValue);
+              setCityName(selectedCity?.name || '');
             }}
-            style={{
-              color: '#000', // Ensure text is visible
-              // height: Platform.OS === 'ios' ? 200 : 50, // Better height for Android
-              // padding: ''
-            }}
-            dropdownIconColor="#000" // For Android dropdown icon
+            style={{ color: '#000' }}
+            dropdownIconColor="#000"
           >
             <Picker.Item label="Select City" value="" enabled={false} />
             {cities.map((city) => (
@@ -152,21 +149,24 @@ const BusinessStep2 = () => {
                 key={city._id}
                 label={city.name}
                 value={city._id}
-                color="#000" // Ensure item text is visible
+                color="#000"
               />
             ))}
           </Picker>
         </View>
 
+        {/* AREA PICKER */}
         <View className="overflow-hidden border border-gray-300 rounded-lg mb-4 bg-gray-200">
           <Picker
             selectedValue={areaId}
-            onValueChange={(itemValue) => setAreaId(itemValue)}
-            enabled={!!cityId} // Disable if no city selected
-            style={{
-              color: '#000',
-              // height: Platform.OS === 'ios' ? 200 : 50,
+            onValueChange={(itemValue) => {
+              setAreaId(itemValue);
+
+              const selectedArea = areas.find((a) => a._id === itemValue);
+              setAreaName(selectedArea?.name || '');
             }}
+            enabled={!!cityId}
+            style={{ color: '#000' }}
             dropdownIconColor="#000"
           >
             <Picker.Item label={cityId ? "Select Area" : "Select a city first"} value="" enabled={false} />
@@ -181,6 +181,7 @@ const BusinessStep2 = () => {
           </Picker>
         </View>
 
+        {/* PINCODE */}
         <Input
           placeholder="Pincode"
           placeholderTextColor="#aaa"
@@ -189,6 +190,7 @@ const BusinessStep2 = () => {
           onChangeText={setPincode}
         />
 
+        {/* BUTTONS */}
         <View className="flex-row justify-between items-center mb-6">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -208,13 +210,12 @@ const BusinessStep2 = () => {
         <TouchableOpacity onPress={() => navigation.navigate(('Login'), { type: 'business' })}>
           <Text className="text-sm text-orange-600 text-center">
             Already have an account?
-            <Text className="underline"
-              onPress={() => navigation.navigate('Login', { type })}
-            >Login</Text>
+            <Text className="underline"> Login</Text>
           </Text>
         </TouchableOpacity>
-      </ScrollView >
-    </View >
+
+      </ScrollView>
+    </View>
   );
 };
 
