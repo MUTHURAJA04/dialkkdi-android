@@ -3,7 +3,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://dev-api.dialkaraikudi.com';
+const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1430,7 +1430,7 @@ export const syncFcmToken = async () => {
         : `${DEV_API_BASE_URL}/user/updatefcm/${id}`;
 
     await axios.patch(endpoint, { fcmToken }, {
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
@@ -1445,6 +1445,52 @@ export const syncFcmToken = async () => {
     }
   }
 };
+
+export const getFestivelfeed = async () => {
+  try {
+
+    const userToken = await AsyncStorage.getItem("userToken");
+
+    console.log(userToken);
+
+
+    const response = await apiClient.get('/festivel',
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        }
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log(error);
+
+  }
+}
+
+
+export const createFestivelFeed = async (data) => {
+  try {
+    const userToken = await AsyncStorage.getItem("userToken");
+
+    const response = await apiClient.post('/festivel/', data, {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+
+    return response.data;  // { success: "", message: "" }
+  } catch (error) {
+    console.error("POST ERROR:", error);
+
+    return {
+      success: false,
+      message: error.response?.data?.message || error.message || "Unknown error"
+    };
+  }
+};
+
 
 
 export default apiClient;

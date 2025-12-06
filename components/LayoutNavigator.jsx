@@ -17,6 +17,7 @@ import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
 import ForgotPassword from '../Screens/Forgetpassword';
 import VerifyOtp from '../Screens/VerifyOtp';
 import DialogramScreen from '../Screens/DialogramScreen';
+import FestivelScreen from '../Screens/Festivel/FestivelScreen';
 import BusinessLanding from '../Screens/Business/BusinessLanding';
 import TalkofTown from '../Screens/TalkOftheTown/TalkofTown';
 import Checkout from '../Screens/Business/Adverts/Checkout';
@@ -108,6 +109,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="BusinessStep2" component={(BusinessStep2)} />
       <Stack.Screen name="BusinessStep3" component={(BusinessStep3)} />
       <Stack.Screen name="DialogramScreen" component={withAuthGuard(DialogramScreen)} />
+      <Stack.Screen name="FestivelScreen" component={withAuthGuard(FestivelScreen)} />
       <Stack.Screen name="TalkofTown" component={withAuthGuard(TalkofTown)} />
       <Stack.Screen name="Profile" component={withAuthGuard(Profile)} />
       <Stack.Screen name="BusinessListScreen" component={withAuthGuard(withLayout(BusinessListScreen))} />

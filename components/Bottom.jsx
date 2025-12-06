@@ -51,6 +51,15 @@ const Bottom = () => {
       ),
     },
     {
+      screen: 'FestivelScreen',
+      icon: (
+        <Image
+          source={require('../assets/Dialogram.png')}
+          className="w-5 h-7"
+        />
+      ),
+    },
+    {
       screen: 'TalkofTown',
       icon: (
         <Image
