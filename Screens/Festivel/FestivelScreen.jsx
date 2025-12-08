@@ -9,10 +9,12 @@ import {
     FlatList,
     ActivityIndicator,
     StatusBar,
-    Share
+    Share,
+    Alert
 } from "react-native";
 // import { launchImageLibrary } from "react-native-image-picker";
 import { launchCamera } from "react-native-image-picker";
+import { Grid, Info } from 'react-native-feather';
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apiClient, { createFestivelFeed, getFestivelfeed } from "../../services/apiClient";
@@ -60,18 +62,18 @@ export default function FestivelScreen() {
         if (!name || !phone || !image) return alert("Fill all fields!");
 
         if (name.trim().length < 3) {
-            return alert("Enter a valid name!");
+            return Alert.alert("Enter a valid name!");
         }
 
         if (!/^[6-9]\d{9}$/.test(phone)) {
-            return alert("Enter a valid 10-digit phone number starting with 6-9!");
+            return Alert.alert("Enter a valid 10-digit phone number starting with 6-9!");
         }
 
         setLoading(true);
 
         const user = await AsyncStorage.getItem("userData");
         const parsed = JSON.parse(user);
-        const userId = parsed._id;
+        const userId = parsed.id;
 
         const formData = new FormData();
         formData.append("userId", userId);
@@ -90,20 +92,52 @@ export default function FestivelScreen() {
             console.log("API RESPONSE ===>", res);
 
             if (res.success) {
-                alert(res.message || "Post submitted!");
-                setModalVisible(false);
-                setName("");
-                setPhone("");
-                setImage(null);
+                Alert.alert(
+                    "Success",
+                    res.message || "Post submitted!",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+
+                                setName("");
+                                setPhone("");
+                                setImage(null);
+                                setInfoModal(false);
+                            }
+                        }
+                    ]
+                );
             } else {
-                alert(res.message || "Something went wrong!");
+                Alert.alert(
+                    "Error",
+                    res.message || "Something went wrong!",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => setInfoModal(false)
+                        }
+                    ]
+                );
             }
+
         } catch (err) {
             console.log(err);
-            alert(err.message || "Error submitting post");
+            Alert.alert(
+                "Error",
+                err.message || "Error submitting post",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => setModalVisible(false)
+                    }
+                ]
+            );
+        } finally {
+            setLoading(false)
         }
 
-        setLoading(false);
+
     };
 
     // 📌 GET FEED
@@ -175,23 +209,30 @@ export default function FestivelScreen() {
         <View className="flex-1 bg-gray-100">
 
             {/* HEADER */}
-            <View className="bg-green-500 flex-row justify-between items-center px-5 py-4">
-                <Text className="text-white text-xl font-bold">Festivel Feed</Text>
+            <View className="bg-orange-500 flex-row justify-between items-center px-5 pt-6 pb-2">
+                <Text className="mt-3 text-white text-2xl font-bold">Kolam Thiruvizha</Text>
 
                 <View className="flex-row items-center">
 
                     {/* ℹ️ INFO BUTTON */}
                     <TouchableOpacity
                         onPress={() => setInfoModal(true)}
-                        className="bg-white rounded-full px-2 py-1 mr-3"
+                        className=" rounded-full px-2 py-1 mr-3 mt-4"
                     >
-                        <Text className="text-purple-700 text-2xl font-bold">i</Text>
+                        <Text className="text-purple-700 text-2xl font-bold">
+                            <Info
+                                // stroke={isDarkMode ? "#ffffff" : "#000000"}
+                                width={32}
+                                height={32}
+                                color={"white"}
+                            />
+                        </Text>
                     </TouchableOpacity>
 
                     {/* ➕ UPLOAD BUTTON */}
                     <TouchableOpacity
                         onPress={() => setUploadModal(true)}
-                        className="bg-white rounded-full px-3 py-1"
+                        className="bg-white rounded-full px-3 py-1 mt-4"
                     >
                         <Text className="text-purple-700 text-2xl font-bold">+</Text>
                     </TouchableOpacity>
@@ -214,8 +255,7 @@ export default function FestivelScreen() {
                         <Text className="text-gray-700 mb-1">• Each post will stay live for 7 days</Text>
                         <Text className="text-gray-700 mb-1">• People can share your post to get more likes</Text>
                         <Text className="text-gray-700 mb-1">• A winner is selected every day</Text>
-                        <Text className="text-gray-700 mb-1">• Grand Prize ceremony on Jan 25 at Planiyappa Chettiar Hall</Text>
-                        <Text className="text-gray-700 mb-1">• Overall performer award will also be given</Text>
+                        <Text className="text-gray-700 mb-1">• Grand Prize ceremony on Jan 25 at L.CT.L Palaniyappa chettiyar Auditorium</Text>
 
                         <TouchableOpacity
                             onPress={() => setInfoModal(false)}
@@ -234,17 +274,18 @@ export default function FestivelScreen() {
                 keyExtractor={(item) => item._id}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
-                    <View className="bg-white m-3 p-3 rounded-xl shadow">
+                    <View className="bg-gray-200 m-3 p-3 rounded-xl shadow">
 
                         {/* DOUBLE TAP LIKE */}
                         <TouchableOpacity
                             activeOpacity={1}
                             onPress={() => handleDoubleTap(item._id)}
                         >
-                            <View className="relative">
+                            <View className="relative w-full" style={{ aspectRatio: 1 }}>
                                 <Image
                                     source={{ uri: `${IMAGE_PREFIX}${item.imageUrl}` }}
-                                    className="w-full h-64 rounded-xl"
+                                    className="w-full h-full rounded-xl"
+                                    resizeMode="contain"   // Image distortion illa – original shape
                                 />
 
                                 {/* ❤️ Heart animation */}
@@ -254,6 +295,7 @@ export default function FestivelScreen() {
                                     </View>
                                 )}
                             </View>
+
                         </TouchableOpacity>
 
                         <View className="flex-row justify-between mt-3">
@@ -275,7 +317,7 @@ export default function FestivelScreen() {
                         >
                             <View className="flex flex-row justify-between">
                                 <Text className="text-xl text-gray-700">
-                                    ❤️ {item.likesCount || 0} Likes
+                                     {item.likesCount || 0} Likes
                                 </Text>
                                 <Text style={{ marginTop: 5, color: "#555", fontSize: 12 }}>
                                     {formatTime(item.updatedAt)}
@@ -296,6 +338,7 @@ export default function FestivelScreen() {
 
                         <TextInput
                             placeholder="Name"
+                            placeholderTextColor="#000"
                             value={name}
                             onChangeText={(text) => {
                                 const onlyLetters = text.replace(/[^A-Za-z ]/g, "");
@@ -306,6 +349,7 @@ export default function FestivelScreen() {
 
                         <TextInput
                             placeholder="Phone"
+                            placeholderTextColor="#000"
                             value={phone}
                             onChangeText={(text) => {
                                 let num = text.replace(/[^0-9]/g, "");

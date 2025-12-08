@@ -54,7 +54,7 @@ const Bottom = () => {
       screen: 'FestivelScreen',
       icon: (
         <Image
-          source={require('../assets/Dialogram.png')}
+          source={require('../assets/kolam.png')}
           className="w-5 h-7"
         />
       ),
