@@ -61,8 +61,8 @@ export default function FestivelScreen() {
     const submitPost = async () => {
         if (!name || !phone || !image) return alert("Fill all fields!");
 
-        if (name.trim().length < 3) {
-            return Alert.alert("Enter a valid name!");
+        if (name.trim().length < 2) {
+            return Alert.alert("Name must be at least 2 characters!");
         }
 
         if (!/^[6-9]\d{9}$/.test(phone)) {
@@ -317,7 +317,7 @@ export default function FestivelScreen() {
                         >
                             <View className="flex flex-row justify-between">
                                 <Text className="text-xl text-gray-700">
-                                     {item.likesCount || 0} Likes
+                                    {item.likesCount || 0} Likes
                                 </Text>
                                 <Text style={{ marginTop: 5, color: "#555", fontSize: 12 }}>
                                     {formatTime(item.updatedAt)}
@@ -336,34 +336,53 @@ export default function FestivelScreen() {
 
                         <Text className="text-xl font-bold">Upload Post</Text>
 
-                        <TextInput
-                            placeholder="Name"
-                            placeholderTextColor="#000"
-                            value={name}
-                            onChangeText={(text) => {
-                                const onlyLetters = text.replace(/[^A-Za-z ]/g, "");
-                                setName(onlyLetters);
-                            }}
-                            className="border border-gray-300 rounded-lg p-3 mt-4"
-                        />
+                        {/* NAME FIELD */}
+                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
+                            Name
+                        </Text>
 
                         <TextInput
-                            placeholder="Phone"
-                            placeholderTextColor="#000"
+                            placeholder="Enter your name"
+                            placeholderTextColor="#888"
+                            value={name}
+                            maxLength={30} // max length restriction
+                            onChangeText={(text) => {
+                                // Remove leading space
+                                let clean = text.replace(/^[ ]+/, "");
+
+                                // Allow only alphabets and space
+                                clean = clean.replace(/[^A-Za-z ]/g, "");
+
+                                setName(clean);
+                            }}
+                            className="border border-gray-300 rounded-lg p-3"
+                        />
+
+                        {/* PHONE FIELD */}
+                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
+                            Phone Number
+                        </Text>
+
+                        <TextInput
+                            placeholder="Enter phone number"
+                            placeholderTextColor="#888"
                             value={phone}
                             onChangeText={(text) => {
+                                // Allow only numbers
                                 let num = text.replace(/[^0-9]/g, "");
-                                if (num.length === 1 && !/[6-9]/.test(num)) {
-                                    return;
-                                }
+
+                                // First digit must be 6-9
+                                if (num.length === 1 && !/[6-9]/.test(num)) return;
+
+                                // Max length 10
                                 if (num.length <= 10) setPhone(num);
                             }}
                             keyboardType="numeric"
                             maxLength={10}
-                            className="border border-gray-300 rounded-lg p-3 mt-3"
+                            className="border border-gray-300 rounded-lg p-3"
                         />
 
-
+                        {/* IMAGE PREVIEW */}
                         {image && (
                             <Image
                                 source={{ uri: image.uri }}
@@ -371,6 +390,7 @@ export default function FestivelScreen() {
                             />
                         )}
 
+                        {/* PICK IMAGE */}
                         <TouchableOpacity
                             onPress={pickImage}
                             className="bg-gray-700 rounded-lg p-3 mt-4 items-center"
@@ -378,6 +398,7 @@ export default function FestivelScreen() {
                             <Text className="text-white">Choose Image</Text>
                         </TouchableOpacity>
 
+                        {/* SUBMIT */}
                         <TouchableOpacity
                             onPress={submitPost}
                             className="bg-purple-700 rounded-lg p-4 mt-5 items-center"
@@ -389,8 +410,14 @@ export default function FestivelScreen() {
                             )}
                         </TouchableOpacity>
 
+                        {/* CLOSE (RESET FORM) */}
                         <TouchableOpacity
-                            onPress={() => setUploadModal(false)}
+                            onPress={() => {
+                                setUploadModal(false);
+                                setName("");
+                                setPhone("");
+                                setImage(null);
+                            }}
                             className="mt-4 items-center"
                         >
                             <Text className="text-red-500 font-bold">Close</Text>
@@ -399,6 +426,7 @@ export default function FestivelScreen() {
                     </View>
                 </View>
             </Modal>
+
         </View>
     );
 }
