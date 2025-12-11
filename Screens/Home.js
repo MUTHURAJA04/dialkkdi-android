@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
+import { View, Modal, Image, Text, TouchableOpacity, ScrollView } from "react-native";
 import HeroSlide from "./Home/HeroSlide";
 import VideoSlide from "./Home/VideoSlide";
 import Banner from "./Home/Banner";
@@ -7,15 +7,17 @@ import ServicesOn from "./Home/ServicesOn";
 import Categories from "./Home/Categories";
 import LimitedOffers from "./Home/LimitedOffers";
 import Recognized from "./Home/Recognized";
-import { getads, syncFcmToken  } from "../services/apiClient";
+import { getads, syncFcmToken } from "../services/apiClient";
 import banner1 from "../assets/Banners/Banner1.jpg";
 import banner2 from "../assets/Banners/Banner2.jpg";
 import banner3 from "../assets/Banners/Banner3.jpg";
 import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
+import popupImg from "../assets/Kolam.jpeg"; // 🔥 create any image
 
+const Home = ({ navigation }) => {
 
-const Home = () => {
+  const [showPopup, setShowPopup] = useState(true); // 👈 popup control
   const [homeBanners, setHomeBanners] = useState([]);
   const [limitedOffers1, setLimitedOffers1] = useState([]);
   const [limitedOffers2, setLimitedOffers2] = useState([]);
@@ -23,7 +25,7 @@ const Home = () => {
 
   const imgUrl = "https://livecdn.dialkaraikudi.com/";
 
-  // 🩵 Fallback data
+  // 🩵 Fallback banners
   const fallbackBanners = [
     { url: banner1, businessId: null },
     { url: banner2, businessId: null },
@@ -37,7 +39,6 @@ const Home = () => {
     { url: banner2, businessId: null },
   ];
 
-  // 🎞️ Default fallback video (W3Schools)
   const fallbackVideo = [
     {
       url: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -46,13 +47,12 @@ const Home = () => {
   ];
 
   useEffect(() => {
-     syncFcmToken();
+    syncFcmToken();
+
     const getAdverts = async () => {
       try {
         const response = await getads();
-        console.log(response, "Adsss");
 
-        // 🟩 HERO BANNERS
         const homeAds = response.filter(
           (ad) => ad.slotId?._id === "68272bafa52bbd6718f881f7" && ad.isActive
         );
@@ -66,10 +66,9 @@ const Home = () => {
 
         if (banners.length < 5)
           banners = [...banners, ...fallbackBanners.slice(0, 5 - banners.length)];
-        setHomeBanners(banners);
-        console.log("[Home] hero banners:", banners);
 
-        // 🟨 LIMITED OFFERS 1
+        setHomeBanners(banners);
+
         const offers1 = response
           .filter(
             (ad) => ad.slotId?._id === "682c1a7b0c32012c369edade" && ad.isActive
@@ -80,10 +79,8 @@ const Home = () => {
           }))
           .filter((ad) => ad.url);
 
-        const finalOffers1 = getTwoOffers(offers1, fallbackOffers);
-        setLimitedOffers1(finalOffers1);
+        setLimitedOffers1(getTwoOffers(offers1, fallbackOffers));
 
-        // 🟦 LIMITED OFFERS 2
         const offers2 = response
           .filter(
             (ad) => ad.slotId?._id === "682b12797e0c060d62669940" && ad.isActive
@@ -94,10 +91,8 @@ const Home = () => {
           }))
           .filter((ad) => ad.url);
 
-        const finalOffers2 = getTwoOffers(offers2, fallbackOffers);
-        setLimitedOffers2(finalOffers2);
+        setLimitedOffers2(getTwoOffers(offers2, fallbackOffers));
 
-        // 🎬 VIDEO SLIDE (your new slot)
         const videos = response
           .filter(
             (ad) => ad.slotId?._id === "682af722344e51b185a45062" && ad.isActive
@@ -112,11 +107,8 @@ const Home = () => {
           }))
           .filter((ad) => ad.url);
 
-        const finalVideos = videos.length ? videos : fallbackVideo;
-        setVideoAds(finalVideos);
-        console.log("[Home] video ads:", finalVideos);
+        setVideoAds(videos.length ? videos : fallbackVideo);
       } catch (error) {
-        console.error("Error loading ads:", error);
         setHomeBanners(fallbackBanners);
         setLimitedOffers1(fallbackOffers);
         setLimitedOffers2(fallbackOffers);
@@ -127,7 +119,6 @@ const Home = () => {
     getAdverts();
   }, []);
 
-  // 🔧 Helper function to always return exactly 2 offers
   const getTwoOffers = (offers, fallback) => {
     if (offers.length >= 2) return offers.slice(0, 2);
     if (offers.length === 1) return [offers[0], fallback[0]];
@@ -135,16 +126,85 @@ const Home = () => {
   };
 
   return (
-    <ScrollView>
-      {console.log("[Home] render with homeBanners length:", homeBanners?.length || 0)}
-      <HeroSlide images={homeBanners} />
-      <Banner />
-      <ServicesOn />
-      <VideoSlide videos={videoAds} />
-      <Categories />
-      <LimitedOffers offers1={limitedOffers1} offers2={limitedOffers2} />
-      <Recognized />
-    </ScrollView>
+    <>
+      {/* 🔥 POPUP UI */}
+      {showPopup &&
+        <Modal transparent animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingHorizontal: 40,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#fff",
+                width: "85%",
+                borderRadius: 15,
+                alignItems: "center",
+                position: "relative"
+              }}
+              onPress={() => {
+                setShowPopup(false);
+                navigation.navigate("FestivelScreen"); // 👉 your page name
+              }}
+            >
+
+              <Image
+                source={popupImg}
+                style={{ width: 320, height: 320, borderRadius: 10 }}
+                resizeMode="contain"
+
+              />
+              <TouchableOpacity
+                className="absolute top-2 right-1 bg-white/50 rounded-full px-1.5 py-0.5"
+
+                onPress={() => {
+                  setShowPopup(false); // 👉 your page name
+                }}
+              >
+                <Text style={{ color: "", fontSize: 18, fontWeight: "bold" }}>
+                  X
+                </Text>
+              </TouchableOpacity>
+
+              {/* 
+              <TouchableOpacity
+                className="bg-green-400 absolute bottom-2"
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 12,
+                  borderRadius: 10,
+                }}
+                onPress={() => {
+                  setShowPopup(false);
+                  navigation.navigate("FestivelScreen"); // 👉 your page name
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+                  Get Started
+                </Text>
+              </TouchableOpacity> */}
+
+
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      }
+      {/* 🔥 MAIN HOME PAGE CONTENT */}
+      <ScrollView>
+        <HeroSlide images={homeBanners} />
+        <Banner />
+        <ServicesOn />
+        <VideoSlide videos={videoAds} />
+        <Categories />
+        <LimitedOffers offers1={limitedOffers1} offers2={limitedOffers2} />
+        <Recognized />
+      </ScrollView>
+    </>
   );
 };
 

@@ -55,7 +55,7 @@ const Bottom = () => {
       icon: (
         <Image
           source={require('../assets/kolam.png')}
-          className="w-5 h-7"
+          className="w-14 h-14"
         />
       ),
     },
@@ -93,7 +93,7 @@ const Bottom = () => {
 
   return (
     <View
-      className="flex-row justify-around items-center py-3"
+      className="flex-row justify-around items-center py-1"
       style={{
         backgroundColor: isDarkMode ? '#1a1a1a' : '#f8f8f8',
         borderTopWidth: 1,

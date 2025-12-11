@@ -18,9 +18,9 @@ import { Grid, Info } from 'react-native-feather';
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import apiClient, { createFestivelFeed, getFestivelfeed } from "../../services/apiClient";
+import YoutubePlayer from "react-native-youtube-iframe";
 
 export default function FestivelScreen() {
-
     const [uploadModal, setUploadModal] = useState(false);
     const [image, setImage] = useState(null);
     const [name, setName] = useState("");
@@ -28,8 +28,24 @@ export default function FestivelScreen() {
     const [loading, setLoading] = useState(false);
     const [feedData, setFeedData] = useState([]);
 
+    const [address, setAddress] = useState("");
+    const [ward, setWard] = useState("");
+    const [wardList, setWardList] = useState([]);
+    const [showWardDropdown, setShowWardDropdown] = useState(false);
+
+
     const [showHeart, setShowHeart] = useState(null);
     const [infoModal, setInfoModal] = useState(false);
+
+
+    useEffect(() => {
+
+        let arr = [];
+        for (let i = 1; i <= 100; i++) arr.push(i);
+        setWardList(arr);
+    }, []);
+
+
 
     let lastTap = null;
 
@@ -79,6 +95,8 @@ export default function FestivelScreen() {
         formData.append("userId", userId);
         formData.append("name", name);
         formData.append("phone", phone);
+        formData.append("address", address);
+        formData.append("wardNo", ward);
 
         // IMPORTANT → must match Multer field name
         formData.append("festivel", {
@@ -195,8 +213,8 @@ export default function FestivelScreen() {
     const handleShare = async (item) => {
         try {
             const msg =
-                `🎉 ${item.name} posted!\n\n` +
-                `Check this picture:\n` +
+                `🎉கோலம் திருவிழா\n` +
+                `${item.name} Like my kolam on the link\n` +
                 `https://play.google.com/store/apps/details?id=com.dialkaraikudi`;
 
             await Share.share({ message: msg });
@@ -210,7 +228,7 @@ export default function FestivelScreen() {
 
             {/* HEADER */}
             <View className="bg-orange-500 flex-row justify-between items-center px-5 pt-6 pb-2">
-                <Text className="mt-3 text-white text-2xl font-bold">Kolam Thiruvizha</Text>
+                <Text className="mt-3 text-white text-xl font-bold">கோலம் திருவிழா</Text>
 
                 <View className="flex-row items-center">
 
@@ -245,10 +263,22 @@ export default function FestivelScreen() {
                 <View className="flex-1 bg-black/50 justify-center items-center">
                     <View className="bg-white w-11/12 rounded-xl p-6">
 
+                        {/* YOUTUBE VIDEO */}
+                        <View style={{ width: "100%", height: 220 }}>
+                            <YoutubePlayer
+                                height={220}
+                                play={false}
+                                videoId={"dccjQT-D_34"}
+                            />
+                        </View>
+
+
+                        {/* TITLE */}
                         <Text className="text-xl font-bold text-center mb-3">
                             Festival Rules & Info
                         </Text>
 
+                        {/* RULES */}
                         <Text className="text-gray-700 mb-1">• Photos must be clear and original</Text>
                         <Text className="text-gray-700 mb-1">• Highest likes will decide the daily winner</Text>
                         <Text className="text-gray-700 mb-1">• Beautiful kolam, clarity and creativity are considered</Text>
@@ -257,6 +287,7 @@ export default function FestivelScreen() {
                         <Text className="text-gray-700 mb-1">• A winner is selected every day</Text>
                         <Text className="text-gray-700 mb-1">• Grand Prize ceremony on Jan 25 at L.CT.L Palaniyappa chettiyar Auditorium</Text>
 
+                        {/* CLOSE BUTTON */}
                         <TouchableOpacity
                             onPress={() => setInfoModal(false)}
                             className="bg-purple-600 p-3 rounded-lg mt-5"
@@ -272,7 +303,7 @@ export default function FestivelScreen() {
             <FlatList
                 data={feedData}
                 keyExtractor={(item) => item._id}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 renderItem={({ item }) => (
                     <View className="bg-gray-200 m-3 p-3 rounded-xl shadow">
 
@@ -285,21 +316,18 @@ export default function FestivelScreen() {
                                 <Image
                                     source={{ uri: `${IMAGE_PREFIX}${item.imageUrl}` }}
                                     className="w-full h-full rounded-xl"
-                                    resizeMode="contain"   // Image distortion illa – original shape
+                                    resizeMode="contain"
                                 />
 
-                                {/* ❤️ Heart animation */}
                                 {showHeart === item._id && (
                                     <View className="absolute inset-0 justify-center items-center">
                                         <Text style={{ fontSize: 90, opacity: 0.9 }}>❤️</Text>
                                     </View>
                                 )}
                             </View>
-
                         </TouchableOpacity>
 
                         <View className="flex-row justify-between mt-3">
-                            {/* NAME */}
                             <Text className=" text-lg text-black font-bold">{item.name}</Text>
 
                             <TouchableOpacity
@@ -310,11 +338,7 @@ export default function FestivelScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        {/* LIKE BUTTON */}
-                        <TouchableOpacity
-                            onPress={() => toggleLike(item._id)}
-                            className="mt-2"
-                        >
+                        <TouchableOpacity onPress={() => toggleLike(item._id)} className="mt-2">
                             <View className="flex flex-row justify-between">
                                 <Text className="text-xl text-gray-700">
                                     {item.likesCount || 0} Likes
@@ -327,7 +351,17 @@ export default function FestivelScreen() {
 
                     </View>
                 )}
+
+                /** 👇 THIS PART ADDED */
+                ListEmptyComponent={() => (
+                    <View style={{ padding: 50, alignItems: "center" }}>
+                        <Text style={{ fontSize: 18, color: "#777" }}>
+                            No posts available
+                        </Text>
+                    </View>
+                )}
             />
+
 
             {/* UPLOAD MODAL */}
             <Modal visible={uploadModal} transparent animationType="slide">
@@ -345,14 +379,10 @@ export default function FestivelScreen() {
                             placeholder="Enter your name"
                             placeholderTextColor="#888"
                             value={name}
-                            maxLength={30} // max length restriction
+                            maxLength={30}
                             onChangeText={(text) => {
-                                // Remove leading space
                                 let clean = text.replace(/^[ ]+/, "");
-
-                                // Allow only alphabets and space
                                 clean = clean.replace(/[^A-Za-z ]/g, "");
-
                                 setName(clean);
                             }}
                             className="border border-gray-300 rounded-lg p-3"
@@ -368,19 +398,61 @@ export default function FestivelScreen() {
                             placeholderTextColor="#888"
                             value={phone}
                             onChangeText={(text) => {
-                                // Allow only numbers
                                 let num = text.replace(/[^0-9]/g, "");
-
-                                // First digit must be 6-9
                                 if (num.length === 1 && !/[6-9]/.test(num)) return;
-
-                                // Max length 10
                                 if (num.length <= 10) setPhone(num);
                             }}
                             keyboardType="numeric"
                             maxLength={10}
                             className="border border-gray-300 rounded-lg p-3"
                         />
+
+                        {/* ADDRESS FIELD */}
+                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
+                            Address
+                        </Text>
+
+                        <TextInput
+                            placeholder="Enter Address"
+                            placeholderTextColor="#888"
+                            value={address}
+                            multiline
+                            numberOfLines={3}
+                            onChangeText={(t) => setAddress(t)}
+                            className="border border-gray-300 rounded-lg p-3 h-24"
+                        />
+
+                        {/* WARD DROPDOWN */}
+                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
+                            Ward
+                        </Text>
+
+                        <TouchableOpacity
+                            onPress={() => setShowWardDropdown(!showWardDropdown)}
+                            className="border border-gray-300 rounded-lg p-3"
+                        >
+                            <Text>{ward ? `Ward ${ward}` : "Select Ward"}</Text>
+                        </TouchableOpacity>
+
+                        {showWardDropdown && (
+                            <View className="max-h-40 border border-gray-300 rounded-lg mt-2 bg-white">
+                                <FlatList
+                                    data={wardList}
+                                    keyExtractor={(i) => i.toString()}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setWard(item);
+                                                setShowWardDropdown(false);
+                                            }}
+                                            className="p-3 border-b border-gray-200"
+                                        >
+                                            <Text>Ward {item}</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                            </View>
+                        )}
 
                         {/* IMAGE PREVIEW */}
                         {image && (
@@ -395,7 +467,7 @@ export default function FestivelScreen() {
                             onPress={pickImage}
                             className="bg-gray-700 rounded-lg p-3 mt-4 items-center"
                         >
-                            <Text className="text-white">Choose Image</Text>
+                            <Text className="text-white">Take Photo</Text>
                         </TouchableOpacity>
 
                         {/* SUBMIT */}
@@ -410,12 +482,14 @@ export default function FestivelScreen() {
                             )}
                         </TouchableOpacity>
 
-                        {/* CLOSE (RESET FORM) */}
+                        {/* CLOSE */}
                         <TouchableOpacity
                             onPress={() => {
                                 setUploadModal(false);
                                 setName("");
                                 setPhone("");
+                                setAddress("");
+                                setWard("");
                                 setImage(null);
                             }}
                             className="mt-4 items-center"
@@ -426,6 +500,7 @@ export default function FestivelScreen() {
                     </View>
                 </View>
             </Modal>
+
 
         </View>
     );
