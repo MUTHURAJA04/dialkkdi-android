@@ -285,7 +285,7 @@ export default function FestivelScreen() {
                         <Text className="text-gray-700 mb-1">• Each post will stay live for 7 days</Text>
                         <Text className="text-gray-700 mb-1">• People can share your post to get more likes</Text>
                         <Text className="text-gray-700 mb-1">• A winner is selected every day</Text>
-                        <Text className="text-gray-700 mb-1">• Grand Prize ceremony on Jan 25 at L.CT.L Palaniyappa chettiyar Auditorium</Text>
+                        <Text className="text-gray-700 mb-1">• Grand Prize Distribution Ceremony is on Jan 25th Evening at L.C.T.L. Palaniyappa Chettiyar Auditorium, Karaikudi</Text>
 
                         {/* CLOSE BUTTON */}
                         <TouchableOpacity
@@ -318,7 +318,6 @@ export default function FestivelScreen() {
                                     className="w-full h-full rounded-xl"
                                     resizeMode="contain"
                                 />
-
                                 {showHeart === item._id && (
                                     <View className="absolute inset-0 justify-center items-center">
                                         <Text style={{ fontSize: 90, opacity: 0.9 }}>❤️</Text>

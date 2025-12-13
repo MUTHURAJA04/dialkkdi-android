@@ -173,7 +173,7 @@ const Home = ({ navigation }) => {
               >
                 <Image
                   source={cancel}
-                  style={{ width: 30, height: 30, borderRadius: 10 }}
+                  style={{ width: 30, height: 30 }}
                   resizeMode="contain"
 
                 />
