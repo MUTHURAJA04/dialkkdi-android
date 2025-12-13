@@ -14,10 +14,11 @@ import banner3 from "../assets/Banners/Banner3.jpg";
 import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
 import popupImg from "../assets/Kolam.jpeg"; // 🔥 create any image
+import cancel from "../assets/cancel.jpg"; // 🔥 create any image
 
 const Home = ({ navigation }) => {
 
-  const [showPopup, setShowPopup] = useState(true); // 👈 popup control
+  const [showPopup, setShowPopup] = useState(false); // 👈 popup control
   const [homeBanners, setHomeBanners] = useState([]);
   const [limitedOffers1, setLimitedOffers1] = useState([]);
   const [limitedOffers2, setLimitedOffers2] = useState([]);
@@ -48,6 +49,10 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     syncFcmToken();
+
+    setTimeout(() => {
+      setShowPopup(true);
+    }, 3000);
 
     const getAdverts = async () => {
       try {
@@ -160,36 +165,20 @@ const Home = ({ navigation }) => {
 
               />
               <TouchableOpacity
-                className="absolute top-2 right-1 bg-white/50 rounded-full px-1.5 py-0.5"
+                className="absolute top-5 right-0"
 
                 onPress={() => {
                   setShowPopup(false); // 👉 your page name
                 }}
               >
-                <Text style={{ color: "", fontSize: 18, fontWeight: "bold" }}>
-                  X
-                </Text>
+                <Image
+                  source={cancel}
+                  style={{ width: 30, height: 30, borderRadius: 10 }}
+                  resizeMode="contain"
+
+                />
+
               </TouchableOpacity>
-
-              {/* 
-              <TouchableOpacity
-                className="bg-green-400 absolute bottom-2"
-                style={{
-                  paddingVertical: 6,
-                  paddingHorizontal: 12,
-                  borderRadius: 10,
-                }}
-                onPress={() => {
-                  setShowPopup(false);
-                  navigation.navigate("FestivelScreen"); // 👉 your page name
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                  Get Started
-                </Text>
-              </TouchableOpacity> */}
-
-
             </TouchableOpacity>
           </View>
         </Modal>

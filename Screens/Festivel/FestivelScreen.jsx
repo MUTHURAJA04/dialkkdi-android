@@ -268,7 +268,7 @@ export default function FestivelScreen() {
                             <YoutubePlayer
                                 height={220}
                                 play={false}
-                                videoId={"dccjQT-D_34"}
+                                videoId={"Lj7yOn76BUw"}
                             />
                         </View>
 
@@ -408,19 +408,7 @@ export default function FestivelScreen() {
                         />
 
                         {/* ADDRESS FIELD */}
-                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
-                            Address
-                        </Text>
 
-                        <TextInput
-                            placeholder="Enter Address"
-                            placeholderTextColor="#888"
-                            value={address}
-                            multiline
-                            numberOfLines={3}
-                            onChangeText={(t) => setAddress(t)}
-                            className="border border-gray-300 rounded-lg p-3 h-24"
-                        />
 
                         {/* WARD DROPDOWN */}
                         <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
@@ -453,6 +441,20 @@ export default function FestivelScreen() {
                                 />
                             </View>
                         )}
+
+                        <Text className="text-sm font-semibold mt-4 mb-1 text-gray-700">
+                            Address
+                        </Text>
+
+                        <TextInput
+                            placeholder="Enter Address"
+                            placeholderTextColor="#888"
+                            value={address}
+                            multiline
+                            numberOfLines={3}
+                            onChangeText={(t) => setAddress(t)}
+                            className="border border-gray-300 rounded-lg p-3 h-24"
+                        />
 
                         {/* IMAGE PREVIEW */}
                         {image && (
