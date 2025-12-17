@@ -15,6 +15,7 @@ import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
 import popupImg from "../assets/Kolam.jpeg"; // 🔥 create any image
 import cancel from "../assets/cancel.jpg"; // 🔥 create any image
+import MusicBanner from "./Home/MusicBanner"
 
 const Home = ({ navigation }) => {
 
@@ -186,6 +187,7 @@ const Home = ({ navigation }) => {
       {/* 🔥 MAIN HOME PAGE CONTENT */}
       <ScrollView>
         <HeroSlide images={homeBanners} />
+        <MusicBanner />
         <Banner />
         <ServicesOn />
         <VideoSlide videos={videoAds} />

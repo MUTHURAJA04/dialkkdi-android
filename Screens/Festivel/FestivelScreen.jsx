@@ -45,8 +45,6 @@ export default function FestivelScreen() {
         setWardList(arr);
     }, []);
 
-
-
     let lastTap = null;
 
     const IMAGE_PREFIX = "https://livecdn.dialkaraikudi.com/";
@@ -163,6 +161,8 @@ export default function FestivelScreen() {
         try {
             const res = await getFestivelfeed();
             setFeedData(res);
+            console.log(res, "feed data ");
+
         } catch (err) {
             console.log(err);
         }
