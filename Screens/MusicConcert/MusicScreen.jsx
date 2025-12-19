@@ -6,112 +6,211 @@ import {
     FlatList,
     Alert,
 } from "react-native";
-import { getSeat, seatHold } from "../../services/apiClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RazorpayCheckout from "react-native-razorpay";
+
+import {
+    getSeat,
+    getTicketSetting,
+    seatHold,
+    createPayment,
+    verifyPayment,
+    confirmBooking,
+    ticketverifyPayment,
+} from "../../services/apiClient";
 
 const HOLD_TIME = 300;
 
-
 const MusicScreen = ({ route }) => {
-    const { concertId } = route.params;
-
-    const fetchSeats = async () => {
-        try {
-            const res = await getSeat(concertId)
-            console.log(res);
-            setSeatRows(res.data)
-        } catch (error) {
-            console.log(error);
-
-        }
-    }
+    const { concertId, concertName } = route.params;
 
     const [seatRows, setSeatRows] = useState([]);
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [timer, setTimer] = useState(null);
+    const [setting, setSetting] = useState(null);
+    const [bookingId, setBookingId] = useState(null);
+    const [userId, setUserId] = useState(null);
 
-    // 🔹 Fetch seats
+    // 🔹 INIT
     useEffect(() => {
-        fetchSeats()
+        init();
     }, []);
 
-    // ⏱ Hold timer
+    const init = async () => {
+        const userData = await AsyncStorage.getItem("userData");
+        console.log(userData, "User Data");
+
+        const parsed = JSON.parse(userData);
+        setUserId(parsed._id || parsed.id || parsed.userId);
+
+        fetchSeats();
+        fetchTicketSetting();
+    };
+
+    const fetchSeats = async () => {
+        try {
+            const res = await getSeat(concertId);
+            setSeatRows(res.data);
+        } catch (error) {
+            console.log(error);
+        }
+
+    };
+
+    const fetchTicketSetting = async () => {
+
+        try {
+            const res = await getTicketSetting();
+            setSetting(res.data);
+        } catch (error) {
+            console.log(error);
+        }
+
+    };
+
+    // ⏱ HOLD TIMER
     useEffect(() => {
         if (timer === null) return;
 
         if (timer === 0) {
-            Alert.alert("Hold Expired", "Seats released");
+            Alert.alert("Hold expired");
             setSelectedSeats([]);
-            fetchSeats()
+            setBookingId(null);
+            fetchSeats();
             setTimer(null);
             return;
         }
 
         const i = setInterval(() => {
-            setTimer((t) => t - 1);
+            setTimer(t => t - 1);
         }, 1000);
 
         return () => clearInterval(i);
     }, [timer]);
 
-    // 👉 select seat
+    // 🪑 seat toggle
     const toggleSeat = (seatNo, status) => {
         if (status !== "AVAILABLE") return;
 
-        setSelectedSeats((prev) =>
+        setSelectedSeats(prev =>
             prev.includes(seatNo)
-                ? prev.filter((s) => s !== seatNo)
+                ? prev.filter(s => s !== seatNo)
                 : [...prev, seatNo]
         );
     };
 
-    // 🔒 HOLD
+    // 🔒 HOLD SEATS
     const holdSeats = async () => {
-        if (selectedSeats.length === 0) {
+        if (!selectedSeats.length) {
             Alert.alert("Select seats");
             return;
         }
 
-        const userData = await AsyncStorage.getItem('userData');
-        const parsedUserData = JSON.parse(userData);
-        const USER_ID = parsedUserData._id || parsedUserData.id || parsedUserData.userId;
+        const res = await seatHold({
+            userId,
+            concertId,
+            seats: selectedSeats,
+        });
 
+        setBookingId(res.data._id);
         setTimer(HOLD_TIME);
+        fetchSeats();
 
-        console.log("HOLD API", {
-            userId: USER_ID,
-            concertId,
-            seats: selectedSeats,
+        Alert.alert("Seats held ⏱️");
+    };
+
+    // 💰 CALCULATION
+    const calculateTotal = () => {
+        let subtotal = 0;
+
+        seatRows.forEach(row => {
+            selectedSeats.forEach(seat => {
+                if (row.seats.find(s => s.seatNo === seat)) {
+                    subtotal += row.basePrice;
+                }
+            });
         });
 
-        const data = {
-            userId: USER_ID,
-            concertId,
-            seats: selectedSeats
+        const gstPercent = setting?.gstAmount || 18;
+        const gst = Math.round(subtotal * gstPercent / 100);
+
+        return {
+            subtotal,
+            gst,
+            total: subtotal + gst,
+        };
+    };
+
+    // 💳 PAYMENT
+    const payNow = async () => {
+        try {
+
+            if (selectedSeats.length > setting.maxValue) {
+                Alert.alert(`Only Allow ${setting.maxValue} Seat`)
+                return
+            }
+
+            const { subtotal, total } = calculateTotal();
+
+            // 1️⃣ CREATE PAYMENT
+            const paymentRes = await createPayment({
+                userId,
+                concertId,
+                seats: selectedSeats,
+                subtotal,
+                gstPercent: setting?.gstAmount || 18,
+            });
+
+            console.log(paymentRes, "BusinessDetailScreen");
+
+
+            const { orderId, amount, bookingId } = paymentRes.data;
+
+            // 2️⃣ OPEN RAZORPAY ✅
+            RazorpayCheckout.open({
+                key: "rzp_test_w7eHbASEFZ4b09",   // ✅ STRING
+                order_id: orderId,
+                amount: amount,                 // ✅ already in paise
+                currency: "INR",
+                name: concertName,
+                description: "Ticket Booking",
+                theme: { color: "#2563eb" },
+            })
+                .then(async (razorpayRes) => {
+
+                    // 3️⃣ CONFIRM BOOKING
+                    await confirmBooking({
+                        bookingId,
+                        razorpayOrderId: razorpayRes.razorpay_order_id,
+                        razorpayPaymentId: razorpayRes.razorpay_payment_id,
+                        razorpaySignature: razorpayRes.razorpay_signature,
+                        amountPaid: total,
+                    });
+
+                    Alert.alert("Booking Confirmed 🎉");
+                    reset();
+                })
+                .catch(err => {
+                    console.log("Razorpay Error:", err);
+                    Alert.alert("Payment cancelled");
+                });
+
+        } catch (err) {
+            console.log(err);
+            Alert.alert(err.message);
         }
-
-        const res = await seatHold(data);
-        setSelectedSeats([]);
-        fetchSeats()
-        console.log(res);
-
-        Alert.alert("Seats Held ⏱️");
     };
 
-    // ✅ CONFIRM
-    const confirmBooking = () => {
-        console.log("CONFIRM API", {
-            userId: USER_ID,
-            concertId,
-            seats: selectedSeats,
-        });
 
-        Alert.alert("Booking Confirmed ✅");
+
+    const reset = () => {
         setSelectedSeats([]);
+        setBookingId(null);
         setTimer(null);
+        fetchSeats();
     };
 
-    // 🎫 Seat Item
+    // 🎫 Seat UI
     const SeatItem = ({ seat }) => {
         const isSelected = selectedSeats.includes(seat.seatNo);
 
@@ -126,26 +225,19 @@ const MusicScreen = ({ route }) => {
                 disabled={seat.status !== "AVAILABLE"}
                 className={`w-[22%] m-1 p-3 rounded-lg items-center ${seatClass}`}
             >
-                <Text className="text-white font-bold">
-                    {seat.seatNo}
-                </Text>
+                <Text className="text-white font-bold">{seat.seatNo}</Text>
             </TouchableOpacity>
         );
     };
 
-    // 🪑 Row UI
     const renderRow = ({ item }) => (
         <View className="mb-6">
             <Text className="font-bold text-lg mb-2">
                 Row {item.rowId} – ₹{item.basePrice}
             </Text>
-
             <View className="flex-row flex-wrap">
-                {item.seats.map((seat) => (
-                    <SeatItem
-                        key={seat.seatNo}
-                        seat={seat}
-                    />
+                {item.seats.map(seat => (
+                    <SeatItem key={seat.seatNo} seat={seat} />
                 ))}
             </View>
         </View>
@@ -153,52 +245,37 @@ const MusicScreen = ({ route }) => {
 
     return (
         <View className="flex-1 bg-gray-100 p-4 mt-6">
+            <Text className="text-2xl font-bold">{concertName}</Text>
 
-            {/* Concert Info */}
-            <Text className="text-2xl font-bold">
-                ARR Live Concert
-            </Text>
-            <Text className="text-gray-600 mb-3">
-                Concert ID: {concertId}
-            </Text>
-
-            {/* Timer */}
             {timer !== null && (
-                <Text className="text-red-600 mb-3 font-semibold">
-                    Hold Time: {Math.floor(timer / 60)}:
-                    {String(timer % 60).padStart(2, "0")}
+                <Text className="text-red-600 font-semibold mb-2">
+                    Hold: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}
                 </Text>
             )}
 
-            {/* Seats */}
             <FlatList
                 data={seatRows}
-                keyExtractor={(item) => item._id}
+                keyExtractor={item => item._id}
                 renderItem={renderRow}
-                showsVerticalScrollIndicator={false}
             />
 
-            {/* HOLD */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 onPress={holdSeats}
                 className="bg-blue-600 py-4 rounded-xl mb-3"
             >
-                <Text className="text-white text-center font-bold">
-                    HOLD SEATS
-                </Text>
-            </TouchableOpacity>
+                <Text className="text-white text-center font-bold">HOLD SEATS</Text>
+            </TouchableOpacity> */}
 
-            {/* CONFIRM */}
             <TouchableOpacity
-                onPress={confirmBooking}
+                onPress={payNow}
                 className="bg-green-600 py-4 rounded-xl"
             >
                 <Text className="text-white text-center font-bold">
-                    CONFIRM BOOKING
+                    PAY ₹{calculateTotal().subtotal} + GST
                 </Text>
             </TouchableOpacity>
         </View>
     );
 };
 
-export default MusicScreen; 
+export default MusicScreen;

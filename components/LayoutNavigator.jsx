@@ -19,6 +19,7 @@ import VerifyOtp from '../Screens/VerifyOtp';
 import DialogramScreen from '../Screens/DialogramScreen';
 import FestivelScreen from '../Screens/Festivel/FestivelScreen';
 import MusicScreen from '../Screens/MusicConcert/MusicScreen';
+import MyTicketScreen from '../Screens/MusicConcert/MyTicketScreen';
 import ConcertListScreen from '../Screens/MusicConcert/ConcertListScreen';
 import BusinessLanding from '../Screens/Business/BusinessLanding';
 import TalkofTown from '../Screens/TalkOftheTown/TalkofTown';
@@ -113,6 +114,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="DialogramScreen" component={withAuthGuard(DialogramScreen)} />
       <Stack.Screen name="FestivelScreen" component={withAuthGuard(FestivelScreen)} />
       <Stack.Screen name="ConcertListScreen" component={withAuthGuard(ConcertListScreen)} />
+      <Stack.Screen name="MyTicketScreen" component={withAuthGuard(MyTicketScreen)} />
 
       <Stack.Screen name="MusicScreen" component={withAuthGuard(MusicScreen)} />
 

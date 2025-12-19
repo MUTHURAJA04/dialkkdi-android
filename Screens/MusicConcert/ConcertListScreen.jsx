@@ -42,7 +42,8 @@ const ConcertListScreen = ({ navigation }) => {
                         className="bg-white p-4 rounded-xl mb-3 shadow"
                         onPress={() =>
                             navigation.navigate("MusicScreen", {
-                                concertId: item._id, // 👈 ONLY ID
+                                concertId: item._id,
+                                concertName: item._concertName // 👈 ONLY ID
                             })
                         }
                     >
@@ -59,6 +60,16 @@ const ConcertListScreen = ({ navigation }) => {
                 )}
             />
 
+            <TouchableOpacity
+                className="mt-3 bg-black py-2 rounded-lg"
+                onPress={() =>
+                    navigation.navigate("MyTicketScreen")
+                }
+            >
+                <Text className="text-white text-center font-semibold">
+                    View My Ticket
+                </Text>
+            </TouchableOpacity>
         </View>
     );
 };

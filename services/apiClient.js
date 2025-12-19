@@ -1527,4 +1527,58 @@ export const seatHold = async (data) => {
   }
 };
 
+
+export const getTicketSetting = async () => {
+  try {
+    const response = await apiClient.get(`/ticket/ticket-settings`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const getTicket = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/bookings/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const createPayment = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/create`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const ticketverifyPayment = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/create`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const confirmBooking = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/bookings/confirm`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+
 export default apiClient;
