@@ -4,12 +4,18 @@ import {
     Text,
     ScrollView,
     ActivityIndicator,
+    TouchableOpacity,
 } from "react-native";
-import { getTicket } from "../../services/apiClient";
+import {
+    getTicket,
+    getCancelTicket,
+} from "../../services/apiClient";
+import CancelTicketModal from "./CancelTicketModal";
 
 const MyTicketScreen = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedTicket, setSelectedTicket] = useState(null);
 
     useEffect(() => {
         fetchTickets();
@@ -17,8 +23,33 @@ const MyTicketScreen = () => {
 
     const fetchTickets = async () => {
         try {
-            const res = await getTicket(); // 👈 returns array
-            setTickets(res.data || []);
+            setLoading(true);
+
+            // ✅ CONFIRMED BOOKINGS
+            const bookingRes = await getTicket();
+
+            const confirmedTickets = (bookingRes.data || []).map(t => ({
+                ...t,
+                type: "BOOKING",
+                status: "CONFIRMED",
+            }));
+
+            // ❌ CANCELLED TICKETS
+            const cancelRes = await getCancelTicket();
+
+            const cancelledTickets = (cancelRes.data || []).map(t => ({
+                _id: t._id,
+                concertId: t.concertId,
+                seats: t.seats,
+                reason: t.reason,
+                createdAt: t.createdAt,
+                type: "CANCELLED",
+                status: "CANCELLED",
+            }));
+
+            // 🔥 MERGE BOTH
+            setTickets([...confirmedTickets, ...cancelledTickets]);
+
         } catch (err) {
             console.log(err);
         } finally {
@@ -26,25 +57,33 @@ const MyTicketScreen = () => {
         }
     };
 
-    if (loading) return <ActivityIndicator size="large" />;
-
-    if (tickets.length === 0) {
+    if (loading) {
         return (
             <View className="flex-1 justify-center items-center">
-                <Text>No tickets found</Text>
+                <ActivityIndicator size="large" />
             </View>
         );
     }
 
     return (
-        <ScrollView className="flex-1 bg-gray-100 p-4">
+        <ScrollView
+            className="flex-1 bg-gray-100 p-4"
+            contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: tickets.length === 0 ? "center" : "flex-start",
+            }}
+        >
+            {tickets.length === 0 && (
+                <View className="items-center">
+                    <Text className="text-gray-500">No Tickets Found</Text>
+                </View>
+            )}
 
             {tickets.map((ticket) => (
                 <View
                     key={ticket._id}
                     className="bg-white rounded-2xl p-5 shadow mb-4"
                 >
-
                     {/* 🎵 Concert */}
                     <Text className="text-xl font-bold text-center">
                         🎵 {ticket.concertId.concertName}
@@ -70,40 +109,103 @@ const MyTicketScreen = () => {
                         </Text>
                     </View>
 
-                    {/* 🆔 Booking ID */}
-                    <View className="mt-3">
-                        <Text className="text-sm text-gray-600">Booking ID</Text>
-                        <Text className="text-xs">{ticket._id}</Text>
-                    </View>
+                    {/* 🆔 Booking ID (ONLY CONFIRMED) */}
+                    {ticket.type === "BOOKING" && (
+                        <View className="mt-3">
+                            <Text className="text-sm text-gray-600">
+                                Booking ID
+                            </Text>
+                            <Text className="text-xs">{ticket._id}</Text>
+                        </View>
+                    )}
+                    {ticket.type === "CANCELLED" && (
+                        <View className="mt-3">
+                            <Text className="text-sm text-gray-600">
+                                Booking ID
+                            </Text>
+                            <Text className="text-xs">{ticket._id}</Text>
+                        </View>
+                    )}
+
+
 
                     <View className="border-b border-dashed my-4" />
 
-                    {/* 💰 Invoice */}
-                    <View className="flex-row justify-between">
-                        <Text>Subtotal</Text>
-                        <Text>₹{ticket.subtotal}</Text>
-                    </View>
+                    {/* 💰 Amount (ONLY CONFIRMED) */}
+                    {ticket.type === "BOOKING" && (
+                        <>
+                            <View className="flex-row justify-between">
+                                <Text>Subtotal</Text>
+                                <Text>₹{ticket.subtotal}</Text>
+                            </View>
 
-                    <View className="flex-row justify-between mt-1">
-                        <Text>GST ({ticket.gstPercent}%)</Text>
-                        <Text>₹{ticket.gstAmount}</Text>
-                    </View>
+                            <View className="flex-row justify-between mt-1">
+                                <Text>GST ({ticket.gstPercent}%)</Text>
+                                <Text>₹{ticket.gstAmount}</Text>
+                            </View>
 
-                    <View className="flex-row justify-between mt-2">
-                        <Text className="font-bold">Total</Text>
-                        <Text className="font-bold">₹{ticket.totalAmount}</Text>
-                    </View>
+                            <View className="flex-row justify-between mt-2">
+                                <Text className="font-bold">Total</Text>
+                                <Text className="font-bold">
+                                    ₹{ticket.totalAmount}
+                                </Text>
+                            </View>
+                        </>
+                    )}
 
-                    {/* ✅ Status */}
-                    <View className="mt-4 bg-green-100 py-2 rounded-lg">
-                        <Text className="text-center text-green-700 font-semibold">
-                            ✅ Booking Confirmed
+                    {/* ❌ Cancel Reason */}
+                    {ticket.type === "CANCELLED" && (
+                        <View className="mt-3 bg-red-50 p-3 rounded-lg">
+                            <Text className="text-red-600 font-semibold">
+                                ❌ Ticket Cancelled
+                            </Text>
+                            <Text className="text-sm mt-1">
+                                Reason: {ticket.reason}
+                            </Text>
+                        </View>
+                    )}
+
+                    {/* ✅ / ❌ STATUS */}
+                    <View
+                        className={`mt-4 py-2 rounded-lg ${ticket.status === "CONFIRMED"
+                            ? "bg-green-100"
+                            : "bg-red-100"
+                            }`}
+                    >
+                        <Text
+                            className={`text-center font-semibold ${ticket.status === "CONFIRMED"
+                                ? "text-green-700"
+                                : "text-red-700"
+                                }`}
+                        >
+                            {ticket.status === "CONFIRMED"
+                                ? "✅ Booking Confirmed"
+                                : "❌ Ticket Cancelled"}
                         </Text>
                     </View>
 
+                    {/* ❌ Cancel Button (ONLY CONFIRMED) */}
+                    {ticket.type === "BOOKING" && (
+                        <TouchableOpacity
+                            className="mt-4 bg-red-500 py-2 rounded-lg"
+                            onPress={() => setSelectedTicket(ticket)}
+                        >
+                            <Text className="text-center text-white font-semibold">
+                                Cancel Ticket
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             ))}
 
+            {/* 🔥 CANCEL MODAL */}
+            {selectedTicket && (
+                <CancelTicketModal
+                    ticket={selectedTicket}
+                    onClose={() => setSelectedTicket(null)}
+                    onSuccess={fetchTickets}
+                />
+            )}
         </ScrollView>
     );
 };

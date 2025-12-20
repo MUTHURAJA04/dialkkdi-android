@@ -4,8 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
 // const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
-// const API_BASE_URL = 'https://api.dialkaraikudi.com/';
-const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
+const API_BASE_URL = 'https://api.dialkaraikudi.com/';
+// const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1540,12 +1540,26 @@ export const getTicketSetting = async () => {
 export const getTicket = async () => {
   try {
     const userData = await AsyncStorage.getItem("userData");
-    console.log(userData, "User Data");
+    console.log(userData, "User Data123124");
 
     const parsed = JSON.parse(userData);
     const userId = parsed._id || parsed.id || parsed.userId;
 
     const response = await apiClient.get(`/ticket/bookings/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const getCancelTicket = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data123124");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/cancel/user/${userId}`)
     return response.data
   } catch (error) {
     console.log(error);
@@ -1572,6 +1586,15 @@ export const ticketverifyPayment = async (data) => {
 export const confirmBooking = async (data) => {
   try {
     const response = await apiClient.post(`/ticket/bookings/confirm`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const ticketCancel = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/bookings/cancel-seat`, data)
     return response.data
   } catch (error) {
     console.log(error);

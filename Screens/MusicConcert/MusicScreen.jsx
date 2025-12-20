@@ -5,6 +5,7 @@ import {
     TouchableOpacity,
     FlatList,
     Alert,
+    TextInput,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RazorpayCheckout from "react-native-razorpay";
@@ -17,6 +18,7 @@ import {
     verifyPayment,
     confirmBooking,
     ticketverifyPayment,
+    getTicket,
 } from "../../services/apiClient";
 
 const HOLD_TIME = 300;
@@ -24,27 +26,45 @@ const HOLD_TIME = 300;
 const MusicScreen = ({ route }) => {
     const { concertId, concertName } = route.params;
 
+    console.log(concertName);
+
+
     const [seatRows, setSeatRows] = useState([]);
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [timer, setTimer] = useState(null);
     const [setting, setSetting] = useState(null);
     const [bookingId, setBookingId] = useState(null);
     const [userId, setUserId] = useState(null);
+    const [userName, setUserName] = useState(null);
+    const [tickets, setTickets] = useState([]);
+
+    const [showUserModal, setShowUserModal] = useState(false);
+
+    const [phone, setPhone] = useState("");
+    const [gender, setGender] = useState("");
+    const [age, setAge] = useState("");
 
     // 🔹 INIT
     useEffect(() => {
         init();
     }, []);
 
+    // useEffect(() => {
+    //     fetchTickets();
+    // }, []);
+
     const init = async () => {
+        gettingTickets();
         const userData = await AsyncStorage.getItem("userData");
         console.log(userData, "User Data");
 
         const parsed = JSON.parse(userData);
         setUserId(parsed._id || parsed.id || parsed.userId);
+        setUserName(parsed.name)
 
         fetchSeats();
         fetchTicketSetting();
+
     };
 
     const fetchSeats = async () => {
@@ -54,7 +74,16 @@ const MusicScreen = ({ route }) => {
         } catch (error) {
             console.log(error);
         }
+    };
 
+    const gettingTickets = async () => {
+        try {
+            const res = await getTicket();
+            setTickets(res.data || []);
+            console.log(res, "ticket");
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     const fetchTicketSetting = async () => {
@@ -150,15 +179,34 @@ const MusicScreen = ({ route }) => {
                 return
             }
 
+            if (phone.length !== 10) {
+                Alert.alert("Invalid phone number");
+                return;
+            }
+
+            if (Number(age) < 1 || Number(age) > 99) {
+                Alert.alert("Invalid age");
+                return;
+            }
+
+            if (!gender) {
+                Alert.alert("Select gender");
+                return;
+            }
+
             const { subtotal, total } = calculateTotal();
 
             // 1️⃣ CREATE PAYMENT
             const paymentRes = await createPayment({
                 userId,
+                userName,
                 concertId,
                 seats: selectedSeats,
                 subtotal,
                 gstPercent: setting?.gstAmount || 18,
+                phone,
+                gender,
+                age,
             });
 
             console.log(paymentRes, "BusinessDetailScreen");
@@ -198,16 +246,18 @@ const MusicScreen = ({ route }) => {
         } catch (err) {
             console.log(err);
             Alert.alert(err.message);
+
         }
     };
-
-
 
     const reset = () => {
         setSelectedSeats([]);
         setBookingId(null);
         setTimer(null);
         fetchSeats();
+        setAge()
+        setBookingId()
+        setPhone()
     };
 
     // 🎫 Seat UI
@@ -243,6 +293,12 @@ const MusicScreen = ({ route }) => {
         </View>
     );
 
+    const alreadyBooked = tickets.some(
+        ticket =>
+            ticket.concertId?._id === concertId &&
+            ["HELD", "CONFIRMED", "PARTIALLY_CANCELLED"].includes(ticket.status)
+    );
+
     return (
         <View className="flex-1 bg-gray-100 p-4 mt-6">
             <Text className="text-2xl font-bold">{concertName}</Text>
@@ -267,13 +323,106 @@ const MusicScreen = ({ route }) => {
             </TouchableOpacity> */}
 
             <TouchableOpacity
-                onPress={payNow}
-                className="bg-green-600 py-4 rounded-xl"
+                onPress={() => setShowUserModal(true)}
+                disabled={alreadyBooked}
+                className={`py-4 rounded-xl ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
+                    }`}
             >
                 <Text className="text-white text-center font-bold">
-                    PAY ₹{calculateTotal().subtotal} + GST
+                    {alreadyBooked
+                        ? "TICKET ALREADY BOOKED"
+                        : `PAY ₹${calculateTotal().subtotal} + GST`}
                 </Text>
             </TouchableOpacity>
+
+            {showUserModal && (
+                <View className="absolute inset-0 bg-black/50 items-center justify-center">
+                    <View className="bg-white w-[90%] rounded-2xl p-5">
+
+                        <Text className="text-lg font-bold mb-4">Enter Details</Text>
+
+                        {/* Phone */}
+                        <Text className="text-sm mb-1">Phone Number</Text>
+                        <TextInput
+                            value={phone}
+                            keyboardType="phone-pad"
+                            maxLength={10}
+                            onChangeText={(text) => {
+                                // allow only numbers
+                                if (!/^\d*$/.test(text)) return;
+
+                                // first digit must be 6–9
+                                if (text.length === 1 && !/[6-9]/.test(text)) return;
+
+                                setPhone(text);
+                            }}
+                            placeholder="Enter phone number"
+                            className="border rounded-lg p-2 mb-3"
+                        />
+
+
+                        {/* Gender */}
+                        <Text className="text-sm mb-1">Gender</Text>
+                        <View className="flex-row mb-3">
+                            {["Male", "Female", "Other"].map(g => (
+                                <TouchableOpacity
+                                    key={g}
+                                    onPress={() => setGender(g)}
+                                    className={`px-4 py-2 mr-2 rounded-full ${gender === g ? "bg-blue-600" : "bg-gray-300"
+                                        }`}
+                                >
+                                    <Text className={gender === g ? "text-white" : "text-black"}>
+                                        {g}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Age */}
+                        <Text className="text-sm mb-1">Age</Text>
+                        <TextInput
+                            value={age}
+                            keyboardType="numeric"
+                            maxLength={2}
+                            onChangeText={(text) => {
+                                if (!/^\d*$/.test(text)) return;
+                                setAge(text);
+                            }}
+                            placeholder="Age"
+                            className="border rounded-lg p-2 mb-4"
+                        />
+
+
+                        {/* Buttons */}
+                        <View className="flex-row justify-between">
+                            <TouchableOpacity
+                                onPress={() => setShowUserModal(false)}
+                                className="px-4 py-2 bg-gray-400 rounded-lg"
+                            >
+                                <Text className="text-white">Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    if (!phone || !gender || !age) {
+                                        Alert.alert("Fill all details");
+                                        return;
+                                    }
+
+                                    setShowUserModal(false);
+                                    payNow(); // 🔥 EXISTING FUNCTION ONLY
+                                }}
+                                className="px-4 py-2 bg-green-600 rounded-lg"
+                            >
+                                <Text className="text-white">Confirm & Pay</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </View>
+                </View>
+            )}
+
+
         </View>
     );
 };

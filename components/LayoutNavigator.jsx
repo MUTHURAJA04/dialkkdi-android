@@ -24,6 +24,7 @@ import ConcertListScreen from '../Screens/MusicConcert/ConcertListScreen';
 import BusinessLanding from '../Screens/Business/BusinessLanding';
 import TalkofTown from '../Screens/TalkOftheTown/TalkofTown';
 import Checkout from '../Screens/Business/Adverts/Checkout';
+import TicketPolicyScreen from '../Screens/MusicConcert/TicketPolicyModal';
 
 
 const Stack = createNativeStackNavigator();
@@ -117,6 +118,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="MyTicketScreen" component={withAuthGuard(MyTicketScreen)} />
 
       <Stack.Screen name="MusicScreen" component={withAuthGuard(MusicScreen)} />
+      <Stack.Screen name="TicketPolicyScreen" component={withAuthGuard(TicketPolicyScreen)} />
 
       <Stack.Screen name="TalkofTown" component={withAuthGuard(TalkofTown)} />
       <Stack.Screen name="Profile" component={withAuthGuard(Profile)} />

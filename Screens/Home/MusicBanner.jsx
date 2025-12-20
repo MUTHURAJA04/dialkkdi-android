@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import banner from '../../assets/Banners/Banner1.jpg';
+import banner from '../../assets/Banners/Music_concert.jpg';
 
 const MusicBanner = () => {
     const navigation = useNavigation();
@@ -10,14 +10,13 @@ const MusicBanner = () => {
         <View>
             <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('ConcertListScreen')} // 👈 target screen
+                onPress={() => navigation.navigate('TicketPolicyScreen')} // 👈 target screen
             >
                 <Image
                     source={banner}
                     style={{
                         width: '100%',
                         height: 180,
-                        borderRadius: 12,
                     }}
                     resizeMode="cover"
                 />
