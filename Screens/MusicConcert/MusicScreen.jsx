@@ -23,11 +23,10 @@ import {
 
 const HOLD_TIME = 300;
 
-const MusicScreen = ({ route }) => {
+const MusicScreen = ({ route, navigation }) => {
     const { concertId, concertName } = route.params;
 
     console.log(concertName);
-
 
     const [seatRows, setSeatRows] = useState([]);
     const [selectedSeats, setSelectedSeats] = useState([]);
@@ -60,8 +59,6 @@ const MusicScreen = ({ route }) => {
 
         const parsed = JSON.parse(userData);
         setUserId(parsed._id || parsed.id || parsed.userId);
-        setUserName(parsed.name)
-
         fetchSeats();
         fetchTicketSetting();
 
@@ -235,7 +232,19 @@ const MusicScreen = ({ route }) => {
                         amountPaid: total,
                     });
 
-                    Alert.alert("Booking Confirmed 🎉");
+                    Alert.alert(
+                        "Booking Confirmed 🎉",
+                        "View Ticket",
+                        [
+                            {
+                                text: "VIEW",
+                                onPress: () => {
+                                    navigation.navigate("MyTicketScreen"); // screen name
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
                     reset();
                 })
                 .catch(err => {
@@ -321,19 +330,21 @@ const MusicScreen = ({ route }) => {
             >
                 <Text className="text-white text-center font-bold">HOLD SEATS</Text>
             </TouchableOpacity> */}
+            {selectedSeats.length > 0 && (
+                <TouchableOpacity
+                    onPress={() => setShowUserModal(true)}
+                    disabled={alreadyBooked}
+                    className={`py-4 rounded-xl ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
+                        }`}
+                >
+                    <Text className="text-white text-center font-bold">
+                        {alreadyBooked
+                            ? "TICKET ALREADY BOOKED"
+                            : `PAY ₹${calculateTotal().subtotal} + GST`}
+                    </Text>
+                </TouchableOpacity>
+            )}
 
-            <TouchableOpacity
-                onPress={() => setShowUserModal(true)}
-                disabled={alreadyBooked}
-                className={`py-4 rounded-xl ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
-                    }`}
-            >
-                <Text className="text-white text-center font-bold">
-                    {alreadyBooked
-                        ? "TICKET ALREADY BOOKED"
-                        : `PAY ₹${calculateTotal().subtotal} + GST`}
-                </Text>
-            </TouchableOpacity>
 
             {showUserModal && (
                 <View className="absolute inset-0 bg-black/50 items-center justify-center">
@@ -342,6 +353,20 @@ const MusicScreen = ({ route }) => {
                         <Text className="text-lg font-bold mb-4">Enter Details</Text>
 
                         {/* Phone */}
+                        <Text className="text-sm mb-1">Name</Text>
+                        <TextInput
+                            value={userName}
+                            keyboardType="default"
+                            maxLength={20}
+                            onChangeText={(text) => {
+                                // allow only numbers
+                                if (!/^[A-Za-z ]*$/.test(text)) return;
+
+                                setUserName(text);
+                            }}
+                            placeholder="Enter your Name"
+                            className="border rounded-lg p-2 mb-3"
+                        />
                         <Text className="text-sm mb-1">Phone Number</Text>
                         <TextInput
                             value={phone}

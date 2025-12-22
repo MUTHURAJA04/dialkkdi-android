@@ -34,7 +34,16 @@ const CancelTicketModal = ({ ticket, onClose, onSuccess }) => {
     const submitCancel = async () => {
         if (selectedSeats.length === 0) {
             return Alert.alert("Select seats to cancel");
+
         }
+
+
+        if (!accepted) {
+            Alert.alert("Accept Required", "Please accept the policy to continue");
+            return;
+        }
+
+
         if (!reason) {
             return Alert.alert("Select cancellation reason");
         }
@@ -139,18 +148,33 @@ const CancelTicketModal = ({ ticket, onClose, onSuccess }) => {
                                 <Text className="font-bold mb-2">
                                     5. Ticket Transfer & Event Cancellation
                                 </Text>
-                                <Text className="mb-20">
+                                <Text className="mb-10">
                                     • Ticket transfer is not allowed.{"\n"}
                                     • If the event is cancelled due to government orders, artist health
                                     issues, or natural disasters, a full face value refund will be issued.
                                 </Text>
+                                <TouchableOpacity
+                                    onPress={() => setAccepted(!accepted)}
+                                    className="flex-row items-center mb-4"
+                                >
+                                    <View
+                                        className={`w-5 h-5 border rounded mr-2 ${accepted ? "bg-black" : "bg-white"
+                                            }`}
+                                    />
+                                    <Text>I have read and accept the policy</Text>
+                                </TouchableOpacity>
+
+
                             </ScrollView>
 
                             <TouchableOpacity
-                                className={`py-2 mb-6 rounded-lg ${accepted ? "bg-green-500" : "bg-gray-300"
+                                className={`py-2 my-6 rounded-lg ${accepted ? "bg-green-500" : "bg-gray-300"
                                     }`}
                                 onPress={() => {
-                                    setAccepted(true);
+                                    if (!accepted) {
+                                        Alert.alert("Accept Required", "Please accept the policy to continue");
+                                        return;
+                                    }
                                     setStep(2);
                                 }}
                             >

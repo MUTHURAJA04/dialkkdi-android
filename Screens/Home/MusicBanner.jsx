@@ -7,7 +7,7 @@ const MusicBanner = () => {
     const navigation = useNavigation();
 
     return (
-        <View>
+        <View className=' border-b-slate-400'>
             <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => navigation.navigate('TicketPolicyScreen')} // 👈 target screen
@@ -16,7 +16,8 @@ const MusicBanner = () => {
                     source={banner}
                     style={{
                         width: '100%',
-                        height: 180,
+                        height: 100,
+                        borderColor: "#000"
                     }}
                     resizeMode="cover"
                 />
