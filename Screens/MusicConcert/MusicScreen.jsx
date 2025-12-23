@@ -334,7 +334,7 @@ const MusicScreen = ({ route, navigation }) => {
                 <TouchableOpacity
                     onPress={() => setShowUserModal(true)}
                     disabled={alreadyBooked}
-                    className={`py-4 rounded-xl ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
+                    className={`py-4 rounded-xl mb-10 ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
                         }`}
                 >
                     <Text className="text-white text-center font-bold">
@@ -419,7 +419,7 @@ const MusicScreen = ({ route, navigation }) => {
 
 
                         {/* Buttons */}
-                        <View className="flex-row justify-between">
+                        <View className="flex-row justify-between ">
                             <TouchableOpacity
                                 onPress={() => setShowUserModal(false)}
                                 className="px-4 py-2 bg-gray-400 rounded-lg"

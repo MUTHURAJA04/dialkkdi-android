@@ -3,9 +3,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
+// const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
 // const API_BASE_URL = 'https://api.dialkaraikudi.com/';
-// const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
+const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1601,7 +1601,13 @@ export const ticketCancel = async (data) => {
   }
 }
 
-
-
+export const youtubeAd = async () => {
+  try {
+    const response = await apiClient.get(`/youtube/youtube-ad`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export default apiClient;

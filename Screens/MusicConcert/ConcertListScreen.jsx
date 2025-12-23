@@ -53,6 +53,9 @@ const ConcertListScreen = ({ navigation }) => {
                 data={data}
                 keyExtractor={(item) => item._id}
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                    paddingBottom: 90, // 🔥 button height + space
+                }}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         className="bg-white p-4 rounded-xl mb-3 shadow"
@@ -79,7 +82,7 @@ const ConcertListScreen = ({ navigation }) => {
             />
 
             <TouchableOpacity
-                className="mt-3 mb-3 bg-black py-2 rounded-lg"
+                className="bg-black py-3 rounded-lg mb-4"
                 onPress={() => navigation.navigate("MyTicketScreen")}
             >
                 <Text className="text-white text-center font-semibold">
