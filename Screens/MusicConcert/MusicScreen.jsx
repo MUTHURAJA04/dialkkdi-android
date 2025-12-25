@@ -218,7 +218,7 @@ const MusicScreen = ({ route, navigation }) => {
 
             // 2️⃣ OPEN RAZORPAY ✅
             RazorpayCheckout.open({
-                key: "rzp_test_w7eHbASEFZ4b09",   // ✅ STRING
+                key: "rzp_live_Ap0i4wR26uP4WR",   // ✅ STRING
                 order_id: orderId,
                 amount: amount,                 // ✅ already in paise
                 currency: "INR",
