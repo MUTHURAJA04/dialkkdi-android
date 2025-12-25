@@ -194,20 +194,25 @@ const MusicScreen = ({ route, navigation }) => {
             const { subtotal, total } = calculateTotal();
 
             // 1️⃣ CREATE PAYMENT
-            const paymentRes = await createPayment({
-                userId,
-                userName,
-                concertId,
-                seats: selectedSeats,
-                subtotal,
-                gstPercent: setting?.gstAmount || 18,
-                phone,
-                gender,
-                age,
-            });
+            let paymentRes;
+            try {
+                paymentRes = await createPayment({
+                    userId,
+                    userName,
+                    concertId,
+                    seats: selectedSeats,
+                    subtotal,
+                    gstPercent: setting?.gstAmount || 18,
+                    phone,
+                    gender,
+                    age,
+                });
+            } catch (err) {
+                Alert.alert("Error", err.message); // 🔴 ONLY alert
+                return; // ⛔ STOP HERE
+            }
 
             console.log(paymentRes, "BusinessDetailScreen");
-
 
             const { orderId, amount, bookingId } = paymentRes.data;
 
@@ -249,6 +254,7 @@ const MusicScreen = ({ route, navigation }) => {
                 })
                 .catch(err => {
                     console.log("Razorpay Error:", err);
+                    gettingTickets()
                     Alert.alert("Payment cancelled");
                 });
 
@@ -302,11 +308,28 @@ const MusicScreen = ({ route, navigation }) => {
         </View>
     );
 
-    const alreadyBooked = tickets.some(
-        ticket =>
-            ticket.concertId?._id === concertId &&
-            ["HELD", "CONFIRMED", "PARTIALLY_CANCELLED"].includes(ticket.status)
-    );
+    const now = new Date();
+
+    const alreadyBooked = tickets.some(ticket => {
+        if (ticket.concertId?._id !== concertId) return false;
+
+        // CONFIRMED / PARTIALLY_CANCELLED → always booked
+        if (["CONFIRMED", "PARTIALLY_CANCELLED"].includes(ticket.status)) {
+            return true;
+        }
+
+        // HELD → only if not expired
+        if (
+            ticket.status === "HELD" &&
+            ticket.holdExpiresAt &&
+            new Date(ticket.holdExpiresAt) > now
+        ) {
+            return true;
+        }
+
+        return false;
+    });
+
 
     return (
         <View className="flex-1 bg-gray-100 p-4 mt-6">
@@ -339,7 +362,7 @@ const MusicScreen = ({ route, navigation }) => {
                 >
                     <Text className="text-white text-center font-bold">
                         {alreadyBooked
-                            ? "TICKET ALREADY BOOKED"
+                            ? "TICKET ALREADY BOOKED OR HELD"
                             : `PAY ₹${calculateTotal().subtotal} + GST`}
                     </Text>
                 </TouchableOpacity>

@@ -9,13 +9,23 @@ import {
 import {
     getTicket,
     getCancelTicket,
+    getTicketHistory,
 } from "../../services/apiClient";
 import CancelTicketModal from "./CancelTicketModal";
+import { Image } from "react-native";
+import Image1 from "../../assets/Logo/Dial_karaikudi.jpg"
+import Image2 from "../../assets/Logo/Dial_pudukkottai.jpg"
+import Image3 from "../../assets/Logo/Digiaiquest.jpg"
+import Image4 from "../../assets/Logo/Digitaly_jobs.jpg"
 
 const MyTicketScreen = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTicket, setSelectedTicket] = useState(null);
+
+    const sponser_Images = [
+        Image1, Image2, Image3, Image4
+    ]
 
     useEffect(() => {
         fetchTickets();
@@ -26,13 +36,19 @@ const MyTicketScreen = () => {
             setLoading(true);
 
             // ✅ CONFIRMED BOOKINGS
-            const bookingRes = await getTicket();
+            const bookingRes = await getTicketHistory();
+
+            console.log(bookingRes, "0987665444");
+
 
             const confirmedTickets = (bookingRes.data || []).map(t => ({
                 ...t,
                 type: "BOOKING",
-                status: "CONFIRMED",
+                // status: "CONFIRMED",
             }));
+
+            console.log(confirmedTickets, "..........");
+
 
             // ❌ CANCELLED TICKETS
             const cancelRes = await getCancelTicket();
@@ -84,54 +100,72 @@ const MyTicketScreen = () => {
                     key={ticket._id}
                     className="bg-white rounded-2xl p-5 shadow mb-4"
                 >
-                    {/* 🎵 Concert */}
-                    <Text className="text-xl font-bold text-center">
-                        🎵 {ticket.concertId.concertName}
-                    </Text>
+                    {/* 🔁 MAIN ROW */}
+                    <View className="flex-row">
+                        {/* ⬅️ LEFT CONTENT */}
+                        <View className="flex-1 pr-3">
+                            {/* 🎵 Concert */}
+                            <Text className="text-xl font-bold text-center">
+                                🎵 {ticket.concertId.concertName}
+                            </Text>
 
-                    <Text className="text-center text-gray-500 mt-1">
-                        {new Date(ticket.concertId.concertDate).toDateString()}
-                    </Text>
+                            <Text className="text-center text-gray-500 mt-1">
+                                {new Date(ticket.concertId.concertDate).toDateString()}
+                            </Text>
 
-                    <View className="border-b border-dashed my-4" />
+                            <View className="border-b border-dashed my-4" />
 
-                    {/* 📍 Venue */}
-                    <Text className="text-sm text-gray-600">Venue</Text>
-                    <Text className="font-semibold">
-                        {ticket.concertId.concertPlace}
-                    </Text>
+                            {/* 📍 Venue */}
+                            <View className="flex-row justify-between">
+                                <View className="">
+                                    <Text className="text-sm text-gray-600">Venue</Text>
+                                    <Text className="font-semibold">
+                                        {ticket.concertId.concertPlace}
+                                    </Text>
 
-                    {/* 💺 Seats */}
-                    <View className="mt-3">
-                        <Text className="text-sm text-gray-600">Seats</Text>
-                        <Text className="font-bold">
-                            {ticket.seats.join(", ")}
-                        </Text>
+                                    {/* 💺 Seats */}
+                                    <View className="mt-3">
+                                        <Text className="text-sm text-gray-600">Seats</Text>
+                                        <Text className="font-bold">
+                                            {ticket.seats.join(", ")}
+                                        </Text>
+                                    </View>
+
+                                    {/* 🆔 Booking ID */}
+                                    <View className="mt-3">
+                                        <Text className="text-sm text-gray-600">Booking ID</Text>
+                                        <Text className="text-xs">{ticket._id}</Text>
+                                    </View>
+                                </View>
+
+                                <View className="w-28 flex-row flex-wrap justify-between">
+                                    <Text
+                                        className="text-xs underline text-red-600 font-semibold"
+                                    >Ticket Partner</Text>
+                                    {sponser_Images.map((img, i) => (
+                                        <View
+                                            key={i}
+                                            className="w-[48%] h-14 mb-2 rounded-lg overflow-hidden
+                                            "
+                                        >
+                                            <Image
+                                                source={img}
+                                                className="w-full h-full"
+                                                resizeMode="cover"
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* ➡️ RIGHT SIDE IMAGES */}
+
                     </View>
 
-                    {/* 🆔 Booking ID (ONLY CONFIRMED) */}
-                    {ticket.type === "BOOKING" && (
-                        <View className="mt-3">
-                            <Text className="text-sm text-gray-600">
-                                Booking ID
-                            </Text>
-                            <Text className="text-xs">{ticket._id}</Text>
-                        </View>
-                    )}
-                    {ticket.type === "CANCELLED" && (
-                        <View className="mt-3">
-                            <Text className="text-sm text-gray-600">
-                                Booking ID
-                            </Text>
-                            <Text className="text-xs">{ticket._id}</Text>
-                        </View>
-                    )}
-
-
-
                     <View className="border-b border-dashed my-4" />
 
-                    {/* 💰 Amount (ONLY CONFIRMED) */}
+                    {/* 💰 Amount */}
                     {ticket.type === "BOOKING" && (
                         <>
                             <View className="flex-row justify-between">
@@ -184,8 +218,8 @@ const MyTicketScreen = () => {
                         </Text>
                     </View>
 
-                    {/* ❌ Cancel Button (ONLY CONFIRMED) */}
-                    {ticket.type === "BOOKING" && (
+                    {/* ❌ Cancel Button */}
+                    {ticket.type === "BOOKING" && ticket.status === "CONFIRMED" && (
                         <TouchableOpacity
                             className="mt-4 bg-red-500 py-2 rounded-lg"
                             onPress={() => setSelectedTicket(ticket)}
@@ -196,6 +230,7 @@ const MyTicketScreen = () => {
                         </TouchableOpacity>
                     )}
                 </View>
+
             ))}
 
             {/* 🔥 CANCEL MODAL */}

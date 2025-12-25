@@ -3,9 +3,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-// const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
+const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
 // const API_BASE_URL = 'https://api.dialkaraikudi.com/';
-const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
+// const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1551,6 +1551,20 @@ export const getTicket = async () => {
     console.log(error);
   }
 }
+export const getTicketHistory = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data123124");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/bookings-history/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
 export const getCancelTicket = async () => {
   try {
     const userData = await AsyncStorage.getItem("userData");
@@ -1569,9 +1583,14 @@ export const getCancelTicket = async () => {
 export const createPayment = async (data) => {
   try {
     const response = await apiClient.post(`/ticket/create`, data)
+    console.log(response, "qwrqwrqwrwqr");
+    if (!response.data.success === true) {
+      throw new Error(res.data?.message || "Payment creation failed");
+    }
     return response.data
   } catch (error) {
-    console.log(error);
+    console.log(error, "wrwrwr");
+    return error.me
   }
 }
 

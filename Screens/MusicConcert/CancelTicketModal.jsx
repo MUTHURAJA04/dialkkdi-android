@@ -158,9 +158,14 @@ const CancelTicketModal = ({ ticket, onClose, onSuccess }) => {
                                     className="flex-row items-center mb-4"
                                 >
                                     <View
-                                        className={`w-5 h-5 border rounded mr-2 ${accepted ? "bg-black" : "bg-white"
+                                        className={`w-5 h-5 border rounded mr-2 items-center justify-center ${accepted ? "bg-black border-black" : "bg-white border-gray-400"
                                             }`}
-                                    />
+                                    >
+                                        {accepted && (
+                                            <Text className="text-white text-xs font-bold">✓</Text>
+                                        )}
+                                    </View>
+
                                     <Text>I have read and accept the policy</Text>
                                 </TouchableOpacity>
 
