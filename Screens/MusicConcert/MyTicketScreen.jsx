@@ -140,7 +140,7 @@ const MyTicketScreen = () => {
 
                                 <View className="w-28 flex-row flex-wrap justify-between">
                                     <Text
-                                        className="text-xs underline text-red-600 font-semibold"
+                                        className="text-xs underline text-red-600"
                                     >Ticket Partner</Text>
                                     {sponser_Images.map((img, i) => (
                                         <View
