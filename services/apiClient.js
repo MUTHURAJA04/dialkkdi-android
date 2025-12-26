@@ -3,9 +3,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 
-const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
-// const API_BASE_URL = 'https://api.dialkaraikudi.com/';
-// const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms';
+// const API_BASE_URL = 'https://dev-api.dialkaraikudi.com/';
+const API_BASE_URL = 'https://api.dialkaraikudi.com/';
+// const API_BASE_URL = 'https://220r1hqs-5000.inc1.devtunnels.ms/';
 
 // Axios instance
 const apiClient = axios.create({
@@ -1470,7 +1470,6 @@ export const getFestivelfeed = async () => {
   }
 }
 
-
 export const createFestivelFeed = async (data) => {
   try {
     const userToken = await AsyncStorage.getItem("userToken");
@@ -1493,6 +1492,141 @@ export const createFestivelFeed = async (data) => {
   }
 };
 
+export const getConcert = async () => {
+  try {
+    console.log("itys woking");
+    const response = await apiClient.get(`/ticket/concerts`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
 
+export const getSeat = async (id) => {
+  try {
+    const response = await apiClient.get(`/ticket/${id}/seats`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const seatHold = async (data) => {
+  try {
+
+    const response = await apiClient.post('/ticket/bookings/hold', data);
+
+    return response.data;  // { success: "", message: "" }
+  } catch (error) {
+    console.error(error);
+
+    return {
+      success: false,
+      message: error.response?.data?.message || error.message || "Unknown error"
+    };
+  }
+};
+
+
+export const getTicketSetting = async () => {
+  try {
+    const response = await apiClient.get(`/ticket/ticket-settings`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const getTicket = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data123124");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/bookings/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const getTicketHistory = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data123124");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/bookings-history/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const getCancelTicket = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    console.log(userData, "User Data123124");
+
+    const parsed = JSON.parse(userData);
+    const userId = parsed._id || parsed.id || parsed.userId;
+
+    const response = await apiClient.get(`/ticket/cancel/user/${userId}`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const createPayment = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/create`, data)
+    console.log(response, "qwrqwrqwrwqr");
+    if (!response.data.success === true) {
+      throw new Error(res.data?.message || "Payment creation failed");
+    }
+    return response.data
+  } catch (error) {
+    console.log(error, "wrwrwr");
+    return error.me
+  }
+}
+
+export const ticketverifyPayment = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/create`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const confirmBooking = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/bookings/confirm`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const ticketCancel = async (data) => {
+  try {
+    const response = await apiClient.post(`/ticket/bookings/cancel-seat`, data)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const youtubeAd = async () => {
+  try {
+    const response = await apiClient.get(`/youtube/youtube-ad`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export default apiClient;
