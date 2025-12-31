@@ -10,22 +10,58 @@ import {
     getTicket,
     getCancelTicket,
     getTicketHistory,
+    ticketPartner,
 } from "../../services/apiClient";
 import CancelTicketModal from "./CancelTicketModal";
 import { Image } from "react-native";
-import Image1 from "../../assets/Logo/Dial_karaikudi.jpg"
-import Image2 from "../../assets/Logo/Dial_pudukkottai.jpg"
-import Image3 from "../../assets/Logo/Digiaiquest.jpg"
-import Image4 from "../../assets/Logo/Digitaly_jobs.jpg"
+// import Image1 from "../../assets/Logo/Dial_karaikudi.jpg"
+// import Image2 from "../../assets/Logo/Dial_pudukkottai.jpg"
+// import Image3 from "../../assets/Logo/Digiaiquest.jpg"
+// import Image4 from "../../assets/Logo/Digitaly_jobs.jpg"
 
 const MyTicketScreen = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTicket, setSelectedTicket] = useState(null);
+    const [ticketPartnerImages, setTicketPartnerImages] = useState([]);
 
-    const sponser_Images = [
-        Image1, Image2, Image3, Image4
-    ]
+
+    useEffect(() => {
+        getTicketPartner()
+    }, [])
+
+
+    const CDN_PREFIX = "https://livecdn.dialkaraikudi.com";
+
+    const getTicketPartner = async () => {
+        try {
+            const res = await ticketPartner()
+            console.log(res);
+            const partner = res?.[0];
+
+            if (partner) {
+                const images = [
+                    partner.image1,
+                    partner.image2,
+                    partner.image3,
+                    partner.image4,
+                ]
+                    .filter(Boolean) // null / empty remove
+                    .map(img => `${CDN_PREFIX}/${img}`);
+
+                setTicketPartnerImages(images);
+                console.log(ticketPartnerImages, images, "final images");
+            }
+
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // const sponser_Images = [
+    //     Image1, Image2, Image3, Image4
+    // ]
 
     useEffect(() => {
         fetchTickets();
@@ -138,24 +174,8 @@ const MyTicketScreen = () => {
                                     </View>
                                 </View>
 
-                                <View className="w-28 flex-row flex-wrap justify-between">
-                                    <Text
-                                        className="text-xs underline text-red-600"
-                                    >Ticket Partner</Text>
-                                    {sponser_Images.map((img, i) => (
-                                        <View
-                                            key={i}
-                                            className="w-[48%] h-14 mb-2 rounded-lg overflow-hidden
-                                            "
-                                        >
-                                            <Image
-                                                source={img}
-                                                className="w-full h-full"
-                                                resizeMode="cover"
-                                            />
-                                        </View>
-                                    ))}
-                                </View>
+
+
                             </View>
                         </View>
 
@@ -229,6 +249,26 @@ const MyTicketScreen = () => {
                             </Text>
                         </TouchableOpacity>
                     )}
+                    <View className="mt-4">
+                        <Text className="text-xs underline text-red-600 mb-3">
+                            Ticket Partner
+                        </Text>
+
+                        <View className="flex-row flex-wrap justify-between">
+                            {ticketPartnerImages.map((img, i) => (
+                                <View
+                                    key={i}
+                                    className="w-[20%] h-16 mb-2 rounded-md overflow-hidden "
+                                >
+                                    <Image
+                                        source={{ uri: img }}
+                                        className="w-full h-full"
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            ))}
+                        </View>
+                    </View>
                 </View>
 
             ))}

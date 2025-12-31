@@ -19,6 +19,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(request => {
   console.log(
     '📡 Request:',
+    request.baseURL,
     request.method?.toUpperCase(),
     request.url,
     request.data,
@@ -1623,6 +1624,14 @@ export const ticketCancel = async (data) => {
 export const youtubeAd = async () => {
   try {
     const response = await apiClient.get(`/youtube/youtube-ad`)
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const ticketPartner = async () => {
+  try {
+    const response = await apiClient.get(`/ticket/ticket-partner`)
     return response.data
   } catch (error) {
     console.log(error);
