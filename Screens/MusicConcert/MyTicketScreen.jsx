@@ -250,7 +250,7 @@ const MyTicketScreen = () => {
                         </TouchableOpacity>
                     )}
                     <View className="mt-4">
-                        <Text className="text-xs underline text-red-600 mb-1">
+                        <Text className="text-xs underline text-red-600 mb-3">
                             Ticket Partner
                         </Text>
 
@@ -258,7 +258,7 @@ const MyTicketScreen = () => {
                             {ticketPartnerImages.map((img, i) => (
                                 <View
                                     key={i}
-                                    className="w-[20%] h-16 mb-2 rounded-md overflow-hidden bg-gray-100"
+                                    className="w-[20%] h-16 mb-2 rounded-md overflow-hidden "
                                 >
                                     <Image
                                         source={{ uri: img }}
