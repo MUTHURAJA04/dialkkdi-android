@@ -279,9 +279,9 @@ const MusicScreen = ({ route, navigation }) => {
     const SeatItem = ({ seat }) => {
         const isSelected = selectedSeats.includes(seat.seatNo);
 
-        let seatClass = "bg-gray-300";
+        let seatClass = "bg-blue-500";
         if (seat.status === "HELD") seatClass = "bg-yellow-500";
-        if (seat.status === "CONFIRMED") seatClass = "bg-green-600";
+        if (seat.status === "CONFIRMED") seatClass = "bg-gray-300";
         if (isSelected) seatClass = "bg-orange-500";
 
         return (
@@ -334,6 +334,34 @@ const MusicScreen = ({ route, navigation }) => {
     return (
         <View className="flex-1 bg-gray-100 p-4 mt-6">
             <Text className="text-2xl font-bold">{concertName}</Text>
+            <View className="flex-row flex-wrap gap-3 py-2 rounded-lg shadow-sm">
+
+                {/* Available */}
+                <View className="flex-row items-center">
+                    <View className="bg-blue-500 h-2 w-2 rounded-full mr-1" />
+                    <Text className="text-[12px] font-bold">Available</Text>
+                </View>
+
+                {/* Held */}
+                <View className="flex-row items-center">
+                    <View className="bg-yellow-500 h-2 w-2 rounded-full mr-1" />
+                    <Text className="text-[12px] font-bold">Held</Text>
+                </View>
+
+                {/* Booked */}
+                <View className="flex-row items-center">
+                    <View className="bg-gray-300 h-2 w-2 rounded-full mr-1" />
+                    <Text className="text-[12px] font-bold">Booked</Text>
+                </View>
+
+                {/* Selected */}
+                <View className="flex-row items-center">
+                    <View className="bg-orange-500 h-2 w-2 rounded-full mr-1" />
+                    <Text className="text-[12px] font-bold">Selected</Text>
+                </View>
+
+            </View>
+
 
             {timer !== null && (
                 <Text className="text-red-600 font-semibold mb-2">

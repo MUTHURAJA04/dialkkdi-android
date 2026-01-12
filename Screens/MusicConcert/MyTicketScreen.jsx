@@ -125,6 +125,10 @@ const MyTicketScreen = () => {
                             <Text className="text-sm text-gray-400">Venue</Text>
                             <Text className="font-semibold text-white mb-3">{ticket.concertId?.concertPlace}</Text>
 
+                            <Text className="text-sm text-gray-400">Customer Name</Text>
+                            <Text className="font-semibold text-white mb-3">{ticket?.userId?.name}</Text>
+
+
                             <Text className="text-sm text-gray-400">Seats</Text>
                             <Text className="font-bold text-white mb-3">{ticket.seats.join(", ")}</Text>
 
