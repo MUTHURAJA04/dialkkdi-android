@@ -105,7 +105,7 @@ const TicketPolicyScreen = ({ navigation }) => {
 
                 <TouchableOpacity
                     onPress={() => setAccepted(!accepted)}
-                    className="flex-row items-center mb-4"
+                    className="flex-row items-center mb-10"
                 >
                     <View
                         className={`w-5 h-5 border rounded mr-2 items-center justify-center ${accepted ? "bg-black border-black" : "bg-white border-gray-400"

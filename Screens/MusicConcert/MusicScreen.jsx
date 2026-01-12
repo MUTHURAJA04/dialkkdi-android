@@ -181,15 +181,15 @@ const MusicScreen = ({ route, navigation }) => {
                 return;
             }
 
-            if (Number(age) < 1 || Number(age) > 99) {
-                Alert.alert("Invalid age");
-                return;
-            }
+            // if (Number(age) < 1 || Number(age) > 99) {
+            //     Alert.alert("Invalid age");
+            //     return;
+            // }
 
-            if (!gender) {
-                Alert.alert("Select gender");
-                return;
-            }
+            // if (!gender) {
+            //     Alert.alert("Select gender");
+            //     return;
+            // }
 
             const { subtotal, total } = calculateTotal();
 
@@ -218,7 +218,7 @@ const MusicScreen = ({ route, navigation }) => {
 
             // 2️⃣ OPEN RAZORPAY ✅
             RazorpayCheckout.open({
-                key: "rzp_live_Ap0i4wR26uP4WR",   // ✅ STRING
+                key: "rzp_test_w7eHbASEFZ4b09",   // ✅ STRING
                 order_id: orderId,
                 amount: amount,                 // ✅ already in paise
                 currency: "INR",
@@ -282,7 +282,7 @@ const MusicScreen = ({ route, navigation }) => {
         let seatClass = "bg-gray-300";
         if (seat.status === "HELD") seatClass = "bg-yellow-500";
         if (seat.status === "CONFIRMED") seatClass = "bg-green-600";
-        if (isSelected) seatClass = "bg-blue-500";
+        if (isSelected) seatClass = "bg-orange-500";
 
         return (
             <TouchableOpacity
@@ -310,25 +310,25 @@ const MusicScreen = ({ route, navigation }) => {
 
     const now = new Date();
 
-    const alreadyBooked = tickets.some(ticket => {
-        if (ticket.concertId?._id !== concertId) return false;
+    // const alreadyBooked = tickets.some(ticket => {
+    //     if (ticket.concertId?._id !== concertId) return false;
 
-        // CONFIRMED / PARTIALLY_CANCELLED → always booked
-        if (["CONFIRMED", "PARTIALLY_CANCELLED"].includes(ticket.status)) {
-            return true;
-        }
+    //     // CONFIRMED / PARTIALLY_CANCELLED → always booked
+    //     if (["CONFIRMED", "PARTIALLY_CANCELLED"].includes(ticket.status)) {
+    //         return true;
+    //     }
 
-        // HELD → only if not expired
-        if (
-            ticket.status === "HELD" &&
-            ticket.holdExpiresAt &&
-            new Date(ticket.holdExpiresAt) > now
-        ) {
-            return true;
-        }
+    //     // HELD → only if not expired
+    //     if (
+    //         ticket.status === "HELD" &&
+    //         ticket.holdExpiresAt &&
+    //         new Date(ticket.holdExpiresAt) > now
+    //     ) {
+    //         return true;
+    //     }
 
-        return false;
-    });
+    //     return false;
+    // });
 
 
     return (
@@ -356,14 +356,12 @@ const MusicScreen = ({ route, navigation }) => {
             {selectedSeats.length > 0 && (
                 <TouchableOpacity
                     onPress={() => setShowUserModal(true)}
-                    disabled={alreadyBooked}
-                    className={`py-4 rounded-xl mb-10 ${alreadyBooked ? "bg-gray-400" : "bg-green-600"
-                        }`}
+                    // disabled={alreadyBooked}
+                    className={`py-4 rounded-xl mb-10 bg-green-600
+                        `}
                 >
                     <Text className="text-white text-center font-bold">
-                        {alreadyBooked
-                            ? "TICKET ALREADY BOOKED OR HELD"
-                            : `PAY ₹${calculateTotal().subtotal} + GST`}
+                        PAY ₹{calculateTotal().subtotal} + GST
                     </Text>
                 </TouchableOpacity>
             )}
@@ -410,7 +408,7 @@ const MusicScreen = ({ route, navigation }) => {
 
 
                         {/* Gender */}
-                        <Text className="text-sm mb-1">Gender</Text>
+                        {/* <Text className="text-sm mb-1">Gender</Text>
                         <View className="flex-row mb-3">
                             {["Male", "Female", "Other"].map(g => (
                                 <TouchableOpacity
@@ -424,10 +422,10 @@ const MusicScreen = ({ route, navigation }) => {
                                     </Text>
                                 </TouchableOpacity>
                             ))}
-                        </View>
+                        </View> */}
 
                         {/* Age */}
-                        <Text className="text-sm mb-1">Age</Text>
+                        {/* <Text className="text-sm mb-1">Age</Text>
                         <TextInput
                             value={age}
                             keyboardType="numeric"
@@ -438,7 +436,7 @@ const MusicScreen = ({ route, navigation }) => {
                             }}
                             placeholder="Age"
                             className="border rounded-lg p-2 mb-4"
-                        />
+                        /> */}
 
 
                         {/* Buttons */}
@@ -452,7 +450,7 @@ const MusicScreen = ({ route, navigation }) => {
 
                             <TouchableOpacity
                                 onPress={() => {
-                                    if (!phone || !gender || !age) {
+                                    if (!phone) {
                                         Alert.alert("Fill all details");
                                         return;
                                     }

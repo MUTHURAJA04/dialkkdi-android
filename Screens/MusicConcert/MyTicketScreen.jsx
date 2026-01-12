@@ -1,279 +1,182 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
     View,
     Text,
     ScrollView,
     ActivityIndicator,
     TouchableOpacity,
+    Alert,
+    Image
 } from "react-native";
 import {
-    getTicket,
     getCancelTicket,
     getTicketHistory,
     ticketPartner,
 } from "../../services/apiClient";
 import CancelTicketModal from "./CancelTicketModal";
-import { Image } from "react-native";
-// import Image1 from "../../assets/Logo/Dial_karaikudi.jpg"
-// import Image2 from "../../assets/Logo/Dial_pudukkottai.jpg"
-// import Image3 from "../../assets/Logo/Digiaiquest.jpg"
-// import Image4 from "../../assets/Logo/Digitaly_jobs.jpg"
+import ViewShot from "react-native-view-shot";
+import RNFS from "react-native-fs";
 
 const MyTicketScreen = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [ticketPartnerImages, setTicketPartnerImages] = useState([]);
+    const [isDownloading, setIsDownloading] = useState(null); // Track which ID is downloading
 
+    const viewShotRefs = useRef({});
 
     useEffect(() => {
-        getTicketPartner()
-    }, [])
+        getTicketPartner();
+        fetchTickets();
+    }, []);
 
+    const downloadTicket = async (ticketId) => {
+        try {
+            // 1. Hide buttons before capturing
+            setIsDownloading(ticketId);
+
+            // Give it a tiny delay to ensure UI updates
+            setTimeout(async () => {
+                const uri = await viewShotRefs.current[ticketId].capture();
+                const fileName = `Ticket_${ticketId.substring(0, 5)}.jpg`;
+                const path = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+
+                await RNFS.copyFile(uri, path);
+
+                // 2. Show buttons back
+                setIsDownloading(null);
+                Alert.alert("Success", "Ticket saved to Downloads!");
+            }, 100);
+        } catch (error) {
+            setIsDownloading(null);
+            console.log(error);
+            Alert.alert("Error", "Could not save ticket");
+        }
+    };
 
     const CDN_PREFIX = "https://livecdn.dialkaraikudi.com";
 
     const getTicketPartner = async () => {
         try {
-            const res = await ticketPartner()
-            console.log(res);
+            const res = await ticketPartner();
             const partner = res?.[0];
-
             if (partner) {
-                const images = [
-                    partner.image1,
-                    partner.image2,
-                    partner.image3,
-                    partner.image4,
-                ]
-                    .filter(Boolean) // null / empty remove
+                const images = [partner.image1, partner.image2, partner.image3, partner.image4]
+                    .filter(Boolean)
                     .map(img => `${CDN_PREFIX}/${img}`);
-
                 setTicketPartnerImages(images);
-                console.log(ticketPartnerImages, images, "final images");
             }
-
-
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    // const sponser_Images = [
-    //     Image1, Image2, Image3, Image4
-    // ]
-
-    useEffect(() => {
-        fetchTickets();
-    }, []);
+        } catch (error) { console.log(error); }
+    };
 
     const fetchTickets = async () => {
         try {
             setLoading(true);
-
-            // ✅ CONFIRMED BOOKINGS
             const bookingRes = await getTicketHistory();
-
-            console.log(bookingRes, "0987665444");
-
-
-            const confirmedTickets = (bookingRes.data || []).map(t => ({
-                ...t,
-                type: "BOOKING",
-                // status: "CONFIRMED",
-            }));
-
-            console.log(confirmedTickets, "..........");
-
-
-            // ❌ CANCELLED TICKETS
+            const confirmedTickets = (bookingRes.data || []).map(t => ({ ...t, type: "BOOKING" }));
             const cancelRes = await getCancelTicket();
-
             const cancelledTickets = (cancelRes.data || []).map(t => ({
-                _id: t._id,
-                concertId: t.concertId,
-                seats: t.seats,
-                reason: t.reason,
-                createdAt: t.createdAt,
+                ...t,
                 type: "CANCELLED",
                 status: "CANCELLED",
             }));
-
-            // 🔥 MERGE BOTH
             setTickets([...confirmedTickets, ...cancelledTickets]);
-
-        } catch (err) {
-            console.log(err);
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { console.log(err); } finally { setLoading(false); }
     };
 
     if (loading) {
         return (
             <View className="flex-1 justify-center items-center">
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#EAB308" />
             </View>
         );
     }
 
     return (
-        <ScrollView
-            className="flex-1 bg-gray-100 p-4"
-            contentContainerStyle={{
-                flexGrow: 1,
-                justifyContent: tickets.length === 0 ? "center" : "flex-start",
-            }}
-        >
+        <ScrollView className="flex-1 bg-gray-100 p-4">
             {tickets.length === 0 && (
-                <View className="items-center">
+                <View className="items-center mt-20">
                     <Text className="text-gray-500">No Tickets Found</Text>
                 </View>
             )}
 
             {tickets.map((ticket) => (
-                <View
+                <ViewShot
                     key={ticket._id}
-                    className="bg-white rounded-2xl p-5 shadow mb-4"
+                    ref={(el) => (viewShotRefs.current[ticket._id] = el)}
+                    options={{ format: "jpg", quality: 1.0 }}
+                    // Fixed: Adding background color so white text is visible in saved image
+                    style={{ backgroundColor: "#000000", borderRadius: 12, marginBottom: 20 }}
                 >
-                    {/* 🔁 MAIN ROW */}
-                    <View className="flex-row">
-                        {/* ⬅️ LEFT CONTENT */}
-                        <View className="flex-1 pr-3">
-                            {/* 🎵 Concert */}
-                            <Text className="text-xl font-bold text-center">
-                                🎵 {ticket.concertId.concertName}
-                            </Text>
-
-                            <Text className="text-center text-gray-500 mt-1">
-                                {new Date(ticket.concertId.concertDate).toDateString()}
-                            </Text>
-
-                            <View className="border-b border-dashed my-4" />
-
-                            {/* 📍 Venue */}
-                            <View className="flex-row justify-between">
-                                <View className="">
-                                    <Text className="text-sm text-gray-600">Venue</Text>
-                                    <Text className="font-semibold">
-                                        {ticket.concertId.concertPlace}
-                                    </Text>
-
-                                    {/* 💺 Seats */}
-                                    <View className="mt-3">
-                                        <Text className="text-sm text-gray-600">Seats</Text>
-                                        <Text className="font-bold">
-                                            {ticket.seats.join(", ")}
-                                        </Text>
-                                    </View>
-
-                                    {/* 🆔 Booking ID */}
-                                    <View className="mt-3">
-                                        <Text className="text-sm text-gray-600">Booking ID</Text>
-                                        <Text className="text-xs">{ticket._id}</Text>
-                                    </View>
-                                </View>
-
-
-
-                            </View>
-                        </View>
-
-                        {/* ➡️ RIGHT SIDE IMAGES */}
-
-                    </View>
-
-                    <View className="border-b border-dashed my-4" />
-
-                    {/* 💰 Amount */}
-                    {ticket.type === "BOOKING" && (
-                        <>
-                            <View className="flex-row justify-between">
-                                <Text>Subtotal</Text>
-                                <Text>₹{ticket.subtotal}</Text>
-                            </View>
-
-                            <View className="flex-row justify-between mt-1">
-                                <Text>GST ({ticket.gstPercent}%)</Text>
-                                <Text>₹{ticket.gstAmount}</Text>
-                            </View>
-
-                            <View className="flex-row justify-between mt-2">
-                                <Text className="font-bold">Total</Text>
-                                <Text className="font-bold">
-                                    ₹{ticket.totalAmount}
-                                </Text>
-                            </View>
-                        </>
-                    )}
-
-                    {/* ❌ Cancel Reason */}
-                    {ticket.type === "CANCELLED" && (
-                        <View className="mt-3 bg-red-50 p-3 rounded-lg">
-                            <Text className="text-red-600 font-semibold">
-                                ❌ Ticket Cancelled
-                            </Text>
-                            <Text className="text-sm mt-1">
-                                Reason: {ticket.reason}
-                            </Text>
-                        </View>
-                    )}
-
-                    {/* ✅ / ❌ STATUS */}
-                    <View
-                        className={`mt-4 py-2 rounded-lg ${ticket.status === "CONFIRMED"
-                            ? "bg-green-100"
-                            : "bg-red-100"
-                            }`}
-                    >
-                        <Text
-                            className={`text-center font-semibold ${ticket.status === "CONFIRMED"
-                                ? "text-green-700"
-                                : "text-red-700"
-                                }`}
-                        >
-                            {ticket.status === "CONFIRMED"
-                                ? "✅ Booking Confirmed"
-                                : "❌ Ticket Cancelled"}
+                    <View className="p-5">
+                        {/* 🎵 Concert Header */}
+                        <Text className="text-xl font-bold text-center text-white">
+                            🎵 {ticket.concertId?.concertName}
                         </Text>
-                    </View>
-
-                    {/* ❌ Cancel Button */}
-                    {ticket.type === "BOOKING" && ticket.status === "CONFIRMED" && (
-                        <TouchableOpacity
-                            className="mt-4 bg-red-500 py-2 rounded-lg"
-                            onPress={() => setSelectedTicket(ticket)}
-                        >
-                            <Text className="text-center text-white font-semibold">
-                                Cancel Ticket
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                    <View className="mt-4">
-                        <Text className="text-xs underline text-red-600 mb-3">
-                            Ticket Partner
+                        <Text className="text-center text-gray-400 mt-1">
+                            {new Date(ticket.concertId?.concertDate).toDateString()}
                         </Text>
 
-                        <View className="flex-row flex-wrap justify-between">
-                            {ticketPartnerImages.map((img, i) => (
-                                <View
-                                    key={i}
-                                    className="w-[20%] h-16 mb-2 rounded-md overflow-hidden "
+                        <View className="border-b border-dashed border-gray-600 my-4" />
+
+                        {/* 📍 Details */}
+                        <View>
+                            <Text className="text-sm text-gray-400">Venue</Text>
+                            <Text className="font-semibold text-white mb-3">{ticket.concertId?.concertPlace}</Text>
+
+                            <Text className="text-sm text-gray-400">Seats</Text>
+                            <Text className="font-bold text-white mb-3">{ticket.seats.join(", ")}</Text>
+
+                            <Text className="text-sm text-gray-400">Booking ID</Text>
+                            <Text className="text-xs text-white">{ticket._id}</Text>
+                        </View>
+
+                        <View className="border-b border-dashed border-gray-600 my-4" />
+
+                        {/* ✅ Status Badge - Always keep this */}
+                        <View className={`py-2 rounded-lg ${ticket.status === "CONFIRMED" ? "bg-green-900" : "bg-red-900"}`}>
+                            <Text className={`text-center font-bold ${ticket.status === "CONFIRMED" ? "text-green-400" : "text-red-400"}`}>
+                                {ticket.status === "CONFIRMED" ? "✅ Booking Confirmed" : "❌ Ticket Cancelled"}
+                            </Text>
+                        </View>
+
+                        {/* 🔘 BUTTONS - Hidden during download */}
+                        {isDownloading !== ticket._id && (
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => downloadTicket(ticket._id)}
+                                    className="mt-4 bg-yellow-500 rounded py-2"
                                 >
-                                    <Image
-                                        source={{ uri: img }}
-                                        className="w-full h-full"
-                                        resizeMode="contain"
-                                    />
-                                </View>
-                            ))}
+                                    <Text className="text-center font-bold text-black">Download Tickets</Text>
+                                </TouchableOpacity>
+
+                                {ticket.type === "BOOKING" && ticket.status === "CONFIRMED" && (
+                                    <TouchableOpacity
+                                        className="mt-4 bg-red-600 py-2 rounded-lg"
+                                        onPress={() => setSelectedTicket(ticket)}
+                                    >
+                                        <Text className="text-center text-white font-semibold">Cancel Ticket</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
+
+                        {/* 🤝 Partners */}
+                        <View className="mt-6">
+                            <Text className="text-xs underline text-red-500 mb-3">Ticket Partner</Text>
+                            <View className="flex-row flex-wrap justify-between">
+                                {ticketPartnerImages.map((img, i) => (
+                                    <View key={i} className="w-[20%] h-12 mb-2 bg-white rounded p-1">
+                                        <Image source={{ uri: img }} className="w-full h-full" resizeMode="contain" />
+                                    </View>
+                                ))}
+                            </View>
                         </View>
                     </View>
-                </View>
-
+                </ViewShot>
             ))}
 
-            {/* 🔥 CANCEL MODAL */}
             {selectedTicket && (
                 <CancelTicketModal
                     ticket={selectedTicket}

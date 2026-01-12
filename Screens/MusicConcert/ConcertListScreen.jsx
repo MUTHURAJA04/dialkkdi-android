@@ -20,6 +20,9 @@ const ConcertListScreen = ({ navigation }) => {
         return new Date(dateString).toLocaleString();
     };
 
+    console.log(formatTime, "formate");
+
+
     // Fetch concerts (only once)
     useEffect(() => {
         fetchConcert();
