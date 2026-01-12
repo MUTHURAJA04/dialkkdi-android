@@ -218,7 +218,7 @@ const MusicScreen = ({ route, navigation }) => {
 
             // 2️⃣ OPEN RAZORPAY ✅
             RazorpayCheckout.open({
-                key: "rzp_test_w7eHbASEFZ4b09",   // ✅ STRING
+                key: "rzp_live_Ap0i4wR26uP4WR",   // ✅ STRING
                 order_id: orderId,
                 amount: amount,                 // ✅ already in paise
                 currency: "INR",
@@ -434,7 +434,6 @@ const MusicScreen = ({ route, navigation }) => {
                             className="border rounded-lg p-2 mb-3"
                         />
 
-
                         {/* Gender */}
                         {/* <Text className="text-sm mb-1">Gender</Text>
                         <View className="flex-row mb-3">
@@ -465,7 +464,6 @@ const MusicScreen = ({ route, navigation }) => {
                             placeholder="Age"
                             className="border rounded-lg p-2 mb-4"
                         /> */}
-
 
                         {/* Buttons */}
                         <View className="flex-row justify-between ">
