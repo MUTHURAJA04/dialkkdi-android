@@ -13,7 +13,7 @@ import banner2 from "../assets/Banners/Banner2.jpg";
 import banner3 from "../assets/Banners/Banner3.jpg";
 import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
-import popupImg from "../assets/Kolam.jpeg"; // 🔥 create any image
+import popupImg from "../assets/MusicConcert.jpeg"; // 🔥 create any image
 import cancel from "../assets/cancel.jpg"; // 🔥 create any image
 import MusicBanner from "./Home/MusicBanner"
 import RunningText from "./Home/RunningText"
@@ -149,7 +149,7 @@ const Home = ({ navigation }) => {
           >
             <TouchableOpacity
               style={{
-                backgroundColor: "#fff",
+                // backgroundColor: "#fff",
                 width: "85%",
                 borderRadius: 15,
                 alignItems: "center",
@@ -157,7 +157,7 @@ const Home = ({ navigation }) => {
               }}
               onPress={() => {
                 setShowPopup(false);
-                navigation.navigate("FestivelScreen"); // 👉 your page name
+                navigation.navigate("TicketPolicyScreen"); // 👉 your page name
               }}
             >
 
@@ -168,7 +168,7 @@ const Home = ({ navigation }) => {
 
               />
               <TouchableOpacity
-                className="absolute top-5 right-0"
+                className="absolute top-1 right-0"
 
                 onPress={() => {
                   setShowPopup(false); // 👉 your page name

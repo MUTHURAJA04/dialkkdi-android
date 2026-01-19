@@ -75,7 +75,6 @@ const Login = ({ route }) => {
 
     const emailRegex = /^(?!\.)(?!.*\.\.)(?!.*\.\@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.com$/;
 
-
     if (!emailRegex.test(email.trim())) {
       Alert.alert('Validation Error', 'Enter a valid email address');
       return;
