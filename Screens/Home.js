@@ -136,7 +136,7 @@ const Home = ({ navigation }) => {
   return (
     <>
       {/* 🔥 POPUP UI */}
-      {showPopup &&
+      {/* {showPopup &&
         <Modal transparent animationType="fade">
           <View
             style={{
@@ -178,18 +178,16 @@ const Home = ({ navigation }) => {
                   source={cancel}
                   style={{ width: 30, height: 30 }}
                   resizeMode="contain"
-
                 />
-
               </TouchableOpacity>
             </TouchableOpacity>
           </View>
         </Modal>
-      }
+      } */}
       {/* 🔥 MAIN HOME PAGE CONTENT */}
       <ScrollView>
         <HeroSlide images={homeBanners} />
-        <MusicBanner />
+        {/* <MusicBanner /> */}
         <RunningText />
         <Banner />
         <ServicesOn />

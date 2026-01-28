@@ -232,6 +232,7 @@ const MusicScreen = ({ route, navigation }) => {
                     await confirmBooking({
                         bookingId,
                         razorpayOrderId: razorpayRes.razorpay_order_id,
+
                         razorpayPaymentId: razorpayRes.razorpay_payment_id,
                         razorpaySignature: razorpayRes.razorpay_signature,
                         amountPaid: total,

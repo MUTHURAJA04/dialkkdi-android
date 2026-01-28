@@ -50,15 +50,15 @@ const Bottom = () => {
         />
       ),
     },
-    {
-      screen: 'FestivelScreen',
-      icon: (
-        <Image
-          source={require('../assets/kolamLogo.png')}
-          className="w-14 h-14"
-        />
-      ),
-    },
+    // {
+    //   screen: 'FestivelScreen',
+    //   icon: (
+    //     <Image
+    //       source={require('../assets/kolamLogo.png')}
+    //       className="w-14 h-14"
+    //     />
+    //   ),
+    // },
     {
       screen: 'TalkofTown',
       icon: (
