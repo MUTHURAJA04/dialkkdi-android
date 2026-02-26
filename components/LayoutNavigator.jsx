@@ -11,6 +11,7 @@ import BusinessStep2 from '../Screens/BusinessStep2';
 import BusinessStep3 from '../Screens/BusinessStep3';
 import UserRegister from '../Screens/UserRegister';
 import Login from '../Screens/Login';
+import Donate from '../Screens/Donate';
 import Layout from './Layout';
 import BusinessListScreen from '../Screens/BusinessListScreen';
 import BusinessDetailScreen from '../Screens/BusinessDetailScreen';
@@ -105,6 +106,7 @@ const LayoutNavigator = () => {
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
       <Stack.Screen name="Checkout" component={Checkout} />
+      <Stack.Screen name="Donate" component={Donate} />
 
       {/* Auth-protected screens */}
       <Stack.Screen name="Home" component={withAuthGuard(withLayout(Home))} />
