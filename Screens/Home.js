@@ -13,7 +13,7 @@ import banner2 from "../assets/Banners/Banner2.jpg";
 import banner3 from "../assets/Banners/Banner3.jpg";
 import banner4 from "../assets/Banners/Banner4.jpg";
 import banner5 from "../assets/Banners/Banner5.jpg";
-import popupImg from "../assets/MusicConcert.jpeg"; // 🔥 create any image
+import popupImg from "../assets/Donate.webp"; // 🔥 create any image
 import cancel from "../assets/cancel.jpg"; // 🔥 create any image
 import MusicBanner from "./Home/MusicBanner"
 import RunningText from "./Home/RunningText"
@@ -136,7 +136,7 @@ const Home = ({ navigation }) => {
   return (
     <>
       {/* 🔥 POPUP UI */}
-      {/* {showPopup &&
+      {showPopup &&
         <Modal transparent animationType="fade">
           <View
             style={{
@@ -157,7 +157,7 @@ const Home = ({ navigation }) => {
               }}
               onPress={() => {
                 setShowPopup(false);
-                navigation.navigate("TicketPolicyScreen"); // 👉 your page name
+                navigation.navigate("Donate"); // 👉 your page name
               }}
             >
 
@@ -183,7 +183,7 @@ const Home = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </Modal>
-      } */}
+      } 
       {/* 🔥 MAIN HOME PAGE CONTENT */}
       <ScrollView>
         <HeroSlide images={homeBanners} />
