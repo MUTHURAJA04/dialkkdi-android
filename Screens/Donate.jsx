@@ -14,7 +14,7 @@ import RazorpayCheckout from 'react-native-razorpay';
 import axios from 'axios';
 
 const VITE_RAZORPAY_KEY_ID = 'rzp_test_w7eHbASEFZ4b09'; // Replace with your key
-const API_BASE_URL = 'https://api.dialkaraikudi.com'; // Replace with your API base URL
+const API_BASE_URL = 'https://dev-api.dialkaraikudi.com'; // Replace with your API base URL
 
 const Donate = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'business'
@@ -383,7 +383,7 @@ const Donate = ({ navigation }) => {
                                     }`}
                             >
                                 ₹ {amount}
-                                
+
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -400,6 +400,7 @@ const Donate = ({ navigation }) => {
                         value={formData.name}
                         onChangeText={(value) => handleInputChange('name', value)}
                         placeholder="Enter your name"
+                        placeholderTextColor="#000000"
                         maxLength={50}
                     />
                     {errors.name && (
@@ -418,6 +419,7 @@ const Donate = ({ navigation }) => {
                         value={formData.mobile}
                         onChangeText={(value) => handleInputChange('mobile', value)}
                         placeholder="Enter mobile number"
+                        placeholderTextColor="#000000"
                         keyboardType="phone-pad"
                         maxLength={10}
                     />
@@ -438,6 +440,7 @@ const Donate = ({ navigation }) => {
                             value={formData.businessName}
                             onChangeText={(value) => handleInputChange('businessName', value)}
                             placeholder="Enter business name"
+                            placeholderTextColor="#000000"
                             maxLength={100}
                         />
                         {errors.businessName && (
@@ -460,6 +463,7 @@ const Donate = ({ navigation }) => {
                         value={formData.address}
                         onChangeText={(value) => handleInputChange('address', value)}
                         placeholder="Enter your address"
+                        placeholderTextColor="#000000"
                         multiline
                         numberOfLines={4}
                         maxLength={250}
@@ -480,6 +484,7 @@ const Donate = ({ navigation }) => {
                         value={formData.donation}
                         onChangeText={(value) => handleInputChange('donation', value)}
                         placeholder={`Enter amount (Min ₹${minAmount})`}
+                        placeholderTextColor="#000000"
                         keyboardType="numeric"
                     />
                     {errors.donation && (
@@ -548,5 +553,6 @@ const Donate = ({ navigation }) => {
         </View>
     );
 };
+
 
 export default Donate;
