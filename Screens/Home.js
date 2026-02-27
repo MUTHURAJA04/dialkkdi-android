@@ -187,7 +187,7 @@ const Home = ({ navigation }) => {
       {/* 🔥 MAIN HOME PAGE CONTENT */}
       <ScrollView>
         <HeroSlide images={homeBanners} />
-        {/* <MusicBanner /> */}
+        <MusicBanner />
         <RunningText />
         <Banner />
         <ServicesOn />
